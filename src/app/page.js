@@ -1,101 +1,113 @@
-import Image from "next/image";
+// src/app/page.js
+import Hero from './components/Hero'; // Import the Hero component
+import HomeCard from './components/HomeCard'; // Import the HomeCard component
+import HomeSection from './components/HomeSection'; // Import the HomeSection component
+import OurClients from './components/OurClients'; // Import the OurClients component
+import Testimonials from './components/Testimonials'; // Import the Testimonials component
+import FAQ from './components/FAQ'; // Import the FAQ component
+import AllFooter from './components/AllFooter'; // Import the Footer component
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  // Sample data for the cards, including icons
+  const cardData = [
+    { title: 'NFC Card 1', description: 'Description for NFC Card 1', icon: 'https://via.placeholder.com/150' },
+    { title: 'NFC Card 2', description: 'Description for NFC Card 2', icon: 'https://via.placeholder.com/150' },
+    { title: 'NFC Card 3', description: 'Description for NFC Card 3', icon: 'https://via.placeholder.com/150' },
+    { title: 'NFC Card 4', description: 'Description for NFC Card 4', icon: 'https://via.placeholder.com/150' },
+    { title: 'NFC Card 5', description: 'Description for NFC Card 5', icon: 'https://via.placeholder.com/150' },
+    { title: 'NFC Card 6', description: 'Description for NFC Card 6', icon: 'https://via.placeholder.com/150' },
+  ];
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // Data for HomeSection pairs
+  const homeSectionData = [
+    {
+      image: 'https://via.placeholder.com/400x300', // Example image URL
+      description: { title: 'Description 1', text: 'This is the description for the first pair.' },
+    },
+    {
+      image: 'https://via.placeholder.com/400x300', // Example image URL
+      description: { title: 'Description 2', text: 'This is the description for the second pair.' },
+    },
+    {
+      image: 'https://via.placeholder.com/400x300', // Example image URL
+      description: { title: 'Description 3', text: 'This is the description for the third pair.' },
+    },
+    {
+      image: 'https://via.placeholder.com/400x300', // Example image URL
+      description: { title: 'Description 4', text: 'This is the description for the fourth pair.' },
+    },
+  ];
+
+  // Sample data for our clients
+  const clientData = [
+    { name: 'Company 1', icon: 'https://via.placeholder.com/100' },
+    { name: 'Company 2', icon: 'https://via.placeholder.com/100' },
+    { name: 'Company 3', icon: 'https://via.placeholder.com/100' },
+    { name: 'Company 4', icon: 'https://via.placeholder.com/100' },
+    { name: 'Company 5', icon: 'https://via.placeholder.com/100' },
+    { name: 'Company 6', icon: 'https://via.placeholder.com/100' },
+  ];
+
+  // Sample data for testimonials
+  const testimonialData = [
+    {
+      icon: 'https://via.placeholder.com/50',
+      name: 'John Doe',
+      designation: 'Web Developer',
+      heading: 'Excellent Service!',
+      description: 'The service provided was outstanding and exceeded my expectations.',
+    },
+    // Add more testimonials as needed
+  ];
+
+  // Sample data for FAQ
+  const faqData = [
+    {
+      question: 'What is an NFC Card?',
+      answer: 'An NFC card is a card that uses Near Field Communication technology to allow for data exchange with compatible devices.'
+    },
+    {
+      question: 'How do I use my NFC Card?',
+      answer: 'You can use your NFC card by tapping it on a compatible NFC reader or smartphone.'
+    },
+    {
+      question: 'Are NFC Cards secure?',
+      answer: 'Yes, NFC technology includes several security features to protect your data.'
+    },
+  ];
+
+  return (
+    <div>
+      <Hero />
+      <section className="container mx-auto text-center p-6">
+        <h1 className="text-4xl font-bold mb-4">Welcome to the NFC Card Website</h1>
+        <p className="mb-6">Manage your NFC card data securely and efficiently.</p>
+        <button className="bg-green-500 text-white px-4 py-2 rounded">Get Started</button>
+      </section>
+      
+      {/* HomeCards Section */}
+      <section className="container mx-auto p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {cardData.map((card, index) => (
+            <HomeCard key={index} title={card.title} description={card.description} icon={card.icon} />
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </section>
+
+      {/* HomeSections */}
+      <HomeSection sections={homeSectionData} />
+
+      {/* Our Clients Section */}
+      <OurClients clients={clientData} />
+
+      {/* Testimonials Section */}
+      <Testimonials testimonials={testimonialData} />
+
+      {/* FAQ Section */}
+      <FAQ faqs={faqData} />
+
+      {/* Footer Section */}
+      <AllFooter />
     </div>
   );
 }

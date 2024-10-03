@@ -15,13 +15,53 @@
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f0f0f0;
+}
+
+h1, h2, h3, h4 {
+  color: #333;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+}
+
+nav a:hover {
+  text-decoration: underline;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink {
+  50% {
+    border-color: transparent; /* Make the cursor transparent */
+  }
+}
+
+.animate-typing {
+  overflow: hidden; /* Ensures the text is hidden until it animates */
+  border-right: 0.15em solid black; /* Cursor effect */
+  width: fit-content; /* Allows the width to be dynamic */
+  animation: typing 3s steps(30, end) forwards, blink 0.75s step-end infinite; /* Blink cursor */
+}
+
+.cursor-hidden {
+  border-right: transparent; /* Hide the cursor */
 }
