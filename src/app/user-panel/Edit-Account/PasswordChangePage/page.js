@@ -1,3 +1,6 @@
+"use client"; // Next.js Client Component
+
+
 import MultiStepForm from '../../../components/MultiStepForm'; // Assuming MultiStepForm is in the same folder
 import { useState } from 'react';
 

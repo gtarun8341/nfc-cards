@@ -1,3 +1,6 @@
+"use client"; // Next.js Client Component
+
+
 import MultiStepForm from '../../components/MultiStepForm'; // Assuming MultiStepForm is in the same folder
 import PasswordChangePage from './PasswordChangePage/page'; // Import the PasswordChangePage component
 import { useState } from 'react';

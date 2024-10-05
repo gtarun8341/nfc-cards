@@ -65,6 +65,7 @@ const AdminPanel = () => {
             <AdjustmentsHorizontalIcon className="h-6 w-6" />
             {isSidebarOpen && <span className="ml-4">Settings</span>}
           </button>
+          
         </div>
 
         {/* Logout Button at the Bottom */}
