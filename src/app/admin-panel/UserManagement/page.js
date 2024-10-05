@@ -1,3 +1,5 @@
+"use client"; // Next.js Client Component
+
 import { useState } from 'react';
 
 const UserManagement = () => {

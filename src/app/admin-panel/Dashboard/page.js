@@ -1,3 +1,5 @@
+"use client"; // Next.js Client Component
+
 const Dashboard = () => {
     // Dummy data
     const stats = {

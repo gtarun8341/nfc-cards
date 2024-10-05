@@ -1,3 +1,5 @@
+"use client"; // Next.js Client Component
+
 const Settings = () => {
     // Dummy data for settings
     const settingsData = {
