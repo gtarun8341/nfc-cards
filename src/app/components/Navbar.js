@@ -89,7 +89,7 @@ const Navbar = () => {
             <Link href="/our-products">Our Products</Link>
           </li>
           <li>
-            <Link href="/login">
+            <Link href="/auth">
               <button className="bg-white text-green-500 w-full px-4 py-2 rounded-md mt-2">
                 Login
               </button>

@@ -1,3 +1,5 @@
+/* globals.css */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -19,6 +21,7 @@ body {
   margin: 0;
   padding: 0;
   background-color: #f0f0f0;
+  height: 100%;
 }
 
 h1, h2, h3, h4 {
@@ -32,6 +35,31 @@ nav a {
 
 nav a:hover {
   text-decoration: underline;
+}
+
+.navbar {
+  position: fixed; /* Fixed positioning */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000; /* Ensure it is above other content */
+  background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent background */
+  padding: 10px 20px; /* Add some padding for aesthetics */
+}
+
+/* Ensure main content does not go behind the navbar */
+.main {
+  padding-top: 60px; /* Adjust this based on the height of the navbar */
+}
+
+/* Style for Footer to stay at the bottom */
+.footer {
+  /* Other footer styles */
+}
+
+/* Optional: You might want to adjust the footer's margin */
+.mt-auto {
+  margin-top: auto; /* Push the footer to the bottom */
 }
 
 @layer utilities {

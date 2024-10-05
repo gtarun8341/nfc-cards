@@ -11,10 +11,12 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
+      <body className="flex flex-col min-h-screen">
         <Navbar />
-        <main>{children}</main>
-        <Footer />
+        <main className="flex-grow"> {/* Adjust padding to match navbar height */}
+          {children}
+        </main>
+        <Footer className="mt-auto" /> {/* Footer sticks to the bottom */}
       </body>
     </html>
   );
