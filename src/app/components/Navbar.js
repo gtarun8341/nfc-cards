@@ -19,7 +19,7 @@ const Navbar = () => {
         </div>
 
         {/* Right Side - Menu Items and Hamburger Menu */}
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-4">
           {/* Menu Items for Desktop */}
           <ul className="hidden md:flex space-x-4 text-white">
             <li>
@@ -36,11 +36,11 @@ const Navbar = () => {
             </li>
           </ul>
 
-          {/* Hamburger Menu (always visible on all screen sizes) */}
+          {/* Hamburger Menu Icon (visible on all screen sizes) */}
           <button onClick={toggleMenu} className="text-white">
             {/* Hamburger Icon */}
             <svg
-              className="w-6 h-6 md:hidden" // Only hide on large screens
+              className="w-6 h-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -56,7 +56,7 @@ const Navbar = () => {
           </button>
 
           {/* Right Side - Login Button (visible on larger screens) */}
-          <Link href="/login">
+          <Link href="/auth">
             <button className="bg-white text-green-500 px-4 py-2 rounded-md hidden md:block">
               Login
             </button>
@@ -64,9 +64,10 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Responsive Menu (visible when hamburger menu is open on small screens) */}
-      <div className={`${isOpen ? 'block' : 'hidden'} md:hidden mt-4`}>
+      {/* Responsive Menu (conditional rendering based on screen size) */}
+      <div className={`${isOpen ? 'block' : 'hidden'} mt-4`}>
         <ul className="space-y-2 text-white">
+          {/* Always show Home, About, and Contact on larger screens */}
           <li>
             <Link href="/">Home</Link>
           </li>
@@ -76,25 +77,31 @@ const Navbar = () => {
           <li>
             <Link href="/contact">Contact</Link>
           </li>
-          <li>
-            <Link href="/nfc-card">NFC Card</Link>
-          </li>
-          <li>
-            <Link href="/pdf-card">PDF Card</Link>
-          </li>
-          <li>
-            <Link href="/physical-card">Physical Card</Link>
-          </li>
-          <li>
-            <Link href="/our-products">Our Products</Link>
-          </li>
-          <li>
-            <Link href="/auth">
-              <button className="bg-white text-green-500 w-full px-4 py-2 rounded-md mt-2">
-                Login
-              </button>
-            </Link>
-          </li>
+
+          {/* Show all menu items only on smaller screens or when the menu is open */}
+          {isOpen && (
+            <>
+              <li>
+                <Link href="/nfc-card">NFC Card</Link>
+              </li>
+              <li>
+                <Link href="/pdf-card">PDF Card</Link>
+              </li>
+              <li>
+                <Link href="/physical-card">Physical Card</Link>
+              </li>
+              <li>
+                <Link href="/our-products">Our Products</Link>
+              </li>
+              <li>
+                <Link href="/auth">
+                  <button className="bg-white text-green-500 w-full px-4 py-2 rounded-md mt-2">
+                    Login
+                  </button>
+                </Link>
+              </li>
+            </>
+          )}
         </ul>
       </div>
     </nav>
