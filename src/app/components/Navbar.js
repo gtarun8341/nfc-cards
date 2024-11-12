@@ -1,14 +1,21 @@
-"use client";  // Marking this as a Client Component
+"use client"; // Marking this as a Client Component
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
+
+  // Check if the auth token exists in localStorage
+  useEffect(() => {
+    const authToken = localStorage.getItem('authToken');
+    setIsLoggedIn(!!authToken);
+  }, []);
 
   return (
     <nav className="bg-green-500 p-4">
@@ -32,13 +39,24 @@ const Navbar = () => {
               <Link href="/physical-card">Physical Card</Link>
             </li>
             <li>
-              <Link href="/our-products">Our Products</Link>
+              <Link href="/one-page-bussiness-profile">One Page Business Profile</Link>
+            </li>
+            <li>
+              <Link href="/one-page-bussiness-profile">Business Essentials</Link>
+            </li>
+            <li>
+              <Link href="/one-page-bussiness-profile">Additional Services</Link>
+            </li>
+            <li>
+              <Link href="/our-products">Shop Now</Link>
+            </li>
+            <li>
+              <Link href="/tracking">Track Product</Link>
             </li>
           </ul>
 
           {/* Hamburger Menu Icon (visible on all screen sizes) */}
           <button onClick={toggleMenu} className="text-white">
-            {/* Hamburger Icon */}
             <svg
               className="w-6 h-6"
               fill="none"
@@ -56,18 +74,19 @@ const Navbar = () => {
           </button>
 
           {/* Right Side - Login Button (visible on larger screens) */}
-          <Link href="/auth">
-            <button className="bg-white text-green-500 px-4 py-2 rounded-md hidden md:block">
-              Login
-            </button>
-          </Link>
+          {!isLoggedIn && (
+            <Link href="/auth">
+              <button className="bg-white text-green-500 px-4 py-2 rounded-md hidden md:block">
+                Login
+              </button>
+            </Link>
+          )}
         </div>
       </div>
 
       {/* Responsive Menu (conditional rendering based on screen size) */}
       <div className={`${isOpen ? 'block' : 'hidden'} mt-4`}>
         <ul className="space-y-2 text-white">
-          {/* Always show Home, About, and Contact on larger screens */}
           <li>
             <Link href="/">Home</Link>
           </li>
@@ -78,7 +97,6 @@ const Navbar = () => {
             <Link href="/contact">Contact</Link>
           </li>
 
-          {/* Show all menu items only on smaller screens or when the menu is open */}
           {isOpen && (
             <>
               <li>
@@ -91,15 +109,29 @@ const Navbar = () => {
                 <Link href="/physical-card">Physical Card</Link>
               </li>
               <li>
-                <Link href="/our-products">Our Products</Link>
-              </li>
-              <li>
-                <Link href="/auth">
-                  <button className="bg-white text-green-500 w-full px-4 py-2 rounded-md mt-2">
-                    Login
-                  </button>
-                </Link>
-              </li>
+              <Link href="/one-page-bussiness-profile">One Page Business Profile</Link>
+            </li>
+            <li>
+              <Link href="/one-page-bussiness-profile">Business Essentials</Link>
+            </li>
+            <li>
+              <Link href="/one-page-bussiness-profile">Additional Services</Link>
+            </li>
+            <li>
+              <Link href="/our-products">Shop Now</Link>
+            </li>
+            <li>
+              <Link href="/tracking">Track Product</Link>
+            </li>
+              {!isLoggedIn && (
+                <li>
+                  <Link href="/auth">
+                    <button className="bg-white text-green-500 w-full px-4 py-2 rounded-md mt-2">
+                      Login
+                    </button>
+                  </Link>
+                </li>
+              )}
             </>
           )}
         </ul>

@@ -1,91 +1,277 @@
-import MultiStepForm from '../../components/MultiStepForm'; // Assuming MultiStepForm is in the same folder
+import { useEffect, useState } from "react";
+import api from "../../apiConfig/axiosConfig"; // Ensure you have the right API config
+import CompanyDetailsForm from "./CompanyDetailsForm/page";
+import SocialMediaForm from "./SocialMediaForm/page";
+import AboutCompanyForm from "./AboutCompanyForm/page";
+import BankDetailsForm from "./BankDetailsForm/page";
+import ProductDetailsForm from "./ProductDetailsForm/page";
+import GalleryImagesForm from "./GalleryImagesForm/page";
 
 const UserFormPage = () => {
-    const steps = [
-        {
-          title: 'Company Details',
-          fields: [
-            { name: 'companyName', type: 'text', label: 'Company Name', placeholder: 'Enter your company name', required: true },
-            { name: 'name', type: 'text', label: 'Name', placeholder: 'Enter your name', required: true },
-            { name: 'designation', type: 'text', label: 'Designation', placeholder: 'Enter your designation', required: true },
-            { name: 'contact1', type: 'text', label: 'Contact Number 1', placeholder: 'Enter contact number', required: true },
-            { name: 'contact2', type: 'text', label: 'Contact Number 2', placeholder: 'Enter contact number', required: false },
-            { name: 'whatsapp1', type: 'text', label: 'WhatsApp Number 1', placeholder: 'Enter WhatsApp number', required: true },
-            { name: 'whatsapp2', type: 'text', label: 'WhatsApp Number 2', placeholder: 'Enter WhatsApp number', required: false },
-            { name: 'website', type: 'url', label: 'Website URL', placeholder: 'Enter your website URL', required: false },
-            { name: 'googleMap', type: 'url', label: 'Google Map Link', placeholder: 'Enter Google Map link', required: false },
-            { name: 'address', type: 'text', label: 'Address', placeholder: 'Enter your address', required: true },
-            { name: 'logo', type: 'file', label: 'Logo Image', accept: 'image/*', required: true },
-          ],
+  const [formData, setFormData] = useState({
+    companyName: "",
+    name: "",
+    designation: "",
+    contact1: "",
+    contact2: "",
+    whatsapp1: "",
+    whatsapp2: "",
+    email: "",
+    website: "",
+    googleMap: "",
+    address: "",
+    logo: null,
+    facebook: "",
+    instagram: "",
+    linkedin: "",
+    twitter: "",
+    youtubeChannel: "",
+    otherProfile: "",
+    youtubeVideos: [""], // Start with one input field
+    googleBusiness: "",
+    video: null,
+    establishedYear: "",
+    natureOfBusiness: "",
+    gstNumber: "",
+    aboutCompany: "",
+    documents: [],
+    bankName: "",
+    accountNumber: "",
+    branchName: "",
+    ifscCode: "",
+    accountHolderName: "",
+    gPayNumber: "",
+    paytmNumber: "",
+    phonePeNumber: "",
+    upiId: "",
+    accountType: "",
+    qrImages: [],
+    products: [], // Change this to an array for multiple products
+    galleryImages: [], // Add galleryImages to the state
+  });
+
+  const [currentStep, setCurrentStep] = useState(0); // Track the current step
+  const [errorMessages, setErrorMessages] = useState([]);
+  const [successMessage, setSuccessMessage] = useState("");
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+        const response = await api.get(`/api/user-details/`, config);
+        
+        // Ensure to map the response to your form structure
+        const data = response.data;
+        setFormData({
+          companyName: data.companyName,
+          name: data.name,
+          designation: data.designation,
+          contact1: data.contact1,
+          contact2: data.contact2,
+          whatsapp1: data.whatsapp1,
+          whatsapp2: data.whatsapp2,
+          email: data.email,
+          website: data.website,
+          googleMap: data.googleMap,
+          address: data.address,
+          logo: data.logo, // Assuming this is an image or file reference
+          // Social Media Links
+          facebook: data.socialMediaLinks.facebook,
+          instagram: data.socialMediaLinks.instagram,
+          linkedin: data.socialMediaLinks.linkedin,
+          twitter: data.socialMediaLinks.twitter,
+          youtubeChannel: data.socialMediaLinks.youtubeChannel,
+          otherProfile:data.socialMediaLinks.otherProfile,
+          youtubeVideos:data.socialMediaLinks.youtubeVideo,
+          googleBusiness:data.socialMediaLinks.googleBusiness,
+          // About Company
+          establishedYear: data.aboutCompany.establishedYear,
+          natureOfBusiness: data.aboutCompany.natureOfBusiness,
+          gstNumber: data.aboutCompany.gstNumber,
+          aboutCompany: data.aboutCompany.description, // Assuming you want the description here
+          // documents: data.aboutCompany.documents,
+          // Bank Details
+          bankName: data.bankDetails.bankName,
+          accountNumber: data.bankDetails.accountNumber,
+          branchName: data.bankDetails.branchName,
+          ifscCode: data.bankDetails.ifscCode,
+          gPayNumber: data.bankDetails.gPayNumber,
+          paytmNumber: data.bankDetails.paytmNumber,
+          phonePeNumber: data.bankDetails.phonePeNumber,
+          upiId: data.bankDetails.upiId,
+          accountType: data.bankDetails.accountType,
+          accountHolderName: data.bankDetails.accountHolderName,
+          // Products and other fields...
+          products: data.products || [], // Ensure it's an array
+          galleryImages: data.galleryImages || [], // Ensure it's an array
+        });
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+        setErrorMessages([...errorMessages, "Error fetching user details"]);
+      }
+    };
+  
+    fetchUserDetails();
+  }, []);
+  
+  const handleFormDataChange = (sectionData) => {
+    setFormData((prevData) => {
+      if (sectionData.products) {
+        return { ...prevData, products: sectionData.products }; // Update products array
+      } else if (sectionData.galleryImages) {
+        return { ...prevData, galleryImages: sectionData.galleryImages }; // Update gallery images
+      } else if (sectionData.youtubeVideos) {
+        return { ...prevData, youtubeVideos: sectionData.youtubeVideos }; // Update YouTube videos
+      }
+      return { ...prevData, ...sectionData }; // Otherwise, merge other data
+    });
+  };
+
+  const handleSubmit = async () => {
+    console.log("Submit button clicked."); // Log when the submit button is clicked
+    console.log("Current Form Data:", formData); // Log current form data
+    const formDataForSubmit = new FormData();
+
+    Object.entries(formData).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        if (key === "products") {
+          value.forEach((product) => {
+            // Append product details
+            formDataForSubmit.append("products[]", JSON.stringify({
+              productName: product.productName,
+              productPrice: product.productPrice,
+              productType: product.productType,
+            }));
+            // Append the image file with its name
+            if (product.productImage) {
+              formDataForSubmit.append("productImages[]", product.productImage, product.productImage.name);
+            }
+          });
+        } else if (key === "galleryImages" || key === "documents" || key === "qrImages") {
+          value.forEach((file) => formDataForSubmit.append(key, file, file.name)); // Append files with their names
+        } else if (key === "youtubeVideos") {
+          value.forEach((video) => formDataForSubmit.append("youtubeVideos[]", video)); // Append YouTube URLs
+        }
+      } else {
+        formDataForSubmit.append(key, value);
+      }
+    });
+
+    console.log("FormData for Submit:", [...formDataForSubmit]);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-        {
-          title: 'Social Media Links',
-          fields: [
-            { name: 'facebook', type: 'url', label: 'Facebook Profile Link', placeholder: 'Enter Facebook link', required: false },
-            { name: 'instagram', type: 'url', label: 'Instagram Profile Link', placeholder: 'Enter Instagram link', required: false },
-            { name: 'linkedin', type: 'url', label: 'LinkedIn Profile Link', placeholder: 'Enter LinkedIn link', required: false },
-            { name: 'twitter', type: 'url', label: 'Twitter Profile Link', placeholder: 'Enter Twitter link', required: false },
-            { name: 'youtube', type: 'url', label: 'YouTube Channel Link', placeholder: 'Enter YouTube link', required: false },
-            { name: 'googleBusiness', type: 'url', label: 'Google Business Link', placeholder: 'Enter Google Business link', required: false },
-            { name: 'other', type: 'url', label: 'Other Profile Link', placeholder: 'Enter other profile link', required: false },
-            { name: 'video', type: 'file', label: 'Upload Video', accept: 'video/*', required: false },
-          ],
-        },
-        {
-          title: 'About Company',
-          fields: [
-            { name: 'establishedYear', type: 'text', label: 'Established Year', placeholder: 'Enter the established year', required: true },
-            { name: 'natureOfBusiness', type: 'text', label: 'Nature of Business', placeholder: 'Describe your business', required: true },
-            { name: 'gstNumber', type: 'text', label: 'GST Number', placeholder: 'Enter your GST number', required: true },
-            { name: 'aboutCompany', type: 'textarea', label: 'About Company', placeholder: 'About your company', required: true },
-            { name: 'documents', type: 'file', label: 'Upload Documents (max 10)', accept: 'application/pdf', required: false, multiple: true },
-          ],
-        },
-        {
-          title: 'Bank Details',
-          fields: [
-            { name: 'bankName', type: 'text', label: 'Bank Name', placeholder: 'Enter your bank name', required: true },
-            { name: 'accountNumber', type: 'text', label: 'Account Number', placeholder: 'Enter your account number', required: true },
-            { name: 'branchName', type: 'text', label: 'Branch Name', placeholder: 'Enter branch name', required: true },
-            { name: 'ifscCode', type: 'text', label: 'IFSC Code', placeholder: 'Enter IFSC code', required: true },
-            { name: 'accountHolderName', type: 'text', label: 'Account Holder Name', placeholder: 'Enter account holder name', required: true },
-            { name: 'gPayNumber', type: 'text', label: 'GPay Number', placeholder: 'Enter GPay number', required: false },
-            { name: 'paytmNumber', type: 'text', label: 'Paytm Number', placeholder: 'Enter Paytm number', required: false },
-            { name: 'phonePeNumber', type: 'text', label: 'PhonePe Number', placeholder: 'Enter PhonePe number', required: false },
-            { name: 'upiId', type: 'text', label: 'UPI ID', placeholder: 'Enter UPI ID', required: false },
-            { name: 'accountType', type: 'dropdown', label: 'Account Type', options: [{ value: 'savings', label: 'Savings' }, { value: 'current', label: 'Current' }], required: true },
-            { name: 'qrImages', type: 'file', label: 'Upload QR Images (up to 4)', accept: 'image/*', required: false, multiple: true },
-          ],
-        },
-        {
-          title: 'Products/Services',
-          fields: [
-            { name: 'productName', type: 'text', label: 'Product/Service Name', placeholder: 'Enter product/service name', required: true },
-            { name: 'productPrice', type: 'number', label: 'Product/Service Price', placeholder: 'Enter price', required: true },
-            { name: 'productImage', type: 'file', label: 'Product/Service Image', accept: 'image/*', required: true },
-            {
-              name: 'productType',
-              type: 'radio',
-              label: 'Type',
-              options: [
-                { value: 'product', label: 'Product' },
-                { value: 'service', label: 'Service' },
-              ],
-              required: true,
-            },
-          ],
-        },
-        {
-          title: 'Gallery',
-          fields: [
-            { name: 'galleryImages', type: 'file', label: 'Upload Images (up to 10)', accept: 'image/*', required: false, multiple: true },
-          ],
-        },
-      ];
+      };
+      const response = await api.post("/api/user-details/", formDataForSubmit, config);
+      
+      setSuccessMessage("Form submitted successfully!");
+      console.log("Response:", response.data); // Log the response
+    } catch (error) {
+      console.error("Submission error:", error);
+      setErrorMessages([...errorMessages, "Error submitting the form"]);
+    }
+  };
+
+  const nextStep = () => {
+    const stepNames = [
+      "Company Details",
+      "Social Media",
+      "About Company",
+      "Bank Details",
+      "Product Details",
+      "Gallery Images"
+    ];
+
+    // Log current step before updating
+    console.log(`Current step before moving to next: ${stepNames[currentStep]}`);
+    // Update to the next step
+    setCurrentStep((prevStep) => {
+      const newStep = prevStep + 1;
+      // Log the new step after updating
+      console.log(`Moving to next step: ${stepNames[newStep]}`);
+      return newStep;
+    });
+  };
+
+  const prevStep = () => {
+    const stepNames = [
+      "Company Details",
+      "Social Media",
+      "About Company",
+      "Bank Details",
+      "Product Details",
+      "Gallery Images"
+    ];
+
+    // Log current step before updating
+    console.log(`Current step before moving to previous: ${stepNames[currentStep]}`);
+    // Update to the previous step
+    setCurrentStep((prevStep) => {
+      const newStep = prevStep - 1;
+      // Log the new step after updating
+      console.log(`Moving to previous step: ${stepNames[newStep]}`);
+      return newStep;
+    });
+  };
+
+  const steps = [
+    <CompanyDetailsForm onDataChange={handleFormDataChange} initialData={formData}/>,
+    <SocialMediaForm onDataChange={handleFormDataChange} initialData={formData}/>,
+    <AboutCompanyForm onDataChange={handleFormDataChange} initialData={formData}/>,
+    <BankDetailsForm onDataChange={handleFormDataChange} initialData={formData}/>,
+    <ProductDetailsForm onDataChange={handleFormDataChange} initialData={formData}/>,
+    <GalleryImagesForm onDataChange={handleFormDataChange} initialData={formData}/>,
+  ];
 
   return (
-    <div>
-      <MultiStepForm steps={steps} formTitle="User Registration Form" />
+    <div className="form-container">
+      {/* Removed <form> tag */}
+      {steps[currentStep]}
+
+      {/* Navigation buttons */}
+      <div className="flex justify-between mt-4">
+        {currentStep > 0 && (
+          <button
+            type="button"
+            onClick={prevStep}
+            className="bg-gray-300 hover:bg-gray-400 text-white font-bold py-2 px-4 rounded"
+          >
+            Previous
+          </button>
+        )}
+        {currentStep < steps.length - 1 ? (
+          <button
+            type="button"
+            onClick={nextStep}
+            className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+          >
+            Next
+          </button>
+        ) : (
+          <button
+            type="button" // Change to button type
+            onClick={handleSubmit} // Call the handleSubmit function
+            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+          >
+            Submit
+          </button>
+        )}
+      </div>
+
+      {/* Error/Success Messages */}
+      {errorMessages.length > 0 && (
+        <div className="error text-red-500">{errorMessages.join(", ")}</div>
+      )}
+      {successMessage && <div className="success text-green-500">{successMessage}</div>}
     </div>
   );
 };

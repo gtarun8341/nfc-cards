@@ -1,4 +1,6 @@
 // src/app/page.js
+"use client";
+
 import Hero from './components/Hero'; // Import the Hero component
 import HomeCard from './components/HomeCard'; // Import the HomeCard component
 import HomeSection from './components/HomeSection'; // Import the HomeSection component

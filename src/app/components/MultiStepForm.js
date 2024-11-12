@@ -1,12 +1,21 @@
-"use client"; // Marking this as a Client Component
+import { useState, useEffect } from 'react';
 
-import { useState } from 'react';
-
-const MultiStepForm = ({ steps, formTitle }) => {
+const MultiStepForm = ({ steps, formTitle, initialFormData = {}, onSubmit }) => { // Added onSubmit prop
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState({});
 
-  // Handle input change
+  useEffect(() => {
+    if (Object.keys(formData).length === 0) {
+      const defaultFormData = {};
+      steps.forEach((step) => {
+        step.fields.forEach((field) => {
+          defaultFormData[field.name] = initialFormData[field.name] || '';
+        });
+      });
+      setFormData(defaultFormData);
+    }
+  }, [initialFormData, steps]);
+
   const handleInputChange = (e) => {
     const { name, value, type, files } = e.target;
     setFormData({
@@ -15,56 +24,47 @@ const MultiStepForm = ({ steps, formTitle }) => {
     });
   };
 
-  // Handle next step
   const handleNext = () => {
     if (step < steps.length - 1) {
       setStep(step + 1);
     }
   };
 
-  // Handle previous step
   const handlePrevious = () => {
     if (step > 0) {
       setStep(step - 1);
     }
   };
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Submit all data at the last step
+    onSubmit(formData); // Call the passed onSubmit function
     console.log('Final Form Data:', formData);
   };
 
   return (
-    <div
-      className="bg-white p-8 rounded-lg shadow-md w-full max-w-2xl mx-auto"
-      style={{
-        maxHeight: '80vh',
-        overflowY: 'auto',
-        marginTop: '30px',
-        marginBottom: '50px',
-        scrollbarWidth: 'none', // For Firefox
-        '-ms-overflow-style': 'none', // For IE/Edge
-      }}
-    >
+    <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-2xl mx-auto" style={{
+      maxHeight: '80vh',
+      overflowY: 'auto',
+      marginTop: '30px',
+      marginBottom: '50px',
+      scrollbarWidth: 'none',
+      msOverflowStyle: 'none',
+    }}>
       <style>
         {`
-          /* Hide scrollbar for WebKit browsers */
           .bg-white::-webkit-scrollbar {
             display: none;
           }
         `}
       </style>
-      <h2 className="text-2xl font-bold mb-4">{formTitle}</h2>
       <h3 className="text-lg mb-2">{steps[step].title}</h3>
       <form onSubmit={step === steps.length - 1 ? handleSubmit : (e) => e.preventDefault()}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {steps[step].fields.map((field, index) => (
             <div key={index} className="mt-4">
-              <label htmlFor={field.name} className="block text-lg font-semibold">
-                {field.label}
-              </label>
+              <label htmlFor={field.name} className="block text-lg font-semibold">{field.label}</label>
+              {/* Render the appropriate input based on field type */}
               {field.type === 'text' && (
                 <input
                   type="text"
@@ -73,6 +73,7 @@ const MultiStepForm = ({ steps, formTitle }) => {
                   placeholder={field.placeholder}
                   className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg"
                   onChange={handleInputChange}
+                  value={formData[field.name] || ''}
                   required={field.required}
                 />
               )}
@@ -84,32 +85,34 @@ const MultiStepForm = ({ steps, formTitle }) => {
                   placeholder={field.placeholder}
                   className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg"
                   onChange={handleInputChange}
+                  value={formData[field.name] || ''}
                   required={field.required}
                 />
               )}
               {field.type === 'email' && (
-  <input
-    type="email"
-    id={field.name}
-    name={field.name}
-    placeholder={field.placeholder}
-    className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg"
-    onChange={handleInputChange}
-    required={field.required}
-  />
-)}
-{field.type === 'password' && (
-  <input
-    type="password"
-    id={field.name}
-    name={field.name}
-    placeholder={field.placeholder}
-    className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg"
-    onChange={handleInputChange}
-    required={field.required}
-  />
-)}
- {field.type === 'url' && (
+                <input
+                  type="email"
+                  id={field.name}
+                  name={field.name}
+                  placeholder={field.placeholder}
+                  className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg"
+                  onChange={handleInputChange}
+                  value={formData[field.name] || ''}
+                  required={field.required}
+                />
+              )}
+              {field.type === 'password' && (
+                <input
+                  type="password"
+                  id={field.name}
+                  name={field.name}
+                  placeholder={field.placeholder}
+                  className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg"
+                  onChange={handleInputChange}
+                  required={field.required}
+                />
+              )}
+              {field.type === 'url' && (
                 <input
                   type="url"
                   id={field.name}
@@ -117,6 +120,7 @@ const MultiStepForm = ({ steps, formTitle }) => {
                   placeholder={field.placeholder}
                   className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg"
                   onChange={handleInputChange}
+                  value={formData[field.name] || ''}
                   required={field.required}
                 />
               )}
@@ -139,63 +143,77 @@ const MultiStepForm = ({ steps, formTitle }) => {
                   placeholder={field.placeholder}
                   className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg"
                   onChange={handleInputChange}
+                  value={formData[field.name] || ''}
                   required={field.required}
                 ></textarea>
               )}
+              {field.type === 'dropdown' && (
+    <select
+        id={field.name}
+        name={field.name}
+        className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg"
+        onChange={handleInputChange}
+        value={formData[field.name] || ''}
+        required={field.required}
+    >
+        <option value="" disabled>
+            {field.placeholder} {/* Placeholder as the first option */}
+        </option>
+        {field.options.map((option) => (
+            <option key={option.value} value={option.value}>
+                {option.label}
+            </option>
+        ))}
+    </select>
+)}
+
               {field.type === 'radio' && (
                 <div className="mt-2">
                   {field.options.map((option, idx) => (
                     <div key={idx} className="flex items-center">
                       <input
                         type="radio"
-                        id={option.value}
+                        id={option.name}
                         name={field.name}
                         value={option.value}
-                        className="mr-2"
                         onChange={handleInputChange}
+                        checked={formData[field.name] === option.value}
                         required={field.required}
                       />
-                      <label htmlFor={option.value}>{option.label}</label>
+                      <label htmlFor={option.name} className="ml-2">{option.label}</label>
                     </div>
                   ))}
                 </div>
               )}
-              {field.type === 'dropdown' && (
-                <select
-                  id={field.name}
-                  name={field.name}
-                  className="mt-2 block w-full border border-gray-300 rounded-lg"
-                  onChange={handleInputChange}
-                  required={field.required}
-                >
-                  <option value="">Select {field.label}</option>
-                  {field.options.map((option, idx) => (
-                    <option key={idx} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              )}
             </div>
           ))}
         </div>
-        <div className="flex justify-between mt-6">
+        <div className="flex justify-between mt-4">
           {step > 0 && (
             <button
               type="button"
-              className="bg-gray-500 text-white px-4 py-2 rounded-md"
               onClick={handlePrevious}
+              className="py-2 px-4 bg-gray-600 text-white rounded-md"
             >
-              Back
+              Previous
             </button>
           )}
-          <button
-            type="button"
-            className="bg-blue-500 text-white px-4 py-2 rounded-md"
-            onClick={handleNext}
-          >
-            {step === steps.length - 1 ? 'Submit' : 'Next'}
-          </button>
+          {step < steps.length - 1 ? (
+            <button
+              type="button"
+              onClick={handleNext}
+              className="py-2 px-4 bg-blue-600 text-white rounded-md"
+            >
+              Next
+            </button>
+          ) : (
+            <button
+              type="submit"
+              className="py-2 px-4 bg-green-600 text-white rounded-md"
+            >
+              Submit
+            </button>
+          )}
         </div>
       </form>
     </div>

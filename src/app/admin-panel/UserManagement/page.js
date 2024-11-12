@@ -1,17 +1,34 @@
 "use client"; // Next.js Client Component
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import api from '../../apiConfig/axiosConfig'; // Adjust the path as necessary
 
 const UserManagement = () => {
-  // Dummy data for user settings
-  const [users, setUsers] = useState([
-    { id: 1, username: 'JohnDoe', email: 'johndoe@example.com', emailNotifications: true, smsNotifications: false },
-    { id: 2, username: 'JaneSmith', email: 'janesmith@example.com', emailNotifications: true, smsNotifications: true },
-    { id: 3, username: 'AliceJohnson', email: 'alicejohnson@example.com', emailNotifications: false, smsNotifications: true },
-  ]);
-
-  const [selectedUser, setSelectedUser] = useState(users[0]); // Default to the first user
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null); // Set to null initially
   const [isEditing, setIsEditing] = useState(false);
+
+  // Function to fetch users from the backend
+  const fetchUsers = async () => {
+    try {
+        const token = localStorage.getItem('authToken'); // Retrieve the JWT token from localStorage
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
+          },
+        };
+  
+      const response = await api.get('/api/users/users',config); // Ensure your backend route matches this
+      setUsers(response.data);
+      setSelectedUser(response.data[0]); // Default to the first user
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   // Function to handle input changes
   const handleInputChange = (e) => {
@@ -23,9 +40,21 @@ const UserManagement = () => {
   };
 
   // Function to save changes
-  const handleSave = () => {
-    setUsers((prev) => prev.map((user) => (user.id === selectedUser.id ? selectedUser : user)));
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+        const token = localStorage.getItem('authToken'); // Retrieve the JWT token from localStorage
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
+          },
+        };
+  
+      await api.put(`/api/users/users/${selectedUser.id}`, selectedUser,config); // Update route as necessary
+      setUsers((prev) => prev.map((user) => (user.id === selectedUser.id ? selectedUser : user)));
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating user:', error);
+    }
   };
 
   return (
@@ -37,7 +66,7 @@ const UserManagement = () => {
           {users.map((user) => (
             <li key={user.id}>
               <button
-                className={`block w-full text-left p-2 rounded-md hover:bg-gray-200 ${selectedUser.id === user.id ? 'bg-gray-200' : ''}`}
+                className={`block w-full text-left p-2 rounded-md hover:bg-gray-200 ${selectedUser && selectedUser.id === user.id ? 'bg-gray-200' : ''}`}
                 onClick={() => {
                   setSelectedUser(user);
                   setIsEditing(true);
@@ -51,7 +80,7 @@ const UserManagement = () => {
       </div>
 
       {/* Selected User Details Section */}
-      {isEditing && (
+      {isEditing && selectedUser && (
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-2xl font-semibold mb-4">Edit User: {selectedUser.username}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
