@@ -59,8 +59,8 @@ const AdminPanel = () => {
         { name: 'PDF Visiting Card', icon: UserIcon, onClick: () => setActiveForm('pdf-visiting-card') },
         { name: 'One Page Business Profile', icon: UserIcon, onClick: () => setActiveForm('one-page-business-profile') },
         { name: 'Physical Visiting Card', icon: UserIcon, onClick: () => setActiveForm('physical-visiting-card') },
-        { name: 'Business Essentials', icon: UserIcon, onClick: () => setActiveForm('business-essentials') },
-        { name: 'Additional Services', icon: UserIcon, onClick: () => setActiveForm('additional-services') },
+        // { name: 'Business Essentials', icon: UserIcon, onClick: () => setActiveForm('business-essentials') },
+        // { name: 'Additional Services', icon: UserIcon, onClick: () => setActiveForm('additional-services') },
       ]
     },    { name: 'Generate QR Code', path: 'generate-qr-code', icon: AdjustmentsHorizontalIcon, onClick: () => setActiveForm('generate-qr-code') },
     { name: 'Generate Link for Customer', path: 'generate-link', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('generate-link') },
@@ -74,31 +74,33 @@ const AdminPanel = () => {
     { name: 'Admin Products', path: 'admin-products', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('admin-products') },
     { name: 'Payment Management', path: 'payment-management', icon: CogIcon, onClick: () => setActiveForm('payment-management') },
     { name: 'Sales & Income', path: 'sales-income', icon: UserIcon, onClick: () => setActiveForm('sales-income') },
-    { 
-      name: 'Reports & Graphs', 
-      icon: AdjustmentsHorizontalIcon, 
-      submenu: [
-        { name: 'Customers added as per products', icon: UserIcon, onClick: () => setActiveForm('customers-per-products') },
-        { name: 'Products sold as per category', icon: UserIcon, onClick: () => setActiveForm('products-per-category') },
-        { name: 'Income generated as per different categories', icon: UserIcon, onClick: () => setActiveForm('income-per-categories') },
-        { name: 'Customer engagement to blogs & testimonials', icon: UserIcon, onClick: () => setActiveForm('customer-engagement') },
-      ]
-    },    { name: 'Social Media Integration', path: 'social-media', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('social-media') },
+    // { 
+    //   name: 'Reports & Graphs', 
+    //   icon: AdjustmentsHorizontalIcon, 
+    //   submenu: [
+    //     { name: 'Customers added as per products', icon: UserIcon, onClick: () => setActiveForm('customers-per-products') },
+    //     { name: 'Products sold as per category', icon: UserIcon, onClick: () => setActiveForm('products-per-category') },
+    //     { name: 'Income generated as per different categories', icon: UserIcon, onClick: () => setActiveForm('income-per-categories') },
+    //     { name: 'Customer engagement to blogs & testimonials', icon: UserIcon, onClick: () => setActiveForm('customer-engagement') },
+    //   ]
+    // },  
+    { name: 'Social Media Integration', path: 'social-media', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('social-media') },
     { name: 'Contact Developer', path: 'contact-developer', icon: CogIcon, onClick: () => setActiveForm('contact-developer') },
     { name: 'Feedback', path: 'feedback', icon: UserIcon, onClick: () => setActiveForm('feedback') },
     { name: 'SMS / WhatsApp Integration', path: 'sms-whatsapp', icon: AdjustmentsHorizontalIcon, onClick: () => setActiveForm('sms-whatsapp') },
     { name: 'Blogs, Testimonials', path: 'blogs-testimonials', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('blogs-testimonials') },
-    { 
-      name: 'Compliance Documents', 
-      icon: CogIcon, 
-      submenu: [
-        { name: 'Privacy Policy', icon: UserIcon, onClick: () => setActiveForm('privacy-policy') },
-        { name: 'Refund Policy', icon: UserIcon, onClick: () => setActiveForm('refund-policy') },
-        { name: 'Terms & Conditions', icon: UserIcon, onClick: () => setActiveForm('terms-conditions') },
-        { name: 'Shipping Policy', icon: UserIcon, onClick: () => setActiveForm('shipping-policy') },
-        { name: 'Cancellation Policy', icon: UserIcon, onClick: () => setActiveForm('cancellation-policy') },
-      ]
-    },    { name: 'Contact Us', path: 'contact-us', icon: UserIcon, onClick: () => setActiveForm('contact-us') },
+    // { 
+    //   name: 'Compliance Documents', 
+    //   icon: CogIcon, 
+    //   submenu: [
+    //     { name: 'Privacy Policy', icon: UserIcon, onClick: () => setActiveForm('privacy-policy') },
+    //     { name: 'Refund Policy', icon: UserIcon, onClick: () => setActiveForm('refund-policy') },
+    //     { name: 'Terms & Conditions', icon: UserIcon, onClick: () => setActiveForm('terms-conditions') },
+    //     { name: 'Shipping Policy', icon: UserIcon, onClick: () => setActiveForm('shipping-policy') },
+    //     { name: 'Cancellation Policy', icon: UserIcon, onClick: () => setActiveForm('cancellation-policy') },
+    //   ]
+    // },  
+    { name: 'Contact Us', path: 'contact-us', icon: UserIcon, onClick: () => setActiveForm('contact-us') },
   ];
 
   const handleLogout = () => {
