@@ -226,13 +226,14 @@ const UserFormPage = () => {
   };
 
   const steps = [
-    <CompanyDetailsForm onDataChange={handleFormDataChange} initialData={formData}/>,
-    <SocialMediaForm onDataChange={handleFormDataChange} initialData={formData}/>,
-    <AboutCompanyForm onDataChange={handleFormDataChange} initialData={formData}/>,
-    <BankDetailsForm onDataChange={handleFormDataChange} initialData={formData}/>,
-    <ProductDetailsForm onDataChange={handleFormDataChange} initialData={formData}/>,
-    <GalleryImagesForm onDataChange={handleFormDataChange} initialData={formData}/>,
+    <CompanyDetailsForm key="company-details" onDataChange={handleFormDataChange} initialData={formData} />,
+    <SocialMediaForm key="social-media" onDataChange={handleFormDataChange} initialData={formData} />,
+    <AboutCompanyForm key="about-company" onDataChange={handleFormDataChange} initialData={formData} />,
+    <BankDetailsForm key="bank-details" onDataChange={handleFormDataChange} initialData={formData} />,
+    <ProductDetailsForm key="product-details" onDataChange={handleFormDataChange} initialData={formData} />,
+    <GalleryImagesForm key="gallery-images" onDataChange={handleFormDataChange} initialData={formData} />,
   ];
+  
 
   return (
     <div className="form-container">

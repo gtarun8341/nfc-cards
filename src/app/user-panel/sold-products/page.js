@@ -1,13 +1,13 @@
 "use client"; // Next.js Client Component
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import api from '../../apiConfig/axiosConfig';
 
 const SoldProducts = () => {
   const [sales, setSales] = useState([]);
   const token = localStorage.getItem('authToken');
 
-  const fetchSalesData = async () => {
+  const fetchSalesData = useCallback(async () => {
     try {
       const response = await api.get('/api/order/user-sales-data', {
         headers: { Authorization: `Bearer ${token}` },
@@ -17,7 +17,7 @@ const SoldProducts = () => {
     } catch (error) {
       console.error("Error fetching sales data:", error);
     }
-  };
+  }, [token]);
 
   const updateStatus = async (id, newStatus) => {
     try {
@@ -34,7 +34,7 @@ const SoldProducts = () => {
 
   useEffect(() => {
     fetchSalesData();
-  }, [token]);
+  }, [fetchSalesData]);
 
   return (
     <div className="max-w-6xl mx-auto p-6 border rounded-lg shadow-lg bg-white">

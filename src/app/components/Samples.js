@@ -1,14 +1,13 @@
 "use client"; // Mark this component as a Client Component
 import Image from 'next/image';
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 const Samples = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const totalImages = images.length;
 
   // Function to change the image index
-  const changeImage = (direction) => {
+  const changeImage = useCallback((direction) => {
     setCurrentIndex((prevIndex) => {
       if (direction === 'next') {
         return (prevIndex + 1) % totalImages;
@@ -16,7 +15,7 @@ const Samples = ({ images }) => {
         return (prevIndex - 1 + totalImages) % totalImages; // Wrap around for previous
       }
     });
-  };
+  }, [totalImages]);
 
   // Function to automatically scroll images
   useEffect(() => {
@@ -25,7 +24,7 @@ const Samples = ({ images }) => {
     }, 3000); // Change image every 3 seconds
 
     return () => clearInterval(interval); // Clean up the interval on component unmount
-  }, [totalImages]);
+  }, [changeImage]);
 
   // Get styles for each image based on its position
   const getImageStyles = (index) => {

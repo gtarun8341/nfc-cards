@@ -4,19 +4,28 @@ import { useState, useEffect } from 'react';
 
 const MultiStepForm = ({ steps, formTitle, initialFormData = {}, onSubmit }) => { // Added onSubmit prop
   const [step, setStep] = useState(0);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState(() => {
 
-  useEffect(() => {
-    if (Object.keys(formData).length === 0) {
-      const defaultFormData = {};
-      steps.forEach((step) => {
-        step.fields.forEach((field) => {
-          defaultFormData[field.name] = initialFormData[field.name] || '';
-        });
-      });
-      setFormData(defaultFormData);
-    }
-  }, [initialFormData, steps]);
+  // useEffect(() => {
+  //   if (Object.keys(formData).length === 0) {
+  //     const defaultFormData = {};
+  //     steps.forEach((step) => {
+  //       step.fields.forEach((field) => {
+  //         defaultFormData[field.name] = initialFormData[field.name] || '';
+  //       });
+  //     });
+  //     setFormData(defaultFormData);
+  //   }
+  // }, [initialFormData, steps]);
+
+  const defaultFormData = {};
+  steps.forEach((step) => {
+    step.fields.forEach((field) => {
+      defaultFormData[field.name] = initialFormData[field.name] || '';
+    });
+  });
+  return defaultFormData;
+});
 
   const handleInputChange = (e) => {
     const { name, value, type, files } = e.target;
