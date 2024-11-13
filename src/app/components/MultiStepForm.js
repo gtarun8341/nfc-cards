@@ -1,3 +1,5 @@
+"use client"; // Next.js Client Component
+
 import { useState, useEffect } from 'react';
 
 const MultiStepForm = ({ steps, formTitle, initialFormData = {}, onSubmit }) => { // Added onSubmit prop

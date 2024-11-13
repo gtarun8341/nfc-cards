@@ -1,4 +1,5 @@
 // pages/sms-whatsapp-integration.js
+"use client"; // Next.js Client Component
 
 const SMSWhatsAppIntegrationPage = () => {
     return (

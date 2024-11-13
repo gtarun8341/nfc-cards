@@ -1,4 +1,6 @@
 // src/app/components/HomeCard.js
+"use client"; // Next.js Client Component
+
 const HomeCard = ({ title, description, icon }) => {
     return (
       <div className="bg-white shadow-lg rounded-lg p-6 h-64 flex flex-col items-center"> {/* Increased height and added flexbox */}

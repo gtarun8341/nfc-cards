@@ -1,4 +1,6 @@
 // src/app/components/FAQ.js
+"use client"; // Next.js Client Component
+
 const FAQ = ({ faqs }) => {
     return (
         <section className="container mx-auto p-6">

@@ -1,4 +1,6 @@
 // CardAnalyticsPage.js
+"use client"; // Next.js Client Component
+
 import React from 'react';
 
 const CardAnalyticsPage = () => {

@@ -1,3 +1,5 @@
+"use client"; // Next.js Client Component
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation'; // Use next/navigation for app directory
 import api from '../../apiConfig/axiosConfig'; // Import the Axios instance

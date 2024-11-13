@@ -1,4 +1,6 @@
 // src/app/components/Testimonials.js
+"use client"; // Next.js Client Component
+
 const Testimonials = ({ testimonials }) => {
     return (
         <section className="container mx-auto p-6">

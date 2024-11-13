@@ -1,4 +1,6 @@
 // src/pages/services.js
+"use client"; // Next.js Client Component
+
 export default function Services() {
     return (
       <section className="container mx-auto p-6">

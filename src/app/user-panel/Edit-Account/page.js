@@ -1,3 +1,5 @@
+"use client"; // Next.js Client Component
+
 import { useState, useEffect } from 'react';
 import api from '../../apiConfig/axiosConfig'; // Import Axios instance
 import MultiStepForm from '../../components/MultiStepForm'; // Assuming MultiStepForm is in the same folder

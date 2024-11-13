@@ -1,4 +1,5 @@
 // pages/blogs-testimonials.js
+"use client"; // Next.js Client Component
 
 import { useState } from 'react';
 

@@ -1,4 +1,5 @@
 // pages/payment-gateway-integration.js
+"use client"; // Next.js Client Component
 
 const PaymentGatewayIntegrationPage = () => {
     return (

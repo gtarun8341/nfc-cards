@@ -1,3 +1,5 @@
+"use client"; // Next.js Client Component
+
 import { useState, useEffect } from 'react';
 import ReactQRCode from 'react-qr-code'; // Using react-qr-code for QR code generation
 import api from '../../apiConfig/axiosConfig';

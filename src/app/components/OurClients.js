@@ -1,4 +1,6 @@
 // src/app/components/OurClients.js
+"use client"; // Next.js Client Component
+
 const OurClients = ({ clients }) => {
     return (
         <section className="container mx-auto p-6">

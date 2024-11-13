@@ -1,4 +1,6 @@
 // src/app/components/HomeSection.js
+"use client"; // Next.js Client Component
+
 const HomeSection = ({ sections }) => {
     return (
         <div className="container mx-auto p-6">

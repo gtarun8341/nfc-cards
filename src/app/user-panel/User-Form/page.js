@@ -1,3 +1,5 @@
+"use client"; // Next.js Client Component
+
 import { useEffect, useState } from "react";
 import api from "../../apiConfig/axiosConfig"; // Ensure you have the right API config
 import CompanyDetailsForm from "./CompanyDetailsForm/page";

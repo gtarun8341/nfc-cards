@@ -1,3 +1,5 @@
+"use client"; // Next.js Client Component
+
 import { useEffect, useState } from "react";
 
 const GalleryImagesForm = ({ onDataChange,initialData }) => {

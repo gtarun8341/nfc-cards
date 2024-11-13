@@ -1,3 +1,5 @@
+"use client"; // Next.js Client Component
+
 import Hero from '../components/Hero';
 import AllFooter from '../components/AllFooter';
 export default function About() {

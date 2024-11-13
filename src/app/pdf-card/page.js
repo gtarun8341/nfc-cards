@@ -1,4 +1,6 @@
 // src/app/nfc-card/page.js
+"use client"; // Next.js Client Component
+
 import Hero from '../components/Hero'; // Adjust the import path as necessary
 import AllCards from '../components/AllCards'; // Import the AllCards component
 import Pricing from '../components/Pricing'; // Import the Pricing component

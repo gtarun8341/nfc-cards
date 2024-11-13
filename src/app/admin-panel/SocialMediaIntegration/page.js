@@ -1,4 +1,5 @@
 // pages/social-media-integration.js
+"use client"; // Next.js Client Component
 
 const SocialMediaIntegrationPage = () => {
     return (

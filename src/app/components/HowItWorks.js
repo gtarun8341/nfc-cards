@@ -1,4 +1,6 @@
 // src/app/components/HowItWorks.js
+"use client"; // Next.js Client Component
+
 import AllCards from './AllCards'; // Import the AllCards component
 
 const HowItWorks = ({ cardsData }) => {

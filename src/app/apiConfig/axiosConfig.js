@@ -1,4 +1,6 @@
 // apiConfig/axiosConfig.js
+"use client"; // Next.js Client Component
+
 import axios from 'axios';
 
 // Create an Axios instance with the base URL

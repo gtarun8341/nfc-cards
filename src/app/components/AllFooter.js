@@ -1,4 +1,6 @@
 // src/app/components/AllFooter.js
+"use client"; // Next.js Client Component
+
 const AllFooter = () => {
     return (
         <footer className="bg-gray-800 text-white p-6">

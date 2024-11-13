@@ -1,4 +1,6 @@
 // ContactDeveloperPage.js
+"use client"; // Next.js Client Component
+
 import React, { useState } from 'react';
 import api from '../../apiConfig/axiosConfig'; // Adjust the path as needed
 
