@@ -129,8 +129,8 @@ const AdminPanel = () => {
       {activeForm === 'pdf-visiting-card' && <PDFVisitingCard />}
       {activeForm === 'one-page-business-profile' && <OnePageBusinessProfile />}
       {activeForm === 'physical-visiting-card' && <PhysicalVisitingCard />}
-      {activeForm === 'business-essentials' && <BusinessEssentials />}
-      {activeForm === 'additional-services' && <AdditionalServices />}
+      {/* {activeForm === 'business-essentials' && <BusinessEssentials />} */}
+      {/* {activeForm === 'additional-services' && <AdditionalServices />} */}
       {activeForm === 'generate-qr-code' && <GenerateQRCode />}
       {activeForm === 'generate-link' && <GenerateLink />}
       {activeForm === 'staff-management' && <StaffManagement />}
@@ -143,20 +143,20 @@ const AdminPanel = () => {
       {activeForm === 'subscription-plan' && <AdminPlansPage />}
       {activeForm === 'payment-management' && <PaymentManagement />}
       {activeForm === 'sales-income' && <SalesIncome />}
-      {activeForm === 'customers-per-products' && <CustomersPerProducts />}
+      {/* {activeForm === 'customers-per-products' && <CustomersPerProducts />}
       {activeForm === 'products-per-category' && <ProductsPerCategory />}
-      {activeForm === 'income-per-categories' && <IncomePerCategories />}
-      {activeForm === 'customer-engagement' && <CustomerEngagement />}
+      {activeForm === 'income-per-categories' && <IncomePerCategories />} */}
+      {/* {activeForm === 'customer-engagement' && <CustomerEngagement />} */}
       {activeForm === 'social-media' && <SocialMediaIntegration />}
       {activeForm === 'contact-developer' && <ContactDeveloper />}
       {activeForm === 'feedback' && <Feedback />}
       {activeForm === 'sms-whatsapp' && <SMSWhatsAppIntegration />}
       {activeForm === 'blogs-testimonials' && <BlogsTestimonials />}
-      {activeForm === 'privacy-policy' && <PrivacyPolicy />}
+      {/* {activeForm === 'privacy-policy' && <PrivacyPolicy />}
       {activeForm === 'refund-policy' && <RefundPolicy />}
       {activeForm === 'terms-conditions' && <TermsConditions />}
       {activeForm === 'shipping-policy' && <ShippingPolicy />}
-      {activeForm === 'cancellation-policy' && <CancellationPolicy />}
+      {activeForm === 'cancellation-policy' && <CancellationPolicy />} */}
       {activeForm === 'contact-us' && <ContactUs />}
       
       {/* Fallback component if none match */}
