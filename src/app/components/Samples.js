@@ -1,4 +1,5 @@
 "use client"; // Mark this component as a Client Component
+import Image from 'next/image';
 
 import React, { useEffect, useState } from 'react';
 
@@ -54,19 +55,19 @@ const Samples = ({ images }) => {
         Prev
       </button>
       <div className="flex items-center transition-transform duration-500 ease-in-out">
-        <img
+        <Image
           src={images[leftImageIndex]}
           alt={`Sample ${leftImageIndex + 1}`}
           className="rounded-lg object-cover h-20 w-auto sm:h-30 md:h-40" // Responsive height
           style={getImageStyles(-1)}
         />
-        <img
+        <Image
           src={images[middleImageIndex]}
           alt={`Sample ${middleImageIndex + 1}`}
           className="rounded-lg object-cover h-20 w-auto sm:h-30 md:h-40" // Responsive height
           style={getImageStyles(0)}
         />
-        <img
+        <Image
           src={images[rightImageIndex]}
           alt={`Sample ${rightImageIndex + 1}`}
           className="rounded-lg object-cover h-20 w-auto sm:h-30 md:h-40" // Responsive height

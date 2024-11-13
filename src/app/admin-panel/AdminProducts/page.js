@@ -1,4 +1,5 @@
 "use client"; // Next.js Client Component
+import Image from 'next/image';
 
 import { useState, useEffect } from 'react';
 import api from '../../apiConfig/axiosConfig';
@@ -150,7 +151,7 @@ const AdminProductsPage = () => {
               <p>{product.productType}</p>
               <p>{product.discount ? `${product.discount}% off` : 'No Discount'}</p>
               {product.productImages && product.productImages.map((img, idx) => (
-                <img
+                <Image
                   key={idx}
                   src={`${api.defaults.baseURL}/uploads/adminproducts/${img}`} // Show the image with correct path
                   alt={`Product ${product.productName}`}

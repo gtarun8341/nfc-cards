@@ -2,6 +2,7 @@
 "use client"; // Marking this as a Client Component
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 const OtherServices = ({ services }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -43,7 +44,7 @@ const OtherServices = ({ services }) => {
       {/* Big Card Section */}
       {services.length > 0 && (
         <div className="flex justify-center">
-          <div className="relative bg-gray-100 border rounded-lg shadow-lg mb-6 overflow-hidden w-3/4 max-w-lg"> {/* Adjust width here */}          <img
+          <div className="relative bg-gray-100 border rounded-lg shadow-lg mb-6 overflow-hidden w-3/4 max-w-lg"> {/* Adjust width here */}          <Image
             src={services[currentIndex].image}
             alt={services[currentIndex].title}
             className="w-full h-80 object-cover rounded-lg transition-transform duration-500 transform hover:scale-105"

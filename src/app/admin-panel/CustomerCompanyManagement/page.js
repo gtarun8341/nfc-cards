@@ -1,4 +1,5 @@
 "use client"; // Next.js Client Component
+import Image from 'next/image';
 
 import { useState, useEffect } from 'react';
 import api from '../../apiConfig/axiosConfig';
@@ -68,7 +69,7 @@ const CustomerCompanyManagementPage = () => {
                   <td className="py-2 px-4 border">{company.googleMap}</td>
                   <td className="py-2 px-4 border">{company.address}</td>
                   <td className="py-2 px-4 border">
-                    <img src={company.logo} alt="Company Logo" className="w-16 h-16 object-cover" />
+                    <Image src={company.logo} alt="Company Logo" className="w-16 h-16 object-cover" />
                   </td>
                   <td className="py-2 px-4 border">
                     <div><strong>Established Year:</strong> {company.aboutCompany.establishedYear}</div>
@@ -93,7 +94,7 @@ const CustomerCompanyManagementPage = () => {
                   </td>
                   <td className="py-2 px-4 border">
                     {company.galleryImages.map((image, index) => (
-                      <img key={index} src={image} alt={`Gallery Image ${index + 1}`} className="w-16 h-16 object-cover mb-2" />
+                      <Image key={index} src={image} alt={`Gallery Image ${index + 1}`} className="w-16 h-16 object-cover mb-2" />
                     ))}
                   </td>
                   <td className="py-2 px-4 border">

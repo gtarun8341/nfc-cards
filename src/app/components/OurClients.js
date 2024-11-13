@@ -1,5 +1,6 @@
 // src/app/components/OurClients.js
 "use client"; // Next.js Client Component
+import Image from 'next/image';
 
 const OurClients = ({ clients }) => {
     return (
@@ -8,7 +9,7 @@ const OurClients = ({ clients }) => {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {clients.map((client, index) => (
                     <div className="flex items-center" key={index}>
-                        <img src={client.icon} alt={client.name} className="w-16 h-16 mr-2" /> {/* Decreased icon size */}
+                        <Image src={client.icon} alt={client.name} className="w-16 h-16 mr-2" /> {/* Decreased icon size */}
                         <span className="text-center">{client.name}</span>
                     </div>
                 ))}

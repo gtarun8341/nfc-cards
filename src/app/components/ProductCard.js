@@ -1,5 +1,6 @@
 "use client"; // Marking this as a Client Component
 import { useState } from 'react'; // Import useState for state management
+import Image from 'next/image';
 
 const ProductCard = ({ product, onAddToCart }) => {
     const [quantity, setQuantity] = useState(0); // State to manage quantity
@@ -32,7 +33,7 @@ const ProductCard = ({ product, onAddToCart }) => {
 
     return (
         <div className="border rounded-lg p-4 shadow-lg">
-            <img
+            <Image
                 src={product.icon}
                 alt={product.title}
                 className="mx-auto mb-4 w-full h-32 object-cover" // Full-width image

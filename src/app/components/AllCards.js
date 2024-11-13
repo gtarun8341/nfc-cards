@@ -1,5 +1,6 @@
 // src/app/components/AllCards.js
 "use client"; // Marking this as a Client Component
+import Image from 'next/image';
 
 const AllCards = ({ cardsData, full }) => {
   return (
@@ -7,7 +8,7 @@ const AllCards = ({ cardsData, full }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> {/* Change to 3 columns on large screens */}
         {cardsData.map((card) => (
           <div key={card.id} className="border rounded-lg p-4 shadow-lg">
-            <img
+            <Image
               src={card.icon}
               alt={card.title}
               className={`mx-auto mb-4 ${full ? 'w-full h-32 object-cover' : 'w-16 h-16'}`} // Conditional styling for image

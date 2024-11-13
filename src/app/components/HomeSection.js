@@ -1,5 +1,6 @@
 // src/app/components/HomeSection.js
 "use client"; // Next.js Client Component
+import Image from 'next/image';
 
 const HomeSection = ({ sections }) => {
     return (
@@ -14,7 +15,7 @@ const HomeSection = ({ sections }) => {
                         className={`flex-1 p-4 ${index % 2 === 0 ? '' : 'order-2'}`}
                         style={{ flexBasis: '50%' }} // Ensure equal width
                     >
-                        <img src={section.image} alt="Section" className="w-full h-auto rounded-lg" />
+                        <Image src={section.image} alt="Section" className="w-full h-auto rounded-lg" />
                     </div>
                     <div
                         className={`flex-1 p-4 ${index % 2 === 0 ? '' : 'order-1'}`}

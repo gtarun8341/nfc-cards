@@ -1,4 +1,5 @@
 "use client"; // Next.js Client Component
+import Image from 'next/image';
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -188,7 +189,7 @@ const ProductCataloguePage = () => {
                 <td className="py-3 px-4 border-b">{product.productPrice}</td>
                 <td className="py-3 px-4 border-b">
   {product.productImages && product.productImages[0] && (
-    <img
+    <Image
       src={`${api.defaults.baseURL}/uploads/userDetails/${product.id}/${product.productImages[0]}`} // Use base URL for images
       alt={product.productName}
       className="h-16 w-16 object-cover"
