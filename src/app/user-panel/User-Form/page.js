@@ -114,7 +114,7 @@ const UserFormPage = () => {
         });
       } catch (error) {
         console.error("Error fetching user details:", error);
-        setErrorMessages([...errorMessages, "Error fetching user details"]);
+        setErrorMessages((prevMessages) => [...prevMessages, "Error fetching user details"]);
       }
     };
   

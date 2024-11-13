@@ -5,9 +5,12 @@ import api from '../../apiConfig/axiosConfig';
 
 const SoldProducts = () => {
   const [sales, setSales] = useState([]);
-  const token = localStorage.getItem('authToken');
+  const [token, setToken] = useState(null); // State to store the token
 
+  // Fetch sales data
   const fetchSalesData = useCallback(async () => {
+    if (!token) return; // Ensure the token is available before making the API call
+    
     try {
       const response = await api.get('/api/order/user-sales-data', {
         headers: { Authorization: `Bearer ${token}` },
@@ -19,6 +22,7 @@ const SoldProducts = () => {
     }
   }, [token]);
 
+  // Update sale status
   const updateStatus = async (id, newStatus) => {
     try {
       await api.put(
@@ -32,9 +36,19 @@ const SoldProducts = () => {
     }
   };
 
+  // Fetch token on the client side only
   useEffect(() => {
-    fetchSalesData();
-  }, [fetchSalesData]);
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('authToken');
+      setToken(storedToken); // Set token to state
+    }
+  }, []); // Empty dependency array ensures this runs only once when the component mounts
+
+  useEffect(() => {
+    if (token) {
+      fetchSalesData(); // Fetch sales data after token is set
+    }
+  }, [token, fetchSalesData]);
 
   return (
     <div className="max-w-6xl mx-auto p-6 border rounded-lg shadow-lg bg-white">
