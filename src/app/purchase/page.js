@@ -2,7 +2,6 @@
 import { Suspense, useEffect, useState } from 'react';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import AllFooter from '../components/AllFooter';
 import api from '../apiConfig/axiosConfig';
 import Script from 'next/script';
