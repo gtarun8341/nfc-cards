@@ -1,6 +1,6 @@
 "use client";
-import { Suspense, useEffect, useState } from 'react';
 
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import AllFooter from '../components/AllFooter';
 import api from '../apiConfig/axiosConfig';
@@ -8,6 +8,15 @@ import Script from 'next/script';
 
 export default function PurchasePage() {
     const router = useRouter();
+    
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <PurchaseContent />
+        </Suspense>
+    );
+}
+
+function PurchaseContent() {
     const searchParams = useSearchParams();
     const [purchaseData, setPurchaseData] = useState([]);
     const [userData, setUserData] = useState({
@@ -25,8 +34,7 @@ export default function PurchasePage() {
                 const isAlreadyParsed = data.startsWith('{') && data.endsWith('}');
                 const decodedData = isAlreadyParsed ? data : decodeURIComponent(data);
                 const parsedData = JSON.parse(decodedData);
-    console.log(parsedData)
-                // Assuming parsedData is an object with "products" and "userId" keys
+                console.log(parsedData);
                 if (parsedData.products && parsedData.userId) {
                     setPurchaseData(parsedData.products);
                     setUserData(prevState => ({ ...prevState, userId: parsedData.userId }));
@@ -39,7 +47,6 @@ export default function PurchasePage() {
         }
     }, [searchParams]);
     
-
     const handleChange = (e) => {
         const { name, value } = e.target;
         setUserData(prevState => ({ ...prevState, [name]: value }));
@@ -108,7 +115,7 @@ export default function PurchasePage() {
             parseFloat(item.discount.replace('%', '')) : 
             parseFloat(item.discount)) 
         : 0;
-            const discountAmount = (price * discountValue) / 100;
+        const discountAmount = (price * discountValue) / 100;
         return (price * quantity) - discountAmount;
     };
 
@@ -140,8 +147,6 @@ export default function PurchasePage() {
                     </div>
                 ) : (
                     <>
-                                        <Suspense fallback={<div>Loading...</div>}>
-
                         {purchaseData.length > 0 ? (
                             <div className="bg-white shadow-md rounded-lg p-6">
                                 <h2 className="text-2xl font-semibold mb-4 text-gray-700">Products Summary</h2>
@@ -217,18 +222,18 @@ export default function PurchasePage() {
                                             required 
                                         />
                                     </div>
+
                                     <button 
                                         type="submit" 
-                                        className="w-full bg-green-500 text-white py-2 px-4 rounded-md font-medium hover:bg-green-600 focus:outline-none focus:ring focus:ring-green-200"
+                                        className="mt-4 w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                                     >
                                         Proceed to Payment
                                     </button>
                                 </form>
                             </div>
                         ) : (
-                            <p className="text-center text-gray-500">No products found for purchase.</p>
+                            <p>No purchase data available.</p>
                         )}
-                                            </Suspense>
                     </>
                 )}
             </div>
