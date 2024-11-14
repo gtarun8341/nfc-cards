@@ -1,4 +1,5 @@
 "use client";
+import { Suspense, useEffect, useState } from 'react';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -140,6 +141,8 @@ export default function PurchasePage() {
                     </div>
                 ) : (
                     <>
+                                        <Suspense fallback={<div>Loading...</div>}>
+
                         {purchaseData.length > 0 ? (
                             <div className="bg-white shadow-md rounded-lg p-6">
                                 <h2 className="text-2xl font-semibold mb-4 text-gray-700">Products Summary</h2>
@@ -226,6 +229,7 @@ export default function PurchasePage() {
                         ) : (
                             <p className="text-center text-gray-500">No products found for purchase.</p>
                         )}
+                                            </Suspense>
                     </>
                 )}
             </div>
