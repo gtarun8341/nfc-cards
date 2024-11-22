@@ -192,6 +192,9 @@ const ProductCataloguePage = () => {
     <Image
       src={`${api.defaults.baseURL}/uploads/userDetails/${product.id}/${product.productImages[0]}`} // Use base URL for images
       alt={product.productName}
+      width={500} // Set a reasonable default width
+      height={500}
+      layout="intrinsic"
       className="h-16 w-16 object-cover"
     />
   )}

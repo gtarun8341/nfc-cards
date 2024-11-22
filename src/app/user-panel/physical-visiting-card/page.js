@@ -9,6 +9,18 @@ const PhysicalVisitingCardPage = () => {
     const [loading, setLoading] = useState(true);
     const [previewHtml, setPreviewHtml] = useState({});
     const [selectedTemplateData, setSelectedTemplateData] = useState([]); // Store selected template data
+    const [isModalOpen, setIsModalOpen] = useState(false); // To control modal visibility
+    const [cardType, setCardType] = useState(''); // Selected card type
+    const [selectedTemplate, setSelectedTemplate] = useState(''); // Selected template
+    const [userDetails, setUserDetails] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        address: '',
+        state:' ',
+        country:' ',
+        pincode:' ',
+    });
     const router = useRouter();
 
     useEffect(() => {
@@ -94,6 +106,39 @@ const PhysicalVisitingCardPage = () => {
         }
     };
 
+    const handlePurchaseClick = () => {
+        setIsModalOpen(true); // Open the modal when the user clicks the "Purchase" button
+    };
+    const handleCancelClick = () => {
+        setIsModalOpen(false); // Close the modal when the user clicks the "Cancel" button
+    };
+
+    const handleFormSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            // Send purchase data to the server
+            const token = localStorage.getItem('authToken');
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            };
+            const templateType = 'physical-visiting-card'; // Example selected template
+
+            const purchaseData = {
+                cardType,
+                templateId: selectedTemplate,
+                templateType, 
+                userDetails
+            };
+
+            const response = await api.post('/api/cardPurchase/card-purchase', purchaseData, config);
+            console.log('Purchase successful:', response.data);
+            setIsModalOpen(false); // Close the modal after purchase
+        } catch (error) {
+            console.error('Error submitting purchase:', error);
+        }
+    };
     if (loading) {
         return <div className="text-center text-xl text-gray-500 py-4">Loading templates...</div>;
     }
@@ -150,6 +195,174 @@ const PhysicalVisitingCardPage = () => {
                     <p className="text-center text-xl text-gray-600">No templates found.</p>
                 )}
             </div>
+            <button
+                onClick={handlePurchaseClick}
+                className="fixed bottom-6 right-6 bg-green-500 text-white rounded-full p-4 shadow-lg hover:bg-green-600 transition duration-200"
+            >
+                Purchase a Card
+            </button>
+
+            {/* Modal for Purchase */}
+            {isModalOpen && (
+    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50">
+        <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl">
+            <h2 className="text-xl font-bold text-center mb-4">Purchase Your Card</h2>
+            <form onSubmit={handleFormSubmit}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Card Type */}
+                    <div className="mb-4">
+                        <label className="block text-gray-700 mb-2">Card Type</label>
+                        <select
+                            className="w-full p-2 border rounded-lg"
+                            value={cardType}
+                            onChange={(e) => setCardType(e.target.value)}
+                            required
+                        >
+                            <option value="">Select Card Type</option>
+                            <option value="metal">Metal</option>
+                            <option value="plastic">Plastic</option>
+                            <option value="wooden">Wooden</option>
+                        </select>
+                    </div>
+
+                    {/* Template Name */}
+                    <div className="mb-4">
+                        <label className="block text-gray-700 mb-2">Template Name</label>
+                        <select
+                            className="w-full p-2 border rounded-lg"
+                            value={selectedTemplate}
+                            onChange={(e) => setSelectedTemplate(e.target.value)}
+                            required
+                        >
+                            <option value="">Select Template</option>
+                            {templates.map((template) => (
+                                <option key={template._id} value={template._id}>
+                                    {template.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Name */}
+                    <div className="mb-4">
+                        <label className="block text-gray-700 mb-2">Name</label>
+                        <input
+                            type="text"
+                            className="w-full p-2 border rounded-lg"
+                            value={userDetails.name}
+                            onChange={(e) =>
+                                setUserDetails({ ...userDetails, name: e.target.value })
+                            }
+                            required
+                        />
+                    </div>
+
+                    {/* Email */}
+                    <div className="mb-4">
+                        <label className="block text-gray-700 mb-2">Email</label>
+                        <input
+                            type="email"
+                            className="w-full p-2 border rounded-lg"
+                            value={userDetails.email}
+                            onChange={(e) =>
+                                setUserDetails({ ...userDetails, email: e.target.value })
+                            }
+                            required
+                        />
+                    </div>
+
+                    {/* Phone */}
+                    <div className="mb-4">
+                        <label className="block text-gray-700 mb-2">Phone</label>
+                        <input
+                            type="text"
+                            className="w-full p-2 border rounded-lg"
+                            value={userDetails.phone}
+                            onChange={(e) =>
+                                setUserDetails({ ...userDetails, phone: e.target.value })
+                            }
+                            required
+                        />
+                    </div>
+
+                    {/* Address */}
+                    <div className="mb-4">
+                        <label className="block text-gray-700 mb-2">Address</label>
+                        <input
+                            type="text"
+                            className="w-full p-2 border rounded-lg"
+                            value={userDetails.address}
+                            onChange={(e) =>
+                                setUserDetails({ ...userDetails, address: e.target.value })
+                            }
+                            required
+                        />
+                    </div>
+
+                    {/* State */}
+                    <div className="mb-4">
+                        <label className="block text-gray-700 mb-2">State</label>
+                        <input
+                            type="text"
+                            className="w-full p-2 border rounded-lg"
+                            value={userDetails.state}
+                            onChange={(e) =>
+                                setUserDetails({ ...userDetails, state: e.target.value })
+                            }
+                            required
+                        />
+                    </div>
+
+                    {/* Country */}
+                    <div className="mb-4">
+                        <label className="block text-gray-700 mb-2">Country</label>
+                        <input
+                            type="text"
+                            className="w-full p-2 border rounded-lg"
+                            value={userDetails.country}
+                            onChange={(e) =>
+                                setUserDetails({ ...userDetails, country: e.target.value })
+                            }
+                            required
+                        />
+                    </div>
+
+                    {/* Pincode */}
+                    <div className="mb-4">
+                        <label className="block text-gray-700 mb-2">Pincode</label>
+                        <input
+                            type="text"
+                            className="w-full p-2 border rounded-lg"
+                            value={userDetails.pincode}
+                            onChange={(e) =>
+                                setUserDetails({ ...userDetails, pincode: e.target.value })
+                            }
+                            required
+                        />
+                    </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-end gap-4 mt-6">
+                    <button
+                        type="button"
+                        onClick={handleCancelClick}
+                        className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-200"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200"
+                    >
+                        Submit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+)}
+
         </div>
     );
 };

@@ -74,10 +74,16 @@ const Navbar = () => {
           </button>
 
           {/* Right Side - Login Button (visible on larger screens) */}
-          {!isLoggedIn && (
+          {!isLoggedIn ? (
             <Link href="/auth">
               <button className="bg-white text-green-500 px-4 py-2 rounded-md hidden md:block">
                 Login
+              </button>
+            </Link>
+          ) : (
+            <Link href="/user-panel">
+              <button className="bg-white text-green-500 px-4 py-2 rounded-md hidden md:block">
+                panel
               </button>
             </Link>
           )}
@@ -123,11 +129,19 @@ const Navbar = () => {
             <li>
               <Link href="/tracking">Track Product</Link>
             </li>
-              {!isLoggedIn && (
+            {!isLoggedIn ? (
                 <li>
                   <Link href="/auth">
                     <button className="bg-white text-green-500 w-full px-4 py-2 rounded-md mt-2">
                       Login
+                    </button>
+                  </Link>
+                </li>
+              ) : (
+                <li>
+                  <Link href="/user-panel">
+                    <button className="bg-white text-green-500 w-full px-4 py-2 rounded-md mt-2">
+                    panel
                     </button>
                   </Link>
                 </li>

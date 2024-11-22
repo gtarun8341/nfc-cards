@@ -147,7 +147,7 @@ const AdminProductsPage = () => {
           products.map((product, index) => (
             <div key={index} className="product-details mb-4">
               <h3 className="font-bold">{product.productName}</h3>
-              <p>{product.productPrice} USD</p>
+              <p>{product.productPrice} INR</p>
               <p>{product.productType}</p>
               <p>{product.discount ? `${product.discount}% off` : 'No Discount'}</p>
               {product.productImages && product.productImages.map((img, idx) => (
@@ -156,6 +156,9 @@ const AdminProductsPage = () => {
                   src={`${api.defaults.baseURL}/uploads/adminproducts/${img}`} // Show the image with correct path
                   alt={`Product ${product.productName}`}
                   className="w-32 h-32 object-cover"
+                  width={500} // Set a reasonable default width
+                  height={500}
+                  layout="intrinsic" // Automatically adjust based on actual image size
                 />
               ))}
             </div>

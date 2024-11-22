@@ -24,6 +24,9 @@ function PurchaseContent() {
         email: '',
         phone: '',
         address: '',
+        state:' ',
+        country:' ',
+        pincode:' ',
     });
     const [trackingNumber, setTrackingNumber] = useState(null); // State for tracking number
 
@@ -217,6 +220,39 @@ function PurchaseContent() {
                                             type="text" 
                                             name="address" 
                                             value={userData.address} 
+                                            onChange={handleChange} 
+                                            className="w-full border border-gray-300 rounded-md p-2"
+                                            required 
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-gray-700">State</label>
+                                        <input 
+                                            type="text" 
+                                            name="state" 
+                                            value={userData.state} 
+                                            onChange={handleChange} 
+                                            className="w-full border border-gray-300 rounded-md p-2"
+                                            required 
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-gray-700">Country</label>
+                                        <input 
+                                            type="text" 
+                                            name="country" 
+                                            value={userData.country} 
+                                            onChange={handleChange} 
+                                            className="w-full border border-gray-300 rounded-md p-2"
+                                            required 
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-gray-700">Pincode</label>
+                                        <input 
+                                            type="text" 
+                                            name="pincode" 
+                                            value={userData.pincode} 
                                             onChange={handleChange} 
                                             className="w-full border border-gray-300 rounded-md p-2"
                                             required 

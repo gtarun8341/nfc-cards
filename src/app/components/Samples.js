@@ -57,18 +57,27 @@ const Samples = ({ images }) => {
         <Image
           src={images[leftImageIndex]}
           alt={`Sample ${leftImageIndex + 1}`}
+          width={500} // Set a reasonable default width
+          height={500}
+          layout="intrinsic"
           className="rounded-lg object-cover h-20 w-auto sm:h-30 md:h-40" // Responsive height
           style={getImageStyles(-1)}
         />
         <Image
           src={images[middleImageIndex]}
           alt={`Sample ${middleImageIndex + 1}`}
+          width={500} // Set a reasonable default width
+          height={500}
+          layout="intrinsic"
           className="rounded-lg object-cover h-20 w-auto sm:h-30 md:h-40" // Responsive height
           style={getImageStyles(0)}
         />
         <Image
           src={images[rightImageIndex]}
           alt={`Sample ${rightImageIndex + 1}`}
+          width={500} // Set a reasonable default width
+          height={500}
+          layout="intrinsic"
           className="rounded-lg object-cover h-20 w-auto sm:h-30 md:h-40" // Responsive height
           style={getImageStyles(1)}
         />

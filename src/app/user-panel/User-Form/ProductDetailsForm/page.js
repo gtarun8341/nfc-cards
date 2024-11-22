@@ -2,20 +2,34 @@
 
 import { useEffect, useState } from "react";
 
-const ProductDetailsForm = ({ onDataChange,initialData }) => {
-  const [products, setProducts] = useState([{ productName: "", productPrice: "", productImage: null, productType: "" }]);
+const ProductDetailsForm = ({ onDataChange, initialData }) => {
+  const [products, setProducts] = useState([
+    {
+      productName: "",
+      productPrice: "",
+      productImage: null,
+      productType: "",
+      hsnCode: "",
+      gst: "",
+    },
+  ]);
 
-    // Use effect to set initial products from initialData
-    useEffect(() => {
-      if (initialData && initialData.products) {
-        setProducts(initialData.products.map(product => ({
+  // Use effect to set initial products from initialData
+  useEffect(() => {
+    if (initialData && initialData.products) {
+      setProducts(
+        initialData.products.map((product) => ({
           productName: product.productName || "",
           productPrice: product.productPrice || "",
           productImage: product.productImage || null,
-          productType: product.productType || ""
-        })));
-      }
-    }, [initialData]);
+          productType: product.productType || "",
+          hsnCode: product.hsnCode || "",
+          gst: product.gst || "",
+        }))
+      );
+    }
+  }, [initialData]);
+
   const handleChange = (index, e) => {
     const { name, value, files } = e.target;
     const newValue = files ? files[0] : value;
@@ -25,11 +39,20 @@ const ProductDetailsForm = ({ onDataChange,initialData }) => {
 
     setProducts(updatedProducts);
     onDataChange({ products: updatedProducts }); // Send the updated array back to the parent
-};
-
+  };
 
   const addProduct = () => {
-    setProducts([...products, { productName: "", productPrice: "", productImage: null, productType: "" }]);
+    setProducts([
+      ...products,
+      {
+        productName: "",
+        productPrice: "",
+        productImage: null,
+        productType: "",
+        hsnCode: "",
+        gst: "",
+      },
+    ]);
   };
 
   const deleteProduct = (index) => {
@@ -43,7 +66,10 @@ const ProductDetailsForm = ({ onDataChange,initialData }) => {
       <h2 className="text-2xl font-semibold text-center mb-4">Product Details</h2>
       <div className="grid grid-cols-1 gap-4">
         {products.map((product, index) => (
-          <div key={index} className="border p-4 rounded-lg mb-4 transition-transform duration-200 hover:shadow-lg">
+          <div
+            key={index}
+            className="border p-4 rounded-lg mb-4 transition-transform duration-200 hover:shadow-lg"
+          >
             <h3 className="text-lg font-semibold mb-2">Product Set {index + 1}</h3>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
@@ -70,6 +96,30 @@ const ProductDetailsForm = ({ onDataChange,initialData }) => {
                   className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">HSN Code</label>
+                <input
+                  type="text"
+                  name="hsnCode"
+                  placeholder="HSN Code"
+                  value={product.hsnCode}
+                  onChange={(e) => handleChange(index, e)}
+                  required
+                  className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">GST (%)</label>
+                <input
+                  type="number"
+                  name="gst"
+                  placeholder="GST Percentage"
+                  value={product.gst}
+                  onChange={(e) => handleChange(index, e)}
+                  required
+                  className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+                />
+              </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700">Product Image</label>
                 <input
@@ -89,12 +139,12 @@ const ProductDetailsForm = ({ onDataChange,initialData }) => {
                   className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
                 >
                   <option value="">Select Product Type</option>
-                  <option value="product">product</option>
-                  <option value="service">service</option>
+                  <option value="product">Product</option>
+                  <option value="service">Service</option>
                 </select>
               </div>
             </div>
-            {products.length > 1 && ( // Show the delete button only if there's more than one product set
+            {products.length > 1 && (
               <button
                 type="button"
                 onClick={() => deleteProduct(index)}

@@ -148,6 +148,8 @@ const UserFormPage = () => {
               productName: product.productName,
               productPrice: product.productPrice,
               productType: product.productType,
+              hsnCode:product.hsnCode,
+              gst:product.gst,
             }));
             // Append the image file with its name
             if (product.productImage) {

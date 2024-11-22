@@ -14,6 +14,7 @@ const CustomerCompanyManagementPage = () => {
     const fetchCompanies = async () => {
       try {
         const response = await api.get('/api/user-details/admin/users'); // Fetch all user details for admin
+        console.log(response.data)
         setCompanies(response.data);  // Store user details in state
       } catch (err) {
         setError('Error fetching companies');
@@ -25,7 +26,7 @@ const CustomerCompanyManagementPage = () => {
 
     fetchCompanies();
   }, []);
-
+console.log(`${api.defaults.baseURL}`)
   return (
     <div className="max-w-full mx-auto p-5 border rounded shadow-lg bg-white">
       <h2 className="text-2xl font-semibold text-center mb-5">Customer Company Management</h2>
@@ -69,7 +70,9 @@ const CustomerCompanyManagementPage = () => {
                   <td className="py-2 px-4 border">{company.googleMap}</td>
                   <td className="py-2 px-4 border">{company.address}</td>
                   <td className="py-2 px-4 border">
-                    <Image src={company.logo} alt="Company Logo" className="w-16 h-16 object-cover" />
+                    <Image src={`${api.defaults.baseURL}/uploads/userDetails/${company.userId}/${company.logo}`} alt="Company Logo" className="w-16 h-16 object-cover"                   width={500} // Set a reasonable default width
+                  height={500}
+                  layout="intrinsic"/>
                   </td>
                   <td className="py-2 px-4 border">
                     <div><strong>Established Year:</strong> {company.aboutCompany.establishedYear}</div>
@@ -94,7 +97,9 @@ const CustomerCompanyManagementPage = () => {
                   </td>
                   <td className="py-2 px-4 border">
                     {company.galleryImages.map((image, index) => (
-                      <Image key={index} src={image} alt={`Gallery Image ${index + 1}`} className="w-16 h-16 object-cover mb-2" />
+                      <Image key={index} src={`${api.defaults.baseURL}/uploads/userDetails/${company.userId}/${image}`} alt={`Gallery Image ${index + 1}`} className="w-16 h-16 object-cover mb-2"                   width={500} // Set a reasonable default width
+                      height={500}
+                      layout="intrinsic"/>
                     ))}
                   </td>
                   <td className="py-2 px-4 border">

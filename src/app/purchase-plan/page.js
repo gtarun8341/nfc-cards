@@ -7,19 +7,30 @@ import api from '../apiConfig/axiosConfig';
 import { useRouter } from 'next/navigation'; 
 
 const PurchasePlan = () => {
+  const [pricingData, setPricingData] = useState([]);
+  const [loading, setLoading] = useState(true);
     const router = useRouter();
 
-    const pricingData = [
-        { id: 1, title: "Basic", price: 5, currency: "INR", features: ["Feature 1", "Feature 2"], expiryMonths: 1 },
-        { id: 2, title: "Pro", price: 15, currency: "INR", features: ["Feature 1", "Feature 2", "Feature 3"], expiryMonths: 3 },
-        { id: 3, title: "Enterprise", price: 30, currency: "INR", features: ["Feature 1", "Feature 2", "Feature 3", "Feature 4"], expiryMonths: 12 },
-      ];
-      
+    useEffect(() => {
+      const fetchSubscriptionPlans = async () => {
+        try {
+          const response = await api.get('/api/subscription/all'); // Adjust endpoint if needed
+          setPricingData(response.data);
+        } catch (error) {
+          console.error('Error fetching subscription plans:', error);
+          alert('Failed to load subscription plans. Please try again.');
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchSubscriptionPlans();
+    }, []);
 
   const handlePayment = async (plan) => {
     try {
       const response = await api.post("/api/payment/create-order", {
-        amount: plan.price * 100,
+        amount: plan.price ,
         currency: plan.currency,
       });
 

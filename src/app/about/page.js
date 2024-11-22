@@ -21,7 +21,9 @@ export default function About() {
         
         {/* Feature 1 */}
         <div className="flex items-start mb-6">
-          <Image src="/path/to/icon1.png" alt="Icon 1" className="w-12 h-12 mr-4" /> {/* Update with the icon path */}
+          <Image src="/path/to/icon1.png" alt="Icon 1" className="w-12 h-12 mr-4"                   width={500} // Set a reasonable default width
+                  height={500}
+                  layout="intrinsic"/> {/* Update with the icon path */}
           <div>
             <h3 className="text-xl font-semibold">Easy to Share</h3>
             <p>Share your digital card effortlessly via a simple tap or scan.</p>
@@ -30,7 +32,9 @@ export default function About() {
         
         {/* Feature 2 */}
         <div className="flex items-start mb-6">
-          <Image src="/path/to/icon2.png" alt="Icon 2" className="w-12 h-12 mr-4" /> {/* Update with the icon path */}
+          <Image src="/path/to/icon2.png" alt="Icon 2" className="w-12 h-12 mr-4"                   width={500} // Set a reasonable default width
+                  height={500}
+                  layout="intrinsic"/> {/* Update with the icon path */}
           <div>
             <h3 className="text-xl font-semibold">Contactless Interaction</h3>
             <p>Keep your interactions contact-free with our innovative NFC solutions.</p>
@@ -39,7 +43,9 @@ export default function About() {
 
         {/* Feature 3 */}
         <div className="flex items-start mb-6">
-          <Image src="/path/to/icon3.png" alt="Icon 3" className="w-12 h-12 mr-4" /> {/* Update with the icon path */}
+          <Image src="/path/to/icon3.png" alt="Icon 3" className="w-12 h-12 mr-4"                  width={500} // Set a reasonable default width
+                  height={500}
+                  layout="intrinsic" /> {/* Update with the icon path */}
           <div>
             <h3 className="text-xl font-semibold">Environmentally Friendly</h3>
             <p>Reduce plastic waste by switching to digital cards.</p>

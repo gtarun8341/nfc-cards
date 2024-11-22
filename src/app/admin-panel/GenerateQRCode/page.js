@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import ReactQRCode from 'react-qr-code'; // Using react-qr-code for QR code generation
+import { toPng } from 'html-to-image'; // For exporting QR code as an image
 import api from '../../apiConfig/axiosConfig';
 
 const QRCodePage = () => {
@@ -24,8 +25,23 @@ const QRCodePage = () => {
   }, []);
 
   const handleGenerate = (templateLink, index) => {
-    setLink(templateLink);  // Set the link for QR code generation
-    setShowQRCode(index);    // Show QR code after button click for the clicked row
+    setLink(templateLink); // Set the link for QR code generation
+    setShowQRCode(index); // Show QR code after button click for the clicked row
+  };
+
+  const handleDownload = async (index) => {
+    const qrCodeElement = document.getElementById(`qr-code-${index}`);
+    if (!qrCodeElement) return;
+
+    try {
+      const dataUrl = await toPng(qrCodeElement);
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `qr-code-${index}.png`;
+      link.click();
+    } catch (error) {
+      console.error('Error downloading QR code:', error);
+    }
   };
 
   return (
@@ -41,7 +57,7 @@ const QRCodePage = () => {
               <th className="px-4 py-2 border">Email</th>
               <th className="px-4 py-2 border">Phone</th>
               <th className="px-4 py-2 border">Template ID</th>
-              <th className="px-4 py-2 border">Action</th>
+              <th className="px-4 py-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -53,7 +69,17 @@ const QRCodePage = () => {
                 <td className="px-4 py-2 border">{template.templateId}</td>
                 <td className="px-4 py-2 border text-center">
                   {showQRCode === index ? (
-                    <ReactQRCode value={template.generatedLink} size={256} />
+                    <div>
+                      <div id={`qr-code-${index}`}>
+                        <ReactQRCode value={template.generatedLink} size={256} />
+                      </div>
+                      <button
+                        onClick={() => handleDownload(index)}
+                        className="mt-2 bg-green-500 text-white rounded px-4 py-2 hover:bg-green-600 transition"
+                      >
+                        Download QR Code
+                      </button>
+                    </div>
                   ) : (
                     <button
                       onClick={() => handleGenerate(template.generatedLink, index)}

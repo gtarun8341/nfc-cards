@@ -41,6 +41,7 @@ import CancellationPolicy from './ComplianceDocuments/CancellationPolicy/page'; 
 import ContactUs from './ContactUs/page'; // Contact Us component
 import AdminProductsPage from './AdminProducts/page';
 import AdminPlansPage from './AdminPlansPage/page';
+import AllCardPurchases from './All-Card-Purchases/page';
 const AdminPanel = () => {
   const [activeForm, setActiveForm] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // State for sidebar toggle
@@ -62,7 +63,9 @@ const AdminPanel = () => {
         // { name: 'Business Essentials', icon: UserIcon, onClick: () => setActiveForm('business-essentials') },
         // { name: 'Additional Services', icon: UserIcon, onClick: () => setActiveForm('additional-services') },
       ]
-    },    { name: 'Generate QR Code', path: 'generate-qr-code', icon: AdjustmentsHorizontalIcon, onClick: () => setActiveForm('generate-qr-code') },
+    },  
+    { name: 'All Card Purchases', path: 'All-Card-Purchases', icon: InboxIcon, onClick: () => setActiveForm('All-Card-Purchases') },
+    { name: 'Generate QR Code', path: 'generate-qr-code', icon: AdjustmentsHorizontalIcon, onClick: () => setActiveForm('generate-qr-code') },
     { name: 'Generate Link for Customer', path: 'generate-link', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('generate-link') },
     { name: 'Staff Management', path: 'staff-management', icon: CogIcon, onClick: () => setActiveForm('staff-management') },
     { name: 'Customer Profile Management', path: 'customer-profile-management', icon: UserIcon, onClick: () => setActiveForm('customer-profile-management') },
@@ -129,6 +132,7 @@ const AdminPanel = () => {
       {activeForm === 'pdf-visiting-card' && <PDFVisitingCard />}
       {activeForm === 'one-page-business-profile' && <OnePageBusinessProfile />}
       {activeForm === 'physical-visiting-card' && <PhysicalVisitingCard />}
+      {activeForm === 'All-Card-Purchases' && <AllCardPurchases />}
       {/* {activeForm === 'business-essentials' && <BusinessEssentials />} */}
       {/* {activeForm === 'additional-services' && <AdditionalServices />} */}
       {activeForm === 'generate-qr-code' && <GenerateQRCode />}

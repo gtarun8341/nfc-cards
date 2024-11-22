@@ -82,7 +82,8 @@ export default function OurProductsPage() {
                                 key={product._id} 
                                 product={{
                                     id: product._id,
-                                    icon: product.productImages[0] || 'https://via.placeholder.com/150',
+                                    icon: `${api.defaults.baseURL}/uploads/adminproducts/${product.productImages[0] }`,
+                                    // icon: product.productImages[0] || 'https://via.placeholder.com/150',
                                     title: product.productName,
                                     description: product.productType,
                                     price: product.productPrice,

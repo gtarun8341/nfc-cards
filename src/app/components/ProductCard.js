@@ -36,6 +36,9 @@ const ProductCard = ({ product, onAddToCart }) => {
             <Image
                 src={product.icon}
                 alt={product.title}
+                width={500} // Set a reasonable default width
+                height={500}
+                layout="intrinsic"
                 className="mx-auto mb-4 w-full h-32 object-cover" // Full-width image
             />
             <h3 className="text-xl font-semibold text-center mb-2">{product.title}</h3>

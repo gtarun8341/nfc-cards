@@ -11,6 +11,9 @@ const AllCards = ({ cardsData, full }) => {
             <Image
               src={card.icon}
               alt={card.title}
+              width={500} // Set a reasonable default width
+              height={500}
+              layout="intrinsic"
               className={`mx-auto mb-4 ${full ? 'w-full h-32 object-cover' : 'w-16 h-16'}`} // Conditional styling for image
             />
             <h3 className={`text-xl font-semibold ${full ? 'text-left' : 'text-center'} mb-2`}>{card.title}</h3> {/* Left align title if full */}

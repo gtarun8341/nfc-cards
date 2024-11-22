@@ -33,6 +33,7 @@ import PaperBusinessCardsScanPage from './paper-business-cards-scan/page';
 import EnquiriesPage from './enquires/page';
 import OfferDiscountsEventsPage from './offer-discounts-events/page';
 import SoldProducts from './sold-products/page';
+import CardPurchases from './card-purchases/page';
 const UserPanel = () => {
   const [activeForm, setActiveForm] = useState('multi-step');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // State for sidebar toggle
@@ -50,6 +51,7 @@ const UserPanel = () => {
     { name: 'One Page Business Profile', path: 'one-page-business-profile', icon: PencilSquareIcon, onClick: () => setActiveForm('one-page-business-profile') },
     { name: 'Physical Visiting Card', path: 'physical-visiting-card', icon: CreditCardIcon, onClick: () => setActiveForm('physical-visiting-card') },
     { name: 'Business Essentials', path: 'business-essentials', icon: BriefcaseIcon, onClick: () => setActiveForm('business-essentials') },
+    { name: 'Card Purchases', path: 'card-purchases', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('card-purchases') },
     { name: 'Purchase History', path: 'purchase-history', icon: ArchiveBoxIcon, onClick: () => setActiveForm('purchase-history') },
     { name: 'Product Catalogue', path: 'product-catalogue', icon: ShoppingCartIcon, onClick: () => setActiveForm('product-catalogue') },
     { name: 'Product Sales Management', path: 'product-sales-management', icon: ChartBarIcon, onClick: () => setActiveForm('product-sales-management') },
@@ -98,6 +100,7 @@ const UserPanel = () => {
         {activeForm === 'one-page-business-profile' && <OnePageBusinessProfilePage />}
         {activeForm === 'physical-visiting-card' && <PhysicalVisitingCardPage />}
         {activeForm === 'business-essentials' && <BusinessEssentialsPage />}
+        {activeForm === 'card-purchases' && <CardPurchases />}
         {activeForm === 'purchase-history' && <PurchaseHistoryPage />}
         {activeForm === 'product-catalogue' && <ProductCataloguePage />}
         {activeForm === 'product-sales-management' && <ProductSalesManagementPage />}
@@ -112,6 +115,8 @@ const UserPanel = () => {
         {activeForm === 'paper-business-cards-scan' && <PaperBusinessCardsScanPage />}
         {activeForm === 'enquires' && <EnquiriesPage />}
         {activeForm === 'offer-discounts-events' && <OfferDiscountsEventsPage />}
+        {activeForm === '' && <AccountFormPage />} {/* Default to Dashboard if no activeForm is set */}
+
       </div>
     </div>
   );

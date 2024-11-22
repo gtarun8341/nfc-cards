@@ -15,7 +15,9 @@ const HomeSection = ({ sections }) => {
                         className={`flex-1 p-4 ${index % 2 === 0 ? '' : 'order-2'}`}
                         style={{ flexBasis: '50%' }} // Ensure equal width
                     >
-                        <Image src={section.image} alt="Section" className="w-full h-auto rounded-lg" />
+                        <Image src={section.image} alt="Section" className="w-full h-auto rounded-lg"                   width={500} // Set a reasonable default width
+                  height={500}
+                  layout="intrinsic"/>
                     </div>
                     <div
                         className={`flex-1 p-4 ${index % 2 === 0 ? '' : 'order-1'}`}

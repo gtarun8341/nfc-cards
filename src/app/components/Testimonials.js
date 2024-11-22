@@ -10,7 +10,9 @@ const Testimonials = ({ testimonials }) => {
                 {testimonials.map((testimonial, index) => (
                     <div className="p-4 border rounded shadow-md" key={index}>
                         <div className="flex items-center mb-2">
-                            <Image src={testimonial.icon} alt={testimonial.name} className="w-12 h-12 rounded-full mr-3" />
+                            <Image src={testimonial.icon} alt={testimonial.name} className="w-12 h-12 rounded-full mr-3"                   width={500} // Set a reasonable default width
+                  height={500}
+                  layout="intrinsic"/>
                             <div>
                                 <h3 className="font-semibold">{testimonial.name}</h3>
                                 <p className="text-sm text-gray-600">{testimonial.designation}</p> {/* Designation below name */}

@@ -47,6 +47,9 @@ const OtherServices = ({ services }) => {
           <div className="relative bg-gray-100 border rounded-lg shadow-lg mb-6 overflow-hidden w-3/4 max-w-lg"> {/* Adjust width here */}          <Image
             src={services[currentIndex].image}
             alt={services[currentIndex].title}
+            width={500} // Set a reasonable default width
+            height={500}
+            layout="intrinsic"
             className="w-full h-80 object-cover rounded-lg transition-transform duration-500 transform hover:scale-105"
           />
           <div className={`absolute inset-0 flex flex-col items-center justify-center text-white  from-black via-transparent to-black rounded-lg transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
