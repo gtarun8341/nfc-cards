@@ -9,7 +9,13 @@ const PaymentManagementPage = () => {
   useEffect(() => {
     const fetchSalesData = async () => {
       try {
-        const response = await api.get('/api/order/sales-data');
+        const token = localStorage.getItem('adminAuthToken'); // Get the token
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach the token
+          },
+        };
+        const response = await api.get('/api/order/sales-data',config);
         setSales(response.data);
       } catch (error) {
         console.error("Error fetching sales data:", error);
@@ -20,8 +26,14 @@ const PaymentManagementPage = () => {
 
   const updateSaleField = async (id, field, value) => {
     try {
+      const token = localStorage.getItem('adminAuthToken'); // Get the token
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach the token
+        },
+      };
       // Update API endpoint
-      await api.put(`/api/order/update-field/${id}`, { field, value });
+      await api.put(`/api/order/update-field/${id}`, { field, value },config);
 
       setSales(sales.map(sale => 
         sale._id === id

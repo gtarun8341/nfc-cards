@@ -4,26 +4,37 @@ import { NextResponse } from 'next/server';
 export function middleware(req) {
   const { pathname } = req.nextUrl;
   
-  // Define protected routes here
-  const protectedRoutes = ['/user-panel'];
+  // Define protected routes with their respective login URLs
+  const protectedRoutes = [
+    { path: '/user-panel', redirectUrl: '/auth' },
+    { path: '/admin-panel', redirectUrl: '/admin-auth' }
+  ];
 
   // Check if the requested route is protected
-  if (protectedRoutes.includes(pathname)) {
-    // Parse cookies manually
-    const cookieHeader = req.headers.get('cookie') || '';
-    const cookies = Object.fromEntries(cookieHeader.split('; ').map(cookie => {
-      const [name, ...rest] = cookie.split('=');
-      return [name, decodeURIComponent(rest.join('='))];
-    }));
+  for (const { path, redirectUrl } of protectedRoutes) {
+    if (pathname.startsWith(path)) {
+      // Parse cookies manually
+      const cookieHeader = req.headers.get('cookie') || '';
+      const cookies = Object.fromEntries(cookieHeader.split('; ').map(cookie => {
+        const [name, ...rest] = cookie.split('=');
+        return [name, decodeURIComponent(rest.join('='))];
+      }));
 
-    // If no auth token is found, redirect to the login page
-    if (!cookies.authToken) {
-      const loginUrl = new URL('/auth', req.url); // Adjust if your login page is at a different route
-      return NextResponse.redirect(loginUrl);
+      // Determine the cookie to check for authentication based on the route
+      const authToken = path === '/user-panel' ? cookies.authToken : cookies.adminAuthToken;
+
+      // If the relevant auth token is not found, redirect to the appropriate login page
+      if (!authToken) {
+        const loginUrl = new URL(redirectUrl, req.url); // Redirect to login if token is missing
+        return NextResponse.redirect(loginUrl);
+      }
     }
   }
+
+  // Allow the request to proceed if the token is valid
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/user-panel'], // Specify routes to protect with middleware
+  matcher: ['/user-panel/:path*', '/admin-panel/:path*'], // Protect `/user-panel` and `/admin-panel` routes
 };

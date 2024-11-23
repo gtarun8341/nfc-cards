@@ -1,5 +1,5 @@
 "use client"; // Next.js Client Component
-
+import { useRouter } from 'next/navigation'; 
 import { useState } from 'react';
 import { UserIcon, CogIcon, AdjustmentsHorizontalIcon, DocumentArrowUpIcon,   ChartBarIcon,  InboxIcon,  PencilSquareIcon,  UserGroupIcon,  WrenchIcon} from '@heroicons/react/24/outline';
 import Sidebar from '../components/Sidebar'; // Import Sidebar component
@@ -45,6 +45,7 @@ import AllCardPurchases from './All-Card-Purchases/page';
 const AdminPanel = () => {
   const [activeForm, setActiveForm] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // State for sidebar toggle
+  const router = useRouter();
 
   const menuItems = [
     { name: 'Dashboard', path: 'dashboard', icon: UserIcon, onClick: () => setActiveForm('dashboard') },
@@ -107,10 +108,10 @@ const AdminPanel = () => {
   ];
 
   const handleLogout = () => {
-    // Implement your logout logic here
-    console.log("Logout clicked");
+    document.cookie = 'authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+    localStorage.clear();
+    router.push('/admin-auth');
   };
-
   return (
     <div className="flex h-screen">
       {/* Sidebar */}

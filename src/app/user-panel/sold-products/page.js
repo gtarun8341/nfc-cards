@@ -26,7 +26,7 @@ const SoldProducts = () => {
   const updateStatus = async (id, newStatus) => {
     try {
       await api.put(
-        `/api/order/update-status/${id}`,
+        `/api/order/update-status-user/${id}`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );

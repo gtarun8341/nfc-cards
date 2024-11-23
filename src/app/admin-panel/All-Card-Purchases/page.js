@@ -10,7 +10,13 @@ const AllCardPurchases = () => {
   useEffect(() => {
     const fetchAllPurchases = async () => {
       try {
-        const { data } = await api.get('/api/cardPurchase/all-purchases'); // Updated endpoint
+        const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach the token
+          },
+        };
+        const { data } = await api.get('/api/cardPurchase/all-purchases',config); // Updated endpoint
         setPurchases(data.purchases || []); // Handle data safely
         console.log(data)
       } catch (error) {
@@ -26,7 +32,13 @@ const AllCardPurchases = () => {
 
   const updateStatus = async (id, newStatus) => {
     try {
-      const { data } = await api.patch(`/api/cardPurchase/update-status/${id}`, { status: newStatus });
+        const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach the token
+          },
+        };
+      const { data } = await api.patch(`/api/cardPurchase/update-status/${id}`, { status: newStatus },config);
       setPurchases((prev) =>
         prev.map((purchase) => (purchase.id === id ? { ...purchase, status: data.status } : purchase))
       );

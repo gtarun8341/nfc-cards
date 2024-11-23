@@ -10,7 +10,8 @@ const ContactDeveloperPage = () => {
   // Function to fetch complaints from the server
   const fetchComplaints = async () => {
     try {
-      const token = localStorage.getItem('authToken'); // Assuming token is stored here
+      
+      const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
       const config = {
         headers: {
           Authorization: `Bearer ${token}`, // Attach the token

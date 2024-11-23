@@ -11,12 +11,12 @@ const UserManagement = () => {
   // Function to fetch users from the backend
   const fetchUsers = async () => {
     try {
-        const token = localStorage.getItem('authToken'); // Retrieve the JWT token from localStorage
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
-          },
-        };
+      const token = localStorage.getItem('adminAuthToken'); // Get the token
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach the token
+        },
+      };
   
       const response = await api.get('/api/users/users',config); // Ensure your backend route matches this
       setUsers(response.data);

@@ -9,7 +9,13 @@ const CustomerManagementPage = () => {
   useEffect(() => {
     const fetchUsersWithPlans = async () => {
       try {
-        const response = await api.get('/api/user-plans/active-plans');
+        const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach the token
+          },
+        };
+        const response = await api.get('/api/user-plans/active-plans',config);
         setUsersWithPlans(response.data);
       } catch (error) {
         console.error("Error fetching users with plans:", error);

@@ -40,7 +40,13 @@ const AdminPlansPage = () => {
       features: newPlan.features.split(","),
     };
     try {
-      const response = await api.post("/api/subscription/add", formattedPlan);
+      const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach the token
+        },
+      };
+      const response = await api.post("/api/subscription/add", formattedPlan,config);
       setPlans([...plans, response.data.plan]);
       setNewPlan({
         title: "",
@@ -64,7 +70,13 @@ const AdminPlansPage = () => {
     };
   
     try {
-      const response = await api.put(`/api/subscription/update?id=${editPlan._id}`, formattedPlan);
+      const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach the token
+        },
+      };
+      const response = await api.put(`/api/subscription/update?id=${editPlan._id}`, formattedPlan,config);
       setPlans(plans.map((plan) => (plan._id === editPlan._id ? response.data.plan : plan)));
       setEditing(false);
       setEditPlan(null);
@@ -76,7 +88,13 @@ const AdminPlansPage = () => {
   // Delete a subscription plan
   const handleDeletePlan = async (id) => {
     try {
-      await api.delete(`/api/subscription/delete?id=${id}`);
+      const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach the token
+        },
+      };
+      await api.delete(`/api/subscription/delete?id=${id}`,config);
       setPlans(plans.filter((plan) => plan._id !== id));
     } catch (error) {
       setError("Failed to delete subscription plan");

@@ -14,7 +14,13 @@ const QRCodePage = () => {
   useEffect(() => {
     const fetchUserTemplates = async () => {
       try {
-        const response = await api.get('/api/selectedtemplates/qr');
+        const token = localStorage.getItem('adminAuthToken'); // Get the token
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach the token
+          },
+        };
+        const response = await api.get('/api/selectedtemplates/qr',config);
         setUserTemplates(response.data.selectedTemplateData);
       } catch (error) {
         console.error('Error fetching selected templates:', error);

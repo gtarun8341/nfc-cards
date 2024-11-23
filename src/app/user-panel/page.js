@@ -1,6 +1,6 @@
 "use client"; // Next.js Client Component
 import { useRouter } from 'next/navigation'; 
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   UserIcon, CogIcon, AdjustmentsHorizontalIcon, DocumentArrowUpIcon, ChartBarIcon,
   InboxIcon, PencilSquareIcon, UserGroupIcon, WrenchIcon, BriefcaseIcon,
@@ -34,11 +34,33 @@ import EnquiriesPage from './enquires/page';
 import OfferDiscountsEventsPage from './offer-discounts-events/page';
 import SoldProducts from './sold-products/page';
 import CardPurchases from './card-purchases/page';
+import api from '../apiConfig/axiosConfig'; // Import the axios instance
+
 const UserPanel = () => {
   const [activeForm, setActiveForm] = useState('multi-step');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // State for sidebar toggle
   const router = useRouter();
+  const [userDetailsExist, setUserDetailsExist] = useState(false); // State to check user details
 
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const token = localStorage.getItem('authToken'); // Retrieve the JWT token from localStorage
+        const config = {
+            headers: {
+                Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
+            },
+        };
+
+        const response = await api.get('/api/user/checkUserDetails',config); // API call to check user details
+        setUserDetailsExist(!!response.data?.userDetails); // Set to true if user details exist
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+        setUserDetailsExist(false);
+      }
+    };
+    fetchUserDetails();
+  }, []);
   const menuItems = [
     // { name: 'multi-step', path: 'multi-step', icon: UserIcon, onClick: () => setActiveForm('multi-step') },
     // { name: 'edit-account', path: 'edit-account', icon: UserGroupIcon, onClick: () => setActiveForm('edit-account') },
@@ -94,12 +116,60 @@ const UserPanel = () => {
         {/* Render Components based on the selected menu */}
         {activeForm === 'customer-profile' && <AccountFormPage />}
         {activeForm === 'company-profile' && <UserFormPage />}
-        {activeForm === 'mini-website' && <MiniWebsitePage />}
+        {/* {activeForm === 'mini-website' && <MiniWebsitePage />}
         {activeForm === 'nfc-cards' && <NFCCardsPage />}
         {activeForm === 'pdf-visiting-card' && <PDFVisitingCardPage />}
         {activeForm === 'one-page-business-profile' && <OnePageBusinessProfilePage />}
         {activeForm === 'physical-visiting-card' && <PhysicalVisitingCardPage />}
-        {activeForm === 'business-essentials' && <BusinessEssentialsPage />}
+        {activeForm === 'business-essentials' && <BusinessEssentialsPage />} */}
+          {activeForm === 'mini-website' &&
+          (userDetailsExist ? (
+            <MiniWebsitePage />
+          ) : (
+            <div className="text-center text-red-500">
+              Please complete your Company profile to access this page.
+            </div>
+          ))}
+        {activeForm === 'nfc-cards' &&
+          (userDetailsExist ? (
+            <NFCCardsPage />
+          ) : (
+            <div className="text-center text-red-500">
+              Please complete your Company profile to access this page.
+            </div>
+          ))}
+        {activeForm === 'pdf-visiting-card' &&
+          (userDetailsExist ? (
+            <PDFVisitingCardPage />
+          ) : (
+            <div className="text-center text-red-500">
+              Please complete your Company profile to access this page.
+            </div>
+          ))}
+        {activeForm === 'one-page-business-profile' &&
+          (userDetailsExist ? (
+            <OnePageBusinessProfilePage />
+          ) : (
+            <div className="text-center text-red-500">
+              Please complete your Company profile to access this page.
+            </div>
+          ))}
+        {activeForm === 'physical-visiting-card' &&
+          (userDetailsExist ? (
+            <PhysicalVisitingCardPage />
+          ) : (
+            <div className="text-center text-red-500">
+              Please complete your Company profile to access this page.
+            </div>
+          ))}
+        {activeForm === 'business-essentials' &&
+          (userDetailsExist ? (
+            <BusinessEssentialsPage />
+          ) : (
+            <div className="text-center text-red-500">
+              Please complete your Company profile to access this page.
+            </div>
+          ))}
         {activeForm === 'card-purchases' && <CardPurchases />}
         {activeForm === 'purchase-history' && <PurchaseHistoryPage />}
         {activeForm === 'product-catalogue' && <ProductCataloguePage />}

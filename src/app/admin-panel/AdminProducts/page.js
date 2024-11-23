@@ -53,6 +53,12 @@ const AdminProductsPage = () => {
 
   const handleAddProduct = async () => {
     try {
+      const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach the token
+        },
+      };
       const formData = new FormData();
       formData.append('productName', newProduct.productName);
       formData.append('productPrice', newProduct.productPrice);
@@ -63,7 +69,7 @@ const AdminProductsPage = () => {
         formData.append('productImages', image);
       });
 
-      const response = await api.post('/api/addAdminProduct/add-product', formData, {
+      const response = await api.post('/api/addAdminProduct/add-product', formData,config, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 

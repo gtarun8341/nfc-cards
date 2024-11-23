@@ -13,14 +13,14 @@ const AdminOnePageBusinessProfilePage = () => {
     useEffect(() => {
         const fetchTemplates = async () => {
             try {
-                const token = localStorage.getItem('authToken'); // Retrieve the JWT token from localStorage
+                const token = localStorage.getItem('adminAuthToken'); // Retrieve the JWT token from localStorage
                 const config = {
                     headers: {
                         Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
                     },
                 };
                 // Fetch NFC card templates
-                const response = await api.get('/api/templates/templates?type=one-page-business-profile', config);
+                const response = await api.get('/api/templates/admin/templates?type=one-page-business-profile', config);
                 setTemplates(response.data);
                 console.log(response.data);
 
@@ -40,7 +40,7 @@ const AdminOnePageBusinessProfilePage = () => {
 
     const previewTemplate = async (templateId) => {
         try {
-            const token = localStorage.getItem('authToken'); // Retrieve the JWT token again
+            const token = localStorage.getItem('adminAuthToken'); // Retrieve the JWT token again
             const config = {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -48,7 +48,7 @@ const AdminOnePageBusinessProfilePage = () => {
             };
 
             // Fetch the rendered template HTML for the iframe preview
-            const response = await api.get(`/api/templates/render/${templateId}?type=one-page-business-profile`, config);
+            const response = await api.get(`/api/templates/admin/render/${templateId}?type=one-page-business-profile`, config);
             setPreviewHtml((prev) => ({ ...prev, [templateId]: response.data })); // Set the rendered HTML to state
         } catch (error) {
             console.error('Error fetching template preview:', error);
@@ -58,7 +58,7 @@ const AdminOnePageBusinessProfilePage = () => {
     // Handle template deletion
     const handleDeleteTemplate = async (templateId) => {
         try {
-            const token = localStorage.getItem('authToken'); // Retrieve the JWT token again
+            const token = localStorage.getItem('adminAuthToken'); // Retrieve the JWT token again
             const config = {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -77,7 +77,7 @@ const AdminOnePageBusinessProfilePage = () => {
 
     const handleViewTemplate = async (templateId) => {
         try {
-            const token = localStorage.getItem('authToken'); // Retrieve the JWT token again
+            const token = localStorage.getItem('adminAuthToken'); // Retrieve the JWT token again
             const config = {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -85,7 +85,7 @@ const AdminOnePageBusinessProfilePage = () => {
             };
 
             // Fetch the rendered template HTML for the new window
-            const response = await api.get(`/api/templates/render/${templateId}?type=one-page-business-profile`, config);
+            const response = await api.get(`/api/templates/admin/render/${templateId}?type=one-page-business-profile`, config);
             // Open a new window with the full template
             const newWindow = window.open();
             newWindow.document.write(response.data);

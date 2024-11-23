@@ -10,7 +10,7 @@ const FeedbackPage = () => {
   useEffect(() => {
     const fetchFeedback = async () => {
       try {
-        const token = localStorage.getItem('authToken'); // Get the token
+        const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
         const config = {
           headers: {
             Authorization: `Bearer ${token}`, // Attach the token
@@ -29,7 +29,7 @@ const FeedbackPage = () => {
 
   const deleteFeedback = async (id) => {
     try {
-      const token = localStorage.getItem('authToken'); // Get the token
+      const token = localStorage.getItem('adminAuthToken'); // Get the token
       const config = {
         headers: {
           Authorization: `Bearer ${token}`, // Attach the token

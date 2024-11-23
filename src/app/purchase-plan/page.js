@@ -53,7 +53,7 @@ const PurchasePlan = () => {
               razorpay_signature: response.razorpay_signature,
               userId: userId, // Include userId here
               plan: {
-                id: plan.id,
+                id: plan._id,
                 title: plan.title,
                 price: plan.price,
                 currency: plan.currency,
@@ -63,6 +63,10 @@ const PurchasePlan = () => {
             const result = verifyResponse.data;
             alert(result.message);
             if (result.status === "success") {
+              localStorage.removeItem('userName');
+              localStorage.removeItem('userEmail');
+              localStorage.removeItem('userPhone');
+              localStorage.removeItem('_id');
                 router.push('/auth');
             }
           },

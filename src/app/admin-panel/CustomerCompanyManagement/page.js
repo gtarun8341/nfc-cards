@@ -13,7 +13,13 @@ const CustomerCompanyManagementPage = () => {
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const response = await api.get('/api/user-details/admin/users'); // Fetch all user details for admin
+        const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach the token
+          },
+        };
+        const response = await api.get('/api/user-details/admin/users',config); // Fetch all user details for admin
         console.log(response.data)
         setCompanies(response.data);  // Store user details in state
       } catch (err) {

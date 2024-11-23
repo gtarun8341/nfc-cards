@@ -19,7 +19,13 @@ const ProductsCategoriesPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await api.get('/api/user-details/admin/users-products');
+        const token = localStorage.getItem('adminAuthToken'); // Get the token
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach the token
+          },
+        };
+        const response = await api.get('/api/user-details/admin/users-products',config);
         setProducts(response.data);
       } catch (err) {
         setError('Error fetching products');

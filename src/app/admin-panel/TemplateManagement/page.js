@@ -20,7 +20,13 @@ const TemplateManagement = () => {
         for (const [key, value] of formData.entries()) {
             console.log(`${key}: ${value}`);
         }        try {
-            const response = await api.post('/api/templates/upload', formData); // Use api instance
+            const token = localStorage.getItem('adminAuthToken'); // Get the token
+            const config = {
+              headers: {
+                Authorization: `Bearer ${token}`, // Attach the token
+              },
+            };
+            const response = await api.post('/api/templates/upload',config, formData); // Use api instance
             alert(response.data.message);
             setFile(null);
             setTemplateName('');
