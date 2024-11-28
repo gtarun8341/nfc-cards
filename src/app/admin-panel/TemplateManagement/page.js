@@ -26,7 +26,7 @@ const TemplateManagement = () => {
                 Authorization: `Bearer ${token}`, // Attach the token
               },
             };
-            const response = await api.post('/api/templates/upload',config, formData); // Use api instance
+            const response = await api.post('/api/templates/upload', formData,config); // Use api instance
             alert(response.data.message);
             setFile(null);
             setTemplateName('');

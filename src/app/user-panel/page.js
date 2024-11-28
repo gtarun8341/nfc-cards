@@ -41,19 +41,20 @@ const UserPanel = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // State for sidebar toggle
   const router = useRouter();
   const [userDetailsExist, setUserDetailsExist] = useState(false); // State to check user details
-
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const token = localStorage.getItem('authToken'); // Retrieve the JWT token from localStorage
+        const token = localStorage.getItem('authToken');
         const config = {
-            headers: {
-                Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
-            },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         };
-
-        const response = await api.get('/api/user/checkUserDetails',config); // API call to check user details
-        setUserDetailsExist(!!response.data?.userDetails); // Set to true if user details exist
+  
+        const response = await api.get('/api/users/checkUserDetails', config);
+        console.log(response.data, 'Server response');
+        console.log(!!response.data?.userDetailsExist, 'Converted boolean value');
+        setUserDetailsExist(!!response.data?.userDetailsExist); // Make sure this is a boolean
       } catch (error) {
         console.error('Error fetching user details:', error);
         setUserDetailsExist(false);
@@ -61,6 +62,7 @@ const UserPanel = () => {
     };
     fetchUserDetails();
   }, []);
+  
   const menuItems = [
     // { name: 'multi-step', path: 'multi-step', icon: UserIcon, onClick: () => setActiveForm('multi-step') },
     // { name: 'edit-account', path: 'edit-account', icon: UserGroupIcon, onClick: () => setActiveForm('edit-account') },

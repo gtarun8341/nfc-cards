@@ -11,12 +11,12 @@ export default function PurchasePage() {
     
     return (
         <Suspense fallback={<div>Loading...</div>}>
-            <PurchaseContent />
+            <PurchaseContent  router={router} />
         </Suspense>
     );
 }
 
-function PurchaseContent() {
+function PurchaseContent({ router }) {
     const searchParams = useSearchParams();
     const [purchaseData, setPurchaseData] = useState([]);
     const [userData, setUserData] = useState({

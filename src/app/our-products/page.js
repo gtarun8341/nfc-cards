@@ -12,12 +12,14 @@ export default function OurProductsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const router = useRouter(); // Initialize router for navigation
+    const [adminId, setAdminId] = useState([]); // State to manage fetched products
 
     useEffect(() => {
         const fetchProducts = async () => {
             try {
                 const response = await api.get('/api/addAdminProduct/all-products'); // Fetch products from the server
                 setProducts(response.data.products);
+                setAdminId(response.data.adminId); // Set adminId
             } catch (error) {
                 console.error("Error fetching products:", error);
                 setError('Failed to load products');
@@ -47,12 +49,14 @@ export default function OurProductsPage() {
         quantity,
         product: products.find(product => product._id === id)
     }));
+    useEffect(() => {
+        console.log("Updated adminId:", adminId);
+    }, [adminId]); // Log when adminId is updated
 
     const handleShopNow = () => {
-        const userId = "9573208359"; // Set userId
 
         const purchaseData = {
-            userId: userId,
+            userId: adminId,
             products: cartItems.map(item => ({
                 id: item.product._id,               // Product ID from the database
                 title: item.product.productName,     // Product name

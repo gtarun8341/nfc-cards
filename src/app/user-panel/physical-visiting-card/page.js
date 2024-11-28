@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '../../apiConfig/axiosConfig';
+import Script from 'next/script';
 
 const PhysicalVisitingCardPage = () => {
     const [templates, setTemplates] = useState([]);
@@ -112,31 +113,92 @@ const PhysicalVisitingCardPage = () => {
     const handleCancelClick = () => {
         setIsModalOpen(false); // Close the modal when the user clicks the "Cancel" button
     };
+    const prices = {
+        metal: 1000,  // Example price for metal card
+        plastic: 500, // Example price for plastic card
+        wooden: 300,   // Example price for wooden card
+      };
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();
+    
         try {
-            // Send purchase data to the server
+            // Fetch the auth token from local storage
             const token = localStorage.getItem('authToken');
             const config = {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             };
+    
+            // Define template type and purchase data
             const templateType = 'physical-visiting-card'; // Example selected template
+            const selectedCardPrice = prices[cardType]; // Get the price based on the selected card type
 
+            if (!selectedCardPrice) {
+                alert("Please select a valid card type.");
+                return;
+            }
+    
             const purchaseData = {
                 cardType,
                 templateId: selectedTemplate,
-                templateType, 
-                userDetails
+                templateType,
+                userDetails,
+                amount: selectedCardPrice, // Send the price of the selected card
+                currency: "INR",  // Assuming INR for now, adjust as necessary
             };
-
-            const response = await api.post('/api/cardPurchase/card-purchase', purchaseData, config);
-            console.log('Purchase successful:', response.data);
-            setIsModalOpen(false); // Close the modal after purchase
+    
+            // Send purchase data to the server to create a Razorpay order
+            const purchaseResponse = await api.post('/api/cardPurchase/card-purchase', purchaseData, config);
+            const orderData = purchaseResponse.data;
+    
+            if (orderData && orderData.orderId) {
+                // Razorpay options configuration
+                const options = {
+                    key: orderData.key, // Razorpay key from the server response
+                    amount: orderData.amount, // Amount in paisa (e.g., ₹500 -> 50000)
+                    currency: orderData.currency,
+                    name: "Card Purchase",
+                    description: "Payment for card template purchase",
+                    order_id: orderData.orderId, // Razorpay order ID
+                    handler: async function (response) {
+                        // Handle successful payment verification
+                        const verifyResponse = await api.post(
+                            '/api/cardPurchase/verify',
+                            {
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                purchaseData, // Pass the original purchase data
+                            },
+                            config
+                        );
+    
+                        const result = verifyResponse.data;
+                        alert(result.message);
+    
+                        if (result.status === 'success') {
+                            setIsModalOpen(false); // Close the modal on success
+                        }
+                    },
+                    prefill: {
+                        name: userDetails.name || "Customer Name",
+                        email: userDetails.email || "customer@example.com",
+                        contact: userDetails.phone || "9999999999",
+                    },
+                    theme: { color: "#3399cc" },
+                };
+    
+                const razorpay = new window.Razorpay(options);
+                razorpay.open();
+            } else {
+                console.error("Failed to create Razorpay order.");
+                alert("Failed to initiate payment. Please try again.");
+            }
         } catch (error) {
-            console.error('Error submitting purchase:', error);
+            console.error('Error submitting purchase or initiating payment:', error);
+            alert('Error occurred during the purchase process. Please try again.');
         }
     };
     if (loading) {
@@ -219,9 +281,9 @@ const PhysicalVisitingCardPage = () => {
                             required
                         >
                             <option value="">Select Card Type</option>
-                            <option value="metal">Metal</option>
-                            <option value="plastic">Plastic</option>
-                            <option value="wooden">Wooden</option>
+                            <option value="metal">Metal - 1000rs</option>
+                            <option value="plastic">Plastic - 500rs</option>
+                            <option value="wooden">Wooden - 300rs</option>
                         </select>
                     </div>
 
@@ -362,7 +424,7 @@ const PhysicalVisitingCardPage = () => {
         </div>
     </div>
 )}
-
+            <Script src="https://checkout.razorpay.com/v1/checkout.js" />
         </div>
     );
 };
