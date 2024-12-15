@@ -1,6 +1,6 @@
 "use client"; // Next.js Client Component
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState, useEffect ,useCallback} from 'react';
 import axios from 'axios';
 import api from "../../apiConfig/axiosConfig"; // Ensure you have the right API config
 
@@ -26,9 +26,9 @@ const ProductCataloguePage = () => {
     fetchProducts(); // Fetch products when the component mounts
   }, []);
 
-  useEffect(() => {
-    handleSearchAndFilter();
-  }, [searchQuery, filterType, catalogue]);
+  // useEffect(() => {
+  //   handleSearchAndFilter();
+  // }, [searchQuery, filterType, catalogue]);
 
   // Handle form input changes
   const handleChange = (e) => {
@@ -92,7 +92,7 @@ const ProductCataloguePage = () => {
   };
 
   // Handle search and filter
-  const handleSearchAndFilter = () => {
+  const handleSearchAndFilter = useCallback(() => {
     let updatedCatalogue = catalogue;
 
     if (searchQuery) {
@@ -110,7 +110,12 @@ const ProductCataloguePage = () => {
     }
 
     setFilteredCatalogue(updatedCatalogue);
-  };
+  }, [searchQuery, filterType, catalogue]);
+
+  useEffect(() => {
+    handleSearchAndFilter();
+  }, [handleSearchAndFilter]);
+
 
   // Edit product
   const editProduct = (product) => {

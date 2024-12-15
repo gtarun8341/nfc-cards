@@ -29,30 +29,27 @@ const PaymentManagementPage = () => {
   }, []);
 
   useEffect(() => {
+    const filterSales = () => {
+      let filtered = sales.filter((sale) => {
+        const searchMatch = 
+          sale.products.some(product =>
+            product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            product.price.toString().includes(searchTerm) ||
+            sale.productTemplateId?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            sale.productTemplateId?.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            sale.productTemplateId?.phone.includes(searchTerm) ||
+            sale.invoiceNumber.includes(searchTerm) ||
+            sale.trackingNumber.includes(searchTerm)
+          );
+        const statusMatch = statusFilter ? sale.status === statusFilter : true;
+        return searchMatch && statusMatch;
+      });
+      setFilteredSales(filtered);
+    };
+  
     filterSales();
   }, [searchTerm, statusFilter, sales]);
-
-  const filterSales = () => {
-    let filtered = sales.filter((sale) => {
-      // Filter by search term in product title, seller details, invoice number, or tracking number
-      const searchMatch = 
-        sale.products.some(product =>
-          product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.price.toString().includes(searchTerm) ||
-          sale.productTemplateId?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          sale.productTemplateId?.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          sale.productTemplateId?.phone.includes(searchTerm) ||
-          sale.invoiceNumber.includes(searchTerm) ||
-          sale.trackingNumber.includes(searchTerm)
-        );
-
-      // Filter by status
-      const statusMatch = statusFilter ? sale.status === statusFilter : true;
-
-      return searchMatch && statusMatch;
-    });
-    setFilteredSales(filtered);
-  };
+  
 
   const updateSaleField = async (id, field, value) => {
     try {

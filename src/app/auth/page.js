@@ -111,7 +111,7 @@ export default function AuthPage() {
 
               <div className="mt-6">
                 <p className="text-gray-600 text-sm">
-                  Don't have an account?
+                Don&apos;t have an account?
                 </p>
                 <button
                   onClick={toggleForm}
