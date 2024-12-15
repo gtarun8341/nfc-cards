@@ -7,6 +7,7 @@ const CustomerProfileManagementPage = () => {
   const [customers, setCustomers] = useState([]);
   const [editCustomer, setEditCustomer] = useState(null);
   const [updatedName, setUpdatedName] = useState('');
+  const [searchTerm, setSearchTerm] = useState(''); // For search functionality
 
   // Fetch customers when the component loads
   useEffect(() => {
@@ -18,7 +19,7 @@ const CustomerProfileManagementPage = () => {
             Authorization: `Bearer ${token}`, // Attach the token
           },
         };
-        const { data } = await api.get('/api/users/users',config); // Assuming '/api/users' is your route to fetch customers
+        const { data } = await api.get('/api/users/users', config); // Assuming '/api/users' is your route to fetch customers
         setCustomers(data);
       } catch (error) {
         console.error('Error fetching customers:', error);
@@ -42,7 +43,7 @@ const CustomerProfileManagementPage = () => {
           Authorization: `Bearer ${token}`, // Attach the token
         },
       };
-      await api.put(`/api/users/users/${id}`, { name: updatedName },config); // Assuming update route is '/api/users/:id'
+      await api.put(`/api/users/users/${id}`, { name: updatedName }, config); // Assuming update route is '/api/users/:id'
       const updatedCustomers = customers.map((customer) =>
         customer._id === id ? { ...customer, name: updatedName } : customer
       );
@@ -62,16 +63,33 @@ const CustomerProfileManagementPage = () => {
           Authorization: `Bearer ${token}`, // Attach the token
         },
       };
-      await api.delete(`/api/users/users/${id}`,config); // Assuming delete route is '/api/users/:id'
+      await api.delete(`/api/users/users/${id}`, config); // Assuming delete route is '/api/users/:id'
       setCustomers(customers.filter((customer) => customer._id !== id));
     } catch (error) {
       console.error('Error deleting customer:', error);
     }
   };
 
+  // Filter customers based on search term
+  const filteredCustomers = customers.filter((customer) =>
+    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="max-w-4xl mx-auto p-5 border rounded shadow-lg bg-white">
       <h2 className="text-2xl font-semibold text-center mb-5">Customer Profile Management</h2>
+
+      {/* Search Bar */}
+      <div className="mb-5">
+        <input
+          type="text"
+          placeholder="Search by name or email..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="border px-4 py-2 rounded w-full"
+        />
+      </div>
 
       {/* Customer Table */}
       <table className="min-w-full bg-white border rounded">
@@ -83,7 +101,7 @@ const CustomerProfileManagementPage = () => {
           </tr>
         </thead>
         <tbody>
-          {customers.map((customer) => (
+          {filteredCustomers.map((customer) => (
             <tr key={customer._id} className="border-b">
               <td className="py-2 px-4">
                 {editCustomer?._id === customer._id ? (

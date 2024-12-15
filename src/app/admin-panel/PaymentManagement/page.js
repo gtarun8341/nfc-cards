@@ -5,6 +5,9 @@ import api from '../../apiConfig/axiosConfig';
 
 const PaymentManagementPage = () => {
   const [sales, setSales] = useState([]);
+  const [filteredSales, setFilteredSales] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
   useEffect(() => {
     const fetchSalesData = async () => {
@@ -15,14 +18,41 @@ const PaymentManagementPage = () => {
             Authorization: `Bearer ${token}`, // Attach the token
           },
         };
-        const response = await api.get('/api/order/sales-data',config);
+        const response = await api.get('/api/order/sales-data', config);
         setSales(response.data);
+        setFilteredSales(response.data); // Initialize filtered sales
       } catch (error) {
         console.error("Error fetching sales data:", error);
       }
     };
     fetchSalesData();
   }, []);
+
+  useEffect(() => {
+    filterSales();
+  }, [searchTerm, statusFilter, sales]);
+
+  const filterSales = () => {
+    let filtered = sales.filter((sale) => {
+      // Filter by search term in product title, seller details, invoice number, or tracking number
+      const searchMatch = 
+        sale.products.some(product =>
+          product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          product.price.toString().includes(searchTerm) ||
+          sale.productTemplateId?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          sale.productTemplateId?.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          sale.productTemplateId?.phone.includes(searchTerm) ||
+          sale.invoiceNumber.includes(searchTerm) ||
+          sale.trackingNumber.includes(searchTerm)
+        );
+
+      // Filter by status
+      const statusMatch = statusFilter ? sale.status === statusFilter : true;
+
+      return searchMatch && statusMatch;
+    });
+    setFilteredSales(filtered);
+  };
 
   const updateSaleField = async (id, field, value) => {
     try {
@@ -33,11 +63,11 @@ const PaymentManagementPage = () => {
         },
       };
       // Update API endpoint
-      await api.put(`/api/order/update-field/${id}`, { field, value },config);
+      await api.put(`/api/order/update-field/${id}`, { field, value }, config);
 
-      setSales(sales.map(sale => 
+      setSales(sales.map(sale =>
         sale._id === id
-          ? { 
+          ? {
               ...sale,
               [field]: value,
               priceWithGST: field === 'gstOnPurchase'
@@ -54,6 +84,34 @@ const PaymentManagementPage = () => {
   return (
     <div className="max-w-4xl mx-auto p-5 border rounded shadow-lg bg-white overflow-x-auto">
       <h2 className="text-2xl font-semibold text-center mb-5">Payment Management</h2>
+
+      {/* Search and Filter Section */}
+      <div className="mb-4 flex justify-between items-center">
+        <input
+          type="text"
+          placeholder="Search by Product Title, Seller, Invoice, or Tracking Number"
+          className="p-2 border rounded w-1/2"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <select
+          className="p-2 border rounded"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="">Filter by Status</option>
+          <option value="Pending">Pending</option>
+          <option value="Paid">Paid</option>
+          <option value="Processing">Processing</option>
+          <option value="Shipped">Shipped</option>
+          <option value="Out for Delivery">Out for Delivery</option>
+          <option value="Delivered">Delivered</option>
+          <option value="Cancelled">Cancelled</option>
+          <option value="Returned">Returned</option>
+        </select>
+      </div>
+
+      {/* Sales Table */}
       <div className="overflow-x-auto">
         <table className="w-full border-collapse border">
           <thead>
@@ -72,7 +130,7 @@ const PaymentManagementPage = () => {
             </tr>
           </thead>
           <tbody>
-            {sales.map((sale) => (
+            {filteredSales.map((sale) => (
               <tr key={sale._id}>
                 <td className="border p-2">
                   {sale.products.map(product => <div key={product.title}>{product.title}</div>)}

@@ -42,6 +42,7 @@ import ContactUs from './ContactUs/page'; // Contact Us component
 import AdminProductsPage from './AdminProducts/page';
 import AdminPlansPage from './AdminPlansPage/page';
 import AllCardPurchases from './All-Card-Purchases/page';
+import ContactManagement from './contact-management/page';
 const AdminPanel = () => {
   const [activeForm, setActiveForm] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // State for sidebar toggle
@@ -49,7 +50,7 @@ const AdminPanel = () => {
 
   const menuItems = [
     { name: 'Dashboard', path: 'dashboard', icon: UserIcon, onClick: () => setActiveForm('dashboard') },
-    { name: 'User Management', path: 'user-management', icon: UserGroupIcon, onClick: () => setActiveForm('user-management') },
+    // { name: 'User Management', path: 'user-management', icon: UserGroupIcon, onClick: () => setActiveForm('user-management') },
     // { name: 'Settings', path: 'settings', icon: WrenchIcon, onClick: () => setActiveForm('settings') },
     { name: 'Template Management', path: 'template-management', icon: InboxIcon, onClick: () => setActiveForm('template-management') },
     { 
@@ -72,7 +73,7 @@ const AdminPanel = () => {
     { name: 'Customer Profile Management', path: 'customer-profile-management', icon: UserIcon, onClick: () => setActiveForm('customer-profile-management') },
     { name: 'Customer Company Management', path: 'customer-company-management', icon: CogIcon, onClick: () => setActiveForm('customer-company-management') },
     { name: 'Customer Management', path: 'customer-management', icon: UserIcon, onClick: () => setActiveForm('customer-management') },
-    { name: 'Payment Gateway Integration', path: 'payment-gateway', icon: AdjustmentsHorizontalIcon, onClick: () => setActiveForm('payment-gateway') },
+    // { name: 'Payment Gateway Integration', path: 'payment-gateway', icon: AdjustmentsHorizontalIcon, onClick: () => setActiveForm('payment-gateway') },
     { name: 'Products & Categories', path: 'products-categories', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('products-categories') },
     { name: 'SubscriptionPlan', path: 'subscription-plan', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('subscription-plan') },
     { name: 'Admin Products', path: 'admin-products', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('admin-products') },
@@ -88,10 +89,12 @@ const AdminPanel = () => {
     //     { name: 'Customer engagement to blogs & testimonials', icon: UserIcon, onClick: () => setActiveForm('customer-engagement') },
     //   ]
     // },  
-    { name: 'Social Media Integration', path: 'social-media', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('social-media') },
+    // { name: 'Social Media Integration', path: 'social-media', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('social-media') },
     { name: 'Contact Developer', path: 'contact-developer', icon: CogIcon, onClick: () => setActiveForm('contact-developer') },
     { name: 'Feedback', path: 'feedback', icon: UserIcon, onClick: () => setActiveForm('feedback') },
-    { name: 'SMS / WhatsApp Integration', path: 'sms-whatsapp', icon: AdjustmentsHorizontalIcon, onClick: () => setActiveForm('sms-whatsapp') },
+        { name: 'User Contact Management', path: 'contact-management', icon: AdjustmentsHorizontalIcon, onClick: () => setActiveForm('contact-management') },
+
+    // { name: 'SMS / WhatsApp Integration', path: 'sms-whatsapp', icon: AdjustmentsHorizontalIcon, onClick: () => setActiveForm('sms-whatsapp') },
     { name: 'Blogs, Testimonials', path: 'blogs-testimonials', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('blogs-testimonials') },
     // { 
     //   name: 'Compliance Documents', 
@@ -125,7 +128,7 @@ const AdminPanel = () => {
       {/* Main Content Area */}
       <div className="flex-1 p-6 overflow-y-auto">
       {activeForm === 'dashboard' && <Dashboard />}
-      {activeForm === 'user-management' && <UserManagement />}
+      {/* {activeForm === 'user-management' && <UserManagement />} */}
       {/* {activeForm === 'settings' && <Settings />} */}
       {activeForm === 'template-management' && <TemplateManagement />}
       {activeForm === 'mini-website' && <MiniWebsite />}
@@ -142,7 +145,7 @@ const AdminPanel = () => {
       {activeForm === 'customer-profile-management' && <CustomerProfileManagement />}
       {activeForm === 'customer-company-management' && <CustomerCompanyManagement />}
       {activeForm === 'customer-management' && <CustomerManagement />}
-      {activeForm === 'payment-gateway' && <PaymentGatewayIntegration />}
+      {/* {activeForm === 'payment-gateway' && <PaymentGatewayIntegration />} */}
       {activeForm === 'products-categories' && <ProductsCategories />}
       {activeForm === 'admin-products' && <AdminProductsPage />}
       {activeForm === 'subscription-plan' && <AdminPlansPage />}
@@ -152,10 +155,11 @@ const AdminPanel = () => {
       {activeForm === 'products-per-category' && <ProductsPerCategory />}
       {activeForm === 'income-per-categories' && <IncomePerCategories />} */}
       {/* {activeForm === 'customer-engagement' && <CustomerEngagement />} */}
-      {activeForm === 'social-media' && <SocialMediaIntegration />}
+      {/* {activeForm === 'social-media' && <SocialMediaIntegration />} */}
       {activeForm === 'contact-developer' && <ContactDeveloper />}
       {activeForm === 'feedback' && <Feedback />}
-      {activeForm === 'sms-whatsapp' && <SMSWhatsAppIntegration />}
+            {activeForm === 'contact-management' && <ContactManagement />}
+      {/* {activeForm === 'sms-whatsapp' && <SMSWhatsAppIntegration />} */}
       {activeForm === 'blogs-testimonials' && <BlogsTestimonials />}
       {/* {activeForm === 'privacy-policy' && <PrivacyPolicy />}
       {activeForm === 'refund-policy' && <RefundPolicy />}

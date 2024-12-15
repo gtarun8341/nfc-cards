@@ -1,34 +1,35 @@
 "use client"; // Next.js Client Component
 
-import { useState, useEffect } from 'react';
-import api from '../../apiConfig/axiosConfig';
+import { useState, useEffect } from "react";
+import api from "../../apiConfig/axiosConfig";
 
 const ProductsCategoriesPage = () => {
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [showAddForm, setShowAddForm] = useState(false);  // State to toggle form visibility
-  const [newProduct, setNewProduct] = useState({
-    productName: '',
-    productPrice: '',
-    productType: 'product', // Default type
-    productImages: [],
-    discount: 0,
-  });
+  const [error, setError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedType, setSelectedType] = useState("all");
+  const [selectedDiscount, setSelectedDiscount] = useState("all");
 
+  // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const token = localStorage.getItem('adminAuthToken'); // Get the token
+        const token = localStorage.getItem("adminAuthToken"); // Get the token
         const config = {
           headers: {
             Authorization: `Bearer ${token}`, // Attach the token
           },
         };
-        const response = await api.get('/api/user-details/admin/users-products',config);
+        const response = await api.get(
+          "/api/user-details/admin/users-products",
+          config
+        );
         setProducts(response.data);
+        setFilteredProducts(response.data); // Initialize filteredProducts
       } catch (err) {
-        setError('Error fetching products');
+        setError("Error fetching products");
       } finally {
         setLoading(false);
       }
@@ -37,24 +38,47 @@ const ProductsCategoriesPage = () => {
     fetchProducts();
   }, []);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewProduct({
-      ...newProduct,
-      [name]: value,
-    });
+  // Handle search and filters
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
   };
 
-  const handleAddProduct = async () => {
-    try {
-      const response = await api.post('/api/products/add-product', newProduct);
-      setProducts([...products, response.data.product]);
-      setShowAddForm(false);  // Hide the form after submitting
-    } catch (error) {
-      console.error('Error adding product:', error);
-      setError('Failed to add product');
-    }
+  const handleTypeFilterChange = (e) => {
+    setSelectedType(e.target.value);
   };
+
+  const handleDiscountFilterChange = (e) => {
+    setSelectedDiscount(e.target.value);
+  };
+
+  useEffect(() => {
+    let filtered = products;
+
+    // Filter by search query
+    if (searchQuery) {
+      filtered = filtered.filter((product) =>
+        product.userName.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Filter by product type
+    if (selectedType !== "all") {
+      filtered = filtered.filter(
+        (product) => product.productType === selectedType
+      );
+    }
+
+    // Filter by discount
+    if (selectedDiscount !== "all") {
+      filtered = filtered.filter(
+        (product) =>
+          (selectedDiscount === "withDiscount" && product.discount > 0) ||
+          (selectedDiscount === "noDiscount" && product.discount === 0)
+      );
+    }
+
+    setFilteredProducts(filtered);
+  }, [searchQuery, selectedType, selectedDiscount, products]);
 
   return (
     <div className="max-w-2xl mx-auto p-5 border rounded shadow-lg bg-white">
@@ -63,15 +87,26 @@ const ProductsCategoriesPage = () => {
       {loading && <p>Loading products...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
+      {/* Search and filter options */}
+      <div className="mb-4">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          placeholder="Search by user name"
+          className="border p-2 mb-2 w-full"
+        />
+      </div>
+
       <div>
         <h3 className="text-xl font-semibold mb-2">Product Details</h3>
-        {products.length > 0 ? (
-          products.map((user, index) => (
-            <div key={index} className="user-details">
-              <h3>{user.userName}</h3>
+        {filteredProducts.length > 0 ? (
+          filteredProducts.map((user, index) => (
+            <div key={index} className="user-details mb-5">
+              <h3 className="font-bold">{user.userName}</h3>
               <p>{user.userEmail}</p>
               <p>{user.userPhone}</p>
-              <table className="min-w-full table-auto mt-5">
+              <table className="min-w-full table-auto mt-5 border-collapse">
                 <thead>
                   <tr>
                     <th className="px-4 py-2 border-b text-left">Product Name</th>
@@ -82,12 +117,16 @@ const ProductsCategoriesPage = () => {
                 </thead>
                 <tbody>
                   {user.products.map((product, idx) => (
-                    <tr key={idx}>
+                    <tr key={idx} className="hover:bg-gray-100">
                       <td className="px-4 py-2 border-b">{product.productName}</td>
-                      <td className="px-4 py-2 border-b">${product.productPrice}</td>
+                      <td className="px-4 py-2 border-b">
+                        ₹{product.productPrice}
+                      </td>
                       <td className="px-4 py-2 border-b">{product.productType}</td>
                       <td className="px-4 py-2 border-b">
-                        {product.discount ? `${product.discount}%` : 'No Discount'}
+                        {product.discount > 0
+                          ? `${product.discount}%`
+                          : "No Discount"}
                       </td>
                     </tr>
                   ))}
@@ -96,7 +135,7 @@ const ProductsCategoriesPage = () => {
             </div>
           ))
         ) : (
-          <p>No products found.</p>
+          <p>No products found matching the criteria.</p>
         )}
       </div>
     </div>

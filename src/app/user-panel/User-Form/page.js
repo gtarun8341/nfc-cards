@@ -70,6 +70,8 @@ const UserFormPage = () => {
         // Ensure to map the response to your form structure
         const data = response.data;
         setFormData({
+          id:data._id,
+          userid:data.userId,
           companyName: data.companyName,
           name: data.name,
           designation: data.designation,
@@ -113,13 +115,19 @@ const UserFormPage = () => {
           galleryImages: data.galleryImages || [], // Ensure it's an array
         });
       } catch (error) {
-        console.error("Error fetching user details:", error);
-        setErrorMessages((prevMessages) => [...prevMessages, "Error fetching user details"]);
-      }
-    };
-  
-    fetchUserDetails();
-  }, []);
+        if (error.response && error.response.status === 404) {
+            // Handle 404 error (User details not found)
+            console.log("User details not found, skipping pre-fill.");
+        } else {
+            // Handle other errors
+            console.error("Error fetching user details:", error);
+            setErrorMessages((prevMessages) => [...prevMessages, "Error fetching user details"]);
+        }
+    }
+};
+
+fetchUserDetails();
+}, []);
   
   const handleFormDataChange = (sectionData) => {
     setFormData((prevData) => {
@@ -175,10 +183,24 @@ const UserFormPage = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await api.post("/api/user-details/", formDataForSubmit, config);
+      let response;
+      if (formData.id) {
+        // If prefilled (data exists), update the user details
+        response = await api.put(`/api/user-details/${formData.id}`, formDataForSubmit, config);
+        setSuccessMessage("Form updated successfully!");
+        console.log("Update Response:", response.data);
+      } else {
+        // New submission (no prefilled data)
+        response = await api.post("/api/user-details/", formDataForSubmit, config);
+        setSuccessMessage("Form submitted successfully!");
+        console.log("Response:", response.data);
+      }
+  
+      // const response = await api.post("/api/user-details/", formDataForSubmit, config);
       
-      setSuccessMessage("Form submitted successfully!");
-      console.log("Response:", response.data); // Log the response
+      // setSuccessMessage("Form submitted successfully!");
+      // console.log("Response:", response.data); // Log the response
+      window.location.reload(); // Refresh the page
     } catch (error) {
       console.error("Submission error:", error);
       setErrorMessages([...errorMessages, "Error submitting the form"]);

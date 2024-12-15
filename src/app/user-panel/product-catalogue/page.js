@@ -8,10 +8,17 @@ import api from "../../apiConfig/axiosConfig"; // Ensure you have the right API 
 const ProductCataloguePage = () => {
   const [catalogue, setCatalogue] = useState([]);
   const [currentProduct, setCurrentProduct] = useState({
-    name: '', type: '', price: '', image: null, 
+    name: '',
+    type: '',
+    price: '',
+    image: null,
+    hsnCode: '',
+    gst: '',
   });
+  
   const [isEditing, setIsEditing] = useState(false);
   const [editProductId, setEditProductId] = useState(null);
+  const [userId, setUserId] = useState(null); // Add a state to store the ID
 
   useEffect(() => {
     fetchProducts(); // Fetch products when the component mounts
@@ -35,7 +42,9 @@ const ProductCataloguePage = () => {
     formData.append('name', currentProduct.name);
     formData.append('type', currentProduct.type);
     formData.append('price', currentProduct.price);
-
+    formData.append('hsnCode', currentProduct.hsnCode);
+    formData.append('gst', currentProduct.gst);
+    
     if (currentProduct.image) {
       formData.append('productImages[]', currentProduct.image); // Append image file if available
     }
@@ -77,8 +86,9 @@ const ProductCataloguePage = () => {
       const { data } = await api.get('/api/products/', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log(data.id)
+      console.log(data)
       setCatalogue(data.products);
+      setUserId(data.id); // Store the ID in state
     } catch (error) {
       console.error('Error fetching products:', error);
     }
@@ -90,8 +100,12 @@ const ProductCataloguePage = () => {
       name: product.productName,
       type: product.productType,
       price: product.productPrice,
-      image: null, // Reset image since we cannot prefill file input
+      image: null,
+      hsnCode: product.hsnCode,
+      gst: product.gst,
+      currentImage: product.productImages?.[0] || null,
     });
+    
     setIsEditing(true);
     setEditProductId(product._id); // Store product ID for updating
   };
@@ -112,7 +126,7 @@ const ProductCataloguePage = () => {
 
   // Reset form after submission
   const resetForm = () => {
-    setCurrentProduct({ name: '', type: '', price: '', image: null });
+    setCurrentProduct({ name: '', type: '', price: '', image: null, hsnCode: '',gst: '' });
     setIsEditing(false);
     setEditProductId(null);
   };
@@ -143,6 +157,24 @@ const ProductCataloguePage = () => {
       <option value="product">Product</option>
       <option value="service">Service</option>
     </select>
+    <input
+  type="text"
+  name="hsnCode"
+  placeholder="HSN Code"
+  value={currentProduct.hsnCode}
+  onChange={handleChange}
+  className="border border-gray-300 p-3 rounded-md"
+  required
+/>
+<input
+  type="text"
+  name="gst"
+  placeholder="GST "
+  value={currentProduct.gst}
+  onChange={handleChange}
+  className="border border-gray-300 p-3 rounded-md"
+  required
+/>
 
           <input
             type="text"
@@ -177,6 +209,8 @@ const ProductCataloguePage = () => {
               <th className="py-3 px-4 border-b">Name</th>
               <th className="py-3 px-4 border-b">Type</th>
               <th className="py-3 px-4 border-b">Price</th>
+              <th className="py-3 px-4 border-b">HSN Code</th>
+<th className="py-3 px-4 border-b">GST</th>
               <th className="py-3 px-4 border-b">Image</th>
               <th className="py-3 px-4 border-b">Actions</th>
             </tr>
@@ -187,17 +221,24 @@ const ProductCataloguePage = () => {
                 <td className="py-3 px-4 border-b">{product.productName}</td>
                 <td className="py-3 px-4 border-b">{product.productType}</td>
                 <td className="py-3 px-4 border-b">{product.productPrice}</td>
+                <td className="py-3 px-4 border-b">{product.hsnCode}</td>
+<td className="py-3 px-4 border-b">{product.gst}</td>
                 <td className="py-3 px-4 border-b">
-  {product.productImages && product.productImages[0] && (
+                {product.productImages && product.productImages[0] && (() => {
+  const imageUrl = `${api.defaults.baseURL}/uploads/userDetails/${userId}/${product.productImages[0]}`;
+  console.log('Image URL:', imageUrl); // Log the URL
+  return (
     <Image
-      src={`${api.defaults.baseURL}/uploads/userDetails/${product.id}/${product.productImages[0]}`} // Use base URL for images
+      src={imageUrl} // Use base URL for images
       alt={product.productName}
       width={500} // Set a reasonable default width
       height={500}
       layout="intrinsic"
       className="h-16 w-16 object-cover"
     />
-  )}
+  );
+})()}
+
 </td>
 
                 <td className="py-3 px-4 border-b flex space-x-2">

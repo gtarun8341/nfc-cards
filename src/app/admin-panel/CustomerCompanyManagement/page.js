@@ -1,11 +1,13 @@
 "use client"; // Next.js Client Component
 import Image from 'next/image';
-
 import { useState, useEffect } from 'react';
 import api from '../../apiConfig/axiosConfig';
 
 const CustomerCompanyManagementPage = () => {
   const [companies, setCompanies] = useState([]);
+  const [filteredCompanies, setFilteredCompanies] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCompany, setSelectedCompany] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -13,15 +15,15 @@ const CustomerCompanyManagementPage = () => {
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
+        const token = localStorage.getItem('adminAuthToken');
         const config = {
           headers: {
-            Authorization: `Bearer ${token}`, // Attach the token
+            Authorization: `Bearer ${token}`,
           },
         };
-        const response = await api.get('/api/user-details/admin/users',config); // Fetch all user details for admin
-        console.log(response.data)
-        setCompanies(response.data);  // Store user details in state
+        const response = await api.get('/api/user-details/admin/users', config); // Fetch user details for admin
+        setCompanies(response.data);
+        setFilteredCompanies(response.data); // Initialize filteredCompanies with all companies
       } catch (err) {
         setError('Error fetching companies');
         console.error(err);
@@ -32,7 +34,28 @@ const CustomerCompanyManagementPage = () => {
 
     fetchCompanies();
   }, []);
-console.log(`${api.defaults.baseURL}`)
+
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value);
+    const filtered = companies.filter((company) => {
+      return (
+        company.companyName.toLowerCase().includes(event.target.value.toLowerCase()) ||
+        company.contact1.includes(event.target.value) ||
+        company.email.toLowerCase().includes(event.target.value.toLowerCase())
+      );
+    });
+    setFilteredCompanies(filtered);
+    setSelectedCompany(null); // Reset selected company when a search is performed
+  };
+
+  const handleViewClick = (company) => {
+    setSelectedCompany(company);
+  };
+
+  const handleCloseClick = () => {
+    setSelectedCompany(null); // Close the selected company details
+  };
+
   return (
     <div className="max-w-full mx-auto p-5 border rounded shadow-lg bg-white">
       <h2 className="text-2xl font-semibold text-center mb-5">Customer Company Management</h2>
@@ -42,82 +65,153 @@ console.log(`${api.defaults.baseURL}`)
       ) : error ? (
         <p className="text-red-500">{error}</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full table-auto">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="py-2 px-4 border">Company Name</th>
-                <th className="py-2 px-4 border">Contact 1</th>
-                <th className="py-2 px-4 border">Contact 2</th>
-                <th className="py-2 px-4 border">WhatsApp 1</th>
-                <th className="py-2 px-4 border">WhatsApp 2</th>
-                <th className="py-2 px-4 border">Email</th>
-                <th className="py-2 px-4 border">Website</th>
-                <th className="py-2 px-4 border">Google Map Link</th>
-                <th className="py-2 px-4 border">Address</th>
-                <th className="py-2 px-4 border">Logo</th>
-                <th className="py-2 px-4 border">About Company</th>
-                <th className="py-2 px-4 border">Bank Details</th>
-                <th className="py-2 px-4 border">Products</th>
-                <th className="py-2 px-4 border">Gallery</th>
-                <th className="py-2 px-4 border">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {companies.map((company) => (
-                <tr key={company._id} className="hover:bg-gray-100">
-                  <td className="py-2 px-4 border">{company.companyName}</td>
-                  <td className="py-2 px-4 border">{company.contact1}</td>
-                  <td className="py-2 px-4 border">{company.contact2}</td>
-                  <td className="py-2 px-4 border">{company.whatsapp1}</td>
-                  <td className="py-2 px-4 border">{company.whatsapp2}</td>
-                  <td className="py-2 px-4 border">{company.email}</td>
-                  <td className="py-2 px-4 border">{company.website}</td>
-                  <td className="py-2 px-4 border">{company.googleMap}</td>
-                  <td className="py-2 px-4 border">{company.address}</td>
-                  <td className="py-2 px-4 border">
-                    <Image src={`${api.defaults.baseURL}/uploads/userDetails/${company.userId}/${company.logo}`} alt="Company Logo" className="w-16 h-16 object-cover"                   width={500} // Set a reasonable default width
-                  height={500}
-                  layout="intrinsic"/>
-                  </td>
-                  <td className="py-2 px-4 border">
-                    <div><strong>Established Year:</strong> {company.aboutCompany.establishedYear}</div>
-                    <div><strong>Nature of Business:</strong> {company.aboutCompany.natureOfBusiness}</div>
-                    <div><strong>GST Number:</strong> {company.aboutCompany.gstNumber}</div>
-                  </td>
-                  <td className="py-2 px-4 border">
-                    <div><strong>Bank Name:</strong> {company.bankDetails.bankName}</div>
-                    <div><strong>Account Number:</strong> {company.bankDetails.accountNumber}</div>
-                    <div><strong>IFSC Code:</strong> {company.bankDetails.ifscCode}</div>
-                    <div><strong>Account Holder:</strong> {company.bankDetails.accountHolderName}</div>
-                  </td>
-                  <td className="py-2 px-4 border">
-                    {company.products.map((product, index) => (
-                      <div key={index}>
-                        <div><strong>Product Name:</strong> {product.productName}</div>
-                        <div><strong>Price:</strong> {product.productPrice}</div>
-                        <div><strong>Type:</strong> {product.productType}</div>
-                        <div><strong>Discount:</strong> {product.discount || 'N/A'}</div>
-                      </div>
-                    ))}
-                  </td>
-                  <td className="py-2 px-4 border">
-                    {company.galleryImages.map((image, index) => (
-                      <Image key={index} src={`${api.defaults.baseURL}/uploads/userDetails/${company.userId}/${image}`} alt={`Gallery Image ${index + 1}`} className="w-16 h-16 object-cover mb-2"                   width={500} // Set a reasonable default width
-                      height={500}
-                      layout="intrinsic"/>
-                    ))}
-                  </td>
-                  <td className="py-2 px-4 border">
-                    {/* You can add edit, delete buttons here */}
-                    <button className="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600 transition">
-                      Edit
-                    </button>
-                  </td>
+        <div>
+          {/* Search Bar */}
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={handleSearch}
+            placeholder="Search by Company Name, Contact Number, or Email"
+            className="w-full mb-5 p-2 border rounded"
+          />
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full table-auto">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="py-2 px-4 border">Company Name</th>
+                  <th className="py-2 px-4 border">Contact 1</th>
+                  <th className="py-2 px-4 border">Email</th>
+                  <th className="py-2 px-4 border">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredCompanies.map((company) => (
+                  <tr key={company._id} className="hover:bg-gray-100">
+                    <td className="py-2 px-4 border">{company.companyName}</td>
+                    <td className="py-2 px-4 border">{company.contact1}</td>
+                    <td className="py-2 px-4 border">{company.email}</td>
+                    <td className="py-2 px-4 border">
+                      <button
+                        onClick={() => handleViewClick(company)}
+                        className="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600 transition"
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Display selected company details */}
+          {selectedCompany && (
+            <div className="mt-10 p-5 border rounded shadow-lg bg-gray-50">
+              <div className="flex justify-between mb-5">
+                <h3 className="text-xl font-semibold">Company Details</h3>
+                <button
+                  onClick={handleCloseClick}
+                  className="bg-red-500 text-white rounded px-4 py-2 hover:bg-red-600 transition"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <strong>Company Name:</strong> {selectedCompany.companyName}
+                </div>
+                <div>
+                  <strong>Contact 1:</strong> {selectedCompany.contact1}
+                </div>
+                <div>
+                  <strong>Contact 2:</strong> {selectedCompany.contact2}
+                </div>
+                <div>
+                  <strong>WhatsApp 1:</strong> {selectedCompany.whatsapp1}
+                </div>
+                <div>
+                  <strong>WhatsApp 2:</strong> {selectedCompany.whatsapp2}
+                </div>
+                <div>
+                  <strong>Email:</strong> {selectedCompany.email}
+                </div>
+                <div>
+                  <strong>Website:</strong> {selectedCompany.website}
+                </div>
+                <div>
+                  <strong>Google Map Link:</strong> {selectedCompany.googleMap}
+                </div>
+                <div>
+                  <strong>Address:</strong> {selectedCompany.address}
+                </div>
+                <div>
+                  <strong>Logo:</strong>
+                  <Image
+                    src={`${api.defaults.baseURL}/uploads/userDetails/${selectedCompany.userId}/${selectedCompany.logo}`}
+                    alt="Company Logo"
+                    width={150}
+                    height={150}
+                    className="object-cover"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-8 space-y-4">
+                <h4 className="text-lg font-semibold">About Company:</h4>
+                <div>Established Year: {selectedCompany.aboutCompany.establishedYear}</div>
+                <div>Nature of Business: {selectedCompany.aboutCompany.natureOfBusiness}</div>
+                <div>GST Number: {selectedCompany.aboutCompany.gstNumber}</div>
+              </div>
+
+              <div className="mt-8 space-y-4">
+                <h4 className="text-lg font-semibold">Bank Details:</h4>
+                <div>Bank Name: {selectedCompany.bankDetails.bankName}</div>
+                <div>Account Number: {selectedCompany.bankDetails.accountNumber}</div>
+                <div>IFSC Code: {selectedCompany.bankDetails.ifscCode}</div>
+                <div>Account Holder: {selectedCompany.bankDetails.accountHolderName}</div>
+              </div>
+
+              <div className="mt-8 space-y-4">
+                <h4 className="text-lg font-semibold">Products:</h4>
+                {selectedCompany.products.map((product, index) => (
+                  <div key={index}>
+                    <div>Product Name: {product.productName}</div>
+                    <div>Price: {product.productPrice}</div>
+                    <div>Type: {product.productType}</div>
+                    <div>HsnCode: {product.hsnCode}</div>
+                    <div>GST: {product.gst}</div>
+                    <div>Image:  <Image
+                      key={index}
+                      src={`${api.defaults.baseURL}/uploads/userDetails/${selectedCompany.userId}/${product.productImages}`}
+                      alt={`Gallery Image ${index + 1}`}
+                      width={100}
+                      height={100}
+                      className="object-cover"
+                    /></div>
+                    <div>Discount: {product.discount || 'N/A'}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8 space-y-4">
+                <h4 className="text-lg font-semibold">Gallery:</h4>
+                <div className="flex space-x-4">
+                  {selectedCompany.galleryImages.map((image, index) => (
+                    <Image
+                      key={index}
+                      src={`${api.defaults.baseURL}/uploads/userDetails/${selectedCompany.userId}/${image}`}
+                      alt={`Gallery Image ${index + 1}`}
+                      width={100}
+                      height={100}
+                      className="object-cover"
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

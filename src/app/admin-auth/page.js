@@ -40,49 +40,49 @@ export default function AuthPage() {
 
   return (
     <>
-      <section className="min-h-screen flex items-center justify-center bg-gray-200">
-        <div className="relative w-full max-w-5xl h-[450px] rounded-lg shadow-2xl bg-white overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full p-12 flex flex-col justify-center items-center">
-            <h2 className="text-4xl font-extrabold text-green-600 mb-8 animate-fadeIn">
-              Login
+      <section className="min-h-screen flex items-center justify-center bg-gradient-to-r from-green-400 to-green-600">
+        <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
+          <div className="flex flex-col items-center justify-center">
+            <h2 className="text-4xl font-bold text-green-600 mb-8 animate__animated animate__fadeIn">
+              Admin Login
             </h2>
 
-            <form className="space-y-6 w-4/5 animate-slideIn" onSubmit={handleSubmit}>
-              <div>
-                <label htmlFor="email" className="block text-lg font-semibold text-gray-700">
-                  Email
-                </label>
+            <form className="space-y-6 w-full" onSubmit={handleSubmit}>
+              {/* Email Input */}
+              <div className="space-y-1">
+                <label htmlFor="email" className="text-lg font-semibold text-gray-800">Email</label>
                 <input
                   type="email"
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Your Email"
-                  className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500"
+                  placeholder="Enter your email"
+                  className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none transition-all"
                 />
               </div>
 
-              <div>
-                <label htmlFor="password" className="block text-lg font-semibold text-gray-700">
-                  Password
-                </label>
+              {/* Password Input */}
+              <div className="space-y-1">
+                <label htmlFor="password" className="text-lg font-semibold text-gray-800">Password</label>
                 <input
                   type="password"
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Your Password"
-                  className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500"
+                  placeholder="Enter your password"
+                  className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none transition-all"
                 />
               </div>
 
+              {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-all duration-300"
+                className="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-all duration-300"
               >
                 Login
               </button>
             </form>
+
           </div>
         </div>
       </section>
