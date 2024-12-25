@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import api from '../../apiConfig/axiosConfig';
-import { jsPDF } from "jspdf";
+import XLSX from "xlsx";
 
 const CustomerCompanyManagementPage = () => {
   const [companies, setCompanies] = useState([]);
@@ -55,46 +55,17 @@ const CustomerCompanyManagementPage = () => {
     setSelectedCompany(company);
   };
 
-  const handleDownloadPDF = (selectedCompany) => {
-    const doc = new jsPDF();
-  
-    // Title
-    doc.setFontSize(16);
-    doc.text("Company Details Of User", 10, 10);
-  
-    let yPosition = 20;
-  
-    // Add User Information
-    doc.setFontSize(14);
-    doc.text("User Information:", 10, yPosition);
-    yPosition += 10;
-  
+  const handleDownloadExcel = (selectedCompany) => {
     const user = selectedCompany.user || {};
-    const userDetails = [
+  
+    // Prepare data for the Excel sheet
+    const companyDetails = [
+      ["User Information"],
       ["Name", user.name || "N/A"],
       ["Phone", user.phone || "N/A"],
       ["Email", user.email || "N/A"],
-    ];
-  
-    userDetails.forEach(([key, value]) => {
-      doc.setFontSize(12);
-      doc.text(`${key}:`, 10, yPosition);
-      doc.text(`${value}`, 60, yPosition);
-      yPosition += 10;
-  
-      if (yPosition > 250) {
-        doc.addPage();
-        yPosition = 20;
-      }
-    });
-  
-    // Company Details Section
-    doc.setFontSize(14);
-    doc.text("Company Details:", 10, yPosition);
-    yPosition += 10;
-  
-    // Company Details
-    const companyDetails = [
+      [],
+      ["Company Details"],
       ["Name", selectedCompany.name || "N/A"],
       ["Designation", selectedCompany.designation || "N/A"],
       ["Company Name", selectedCompany.companyName || "N/A"],
@@ -106,71 +77,14 @@ const CustomerCompanyManagementPage = () => {
       ["Website", selectedCompany.website || "N/A"],
       ["Google Map Link", selectedCompany.googleMap || "N/A"],
       ["Address", selectedCompany.address || "N/A"],
-    ];
-  
-    companyDetails.forEach(([key, value]) => {
-      doc.setFontSize(12);
-      doc.text(`${key}:`, 10, yPosition);
-      doc.text(`${value}`, 60, yPosition);
-      yPosition += 10;
-  
-      if (yPosition > 250) {
-        doc.addPage();
-        yPosition = 20;
-      }
-    });
-  
-    if (selectedCompany.logo) {
-      const logoUrl = `${api.defaults.baseURL}/uploads/userDetails/${selectedCompany.userId}/${selectedCompany.logo}`;
-      doc.addImage(logoUrl, "JPEG", 10, yPosition, 50, 50);
-      yPosition += 60;
-    }
-  
-    // About Company
-    doc.setFontSize(14);
-    doc.text("About Company:", 10, yPosition);
-    yPosition += 10;
-  
-    const aboutCompany = [
+      [],
+      ["About Company"],
       ["Established Year", selectedCompany.aboutCompany?.establishedYear || "N/A"],
       ["Nature of Business", selectedCompany.aboutCompany?.natureOfBusiness || "N/A"],
       ["GST Number", selectedCompany.aboutCompany?.gstNumber || "N/A"],
       ["Description", selectedCompany.aboutCompany?.description || "N/A"],
-    ];
-  
-    aboutCompany.forEach(([key, value]) => {
-      doc.setFontSize(12);
-      doc.text(`${key}:`, 10, yPosition);
-      doc.text(`${value}`, 60, yPosition);
-      yPosition += 10;
-  
-      if (yPosition > 250) {
-        doc.addPage();
-        yPosition = 20;
-      }
-    });
-  
-    // if (selectedCompany.aboutCompany?.documents?.length > 0) {
-    //   doc.text("Documents:", 10, yPosition);
-    //   yPosition += 10;
-    //   selectedCompany.aboutCompany.documents.forEach((docLink, index) => {
-    //     doc.text(`Document ${index + 1}:`, 10, yPosition);
-    //     doc.text(`${api.defaults.baseURL}/uploads/userDetails/${selectedCompany.userId}/${docLink}`, 60, yPosition);
-    //     yPosition += 10;
-  
-    //     if (yPosition > 250) {
-    //       doc.addPage();
-    //       yPosition = 20;
-    //     }
-    //   });
-    // }
-  
-    // Bank Details
-    doc.setFontSize(14);
-    doc.text("Bank Details:", 10, yPosition);
-    yPosition += 10;
-  
-    const bankDetails = [
+      [],
+      ["Bank Details"],
       ["Bank Name", selectedCompany.bankDetails?.bankName || "N/A"],
       ["Account Number", selectedCompany.bankDetails?.accountNumber || "N/A"],
       ["IFSC Code", selectedCompany.bankDetails?.ifscCode || "N/A"],
@@ -181,101 +95,45 @@ const CustomerCompanyManagementPage = () => {
       ["PhonePe Number", selectedCompany.bankDetails?.phonePeNumber || "N/A"],
       ["UPI ID", selectedCompany.bankDetails?.upiId || "N/A"],
       ["Account Type", selectedCompany.bankDetails?.accountType || "N/A"],
+      [],
+      ["Products"],
     ];
   
-    bankDetails.forEach(([key, value]) => {
-      doc.setFontSize(12);
-      doc.text(`${key}:`, 10, yPosition);
-      doc.text(`${value}`, 60, yPosition);
-      yPosition += 10;
-  
-      if (yPosition > 250) {
-        doc.addPage();
-        yPosition = 20;
-      }
-    });
-  
-    if (selectedCompany.bankDetails?.qrImages?.length > 0) {
-      doc.text("QR Images:", 10, yPosition);
-      yPosition += 10;
-      selectedCompany.bankDetails.qrImages.forEach((image, index) => {
-        const qrImageUrl = `${api.defaults.baseURL}/uploads/userDetails/${selectedCompany.userId}/${image}`;
-        doc.addImage(qrImageUrl, "JPEG", 10, yPosition, 50, 50);
-        yPosition += 60;
-  
-        if (yPosition > 250) {
-          doc.addPage();
-          yPosition = 20;
-        }
+    if (selectedCompany.products && selectedCompany.products.length > 0) {
+      selectedCompany.products.forEach((product, index) => {
+        companyDetails.push([
+          `Product ${index + 1}`,
+          product.productName || "N/A",
+          product.productPrice || "N/A",
+          product.productType || "N/A",
+          product.hsnCode || "N/A",
+          product.gst || "N/A",
+          product.discount || "N/A",
+        ]);
       });
+    } else {
+      companyDetails.push(["No products available"]);
     }
   
- // Products Section
- doc.setFontSize(14);
- doc.text("Products:", 10, yPosition);
- yPosition += 10;
-
- if (selectedCompany.products && selectedCompany.products.length > 0) {
-   selectedCompany.products.forEach((product, index) => {
-     doc.setFontSize(12);
-     doc.text(`Product ${index + 1}:`, 10, yPosition);
-     yPosition += 10;
-     doc.text(`Name: ${product.productName || "N/A"}`, 10, yPosition);
-     yPosition += 8;
-     doc.text(`Price: ${product.productPrice || "N/A"}`, 10, yPosition);
-     yPosition += 8;
-     doc.text(`Type: ${product.productType || "N/A"}`, 10, yPosition);
-     yPosition += 8;
-     doc.text(`HSN Code: ${product.hsnCode || "N/A"}`, 10, yPosition);
-     yPosition += 8;
-     doc.text(`GST: ${product.gst || "N/A"}`, 10, yPosition);
-     yPosition += 8;
-     doc.text(`Discount: ${product.discount || "N/A"}`, 10, yPosition);
-     yPosition += 8;
-
-     // Add product image
-     if (product.productImages) {
-       const productImageUrl = `${api.defaults.baseURL}/uploads/userDetails/${selectedCompany.userId}/${product.productImages}`;
-       doc.addImage(productImageUrl, "JPEG", 10, yPosition, 50, 50);
-       yPosition += 60;  // Space for the image
-     }
-
-     // Add page if content exceeds page height
-     if (yPosition > 250) {
-       doc.addPage();
-       yPosition = 20;
-     }
-   });
- } else {
-   doc.text("No products available", 10, yPosition);
-   yPosition += 10;
- }
-
- // Gallery Section
- doc.setFontSize(14);
- doc.text("Gallery:", 10, yPosition);
- yPosition += 10;
-
- if (selectedCompany.galleryImages && selectedCompany.galleryImages.length > 0) {
-   selectedCompany.galleryImages.forEach((image, index) => {
-     const imageUrl = `${api.defaults.baseURL}/uploads/userDetails/${selectedCompany.userId}/${image}`;
-     doc.addImage(imageUrl, "JPEG", 10, yPosition, 50, 50);
-     yPosition += 60; // Space for the image
-
-     // Add page if content exceeds page height
-     if (yPosition > 250) {
-       doc.addPage();
-       yPosition = 20;
-     }
-   });
- } else {
-   doc.text("No gallery images available", 10, yPosition);
-   yPosition += 10;
- }
- 
-    // Save PDF
-    doc.save(`${selectedCompany.companyName || "company"}_details.pdf`);
+    companyDetails.push([], ["Gallery"]);
+    if (selectedCompany.galleryImages && selectedCompany.galleryImages.length > 0) {
+      companyDetails.push(["Gallery Images Available"]);
+    } else {
+      companyDetails.push(["No gallery images available"]);
+    }
+  
+    // Create a worksheet
+    const worksheet = XLSX.utils.aoa_to_sheet(companyDetails);
+  
+    // Create a workbook
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Company Details");
+  
+    // Export the Excel file
+    const companyName = selectedCompany.companyName || "company";
+    XLSX.writeFile(workbook, `${companyName}_details.xlsx`);
   };
+  
   
   const handleCloseClick = () => {
     setSelectedCompany(null); // Close the selected company details
@@ -326,7 +184,7 @@ const CustomerCompanyManagementPage = () => {
                           View
                         </button>
                         <button
-                          onClick={() => handleDownloadPDF(company)}
+                          onClick={() => handleDownloadExcel(company)}
                           className="bg-green-500 text-white rounded px-4 py-2 hover:bg-green-600 transition"
                         >
                           Download
