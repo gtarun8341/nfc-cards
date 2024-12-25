@@ -85,17 +85,25 @@ const ProductDetailsForm = ({ onDataChange, initialData }) => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Product Price</label>
-                <input
-                  type="text"
-                  name="productPrice"
-                  placeholder="Product Price"
-                  value={product.productPrice}
-                  onChange={(e) => handleChange(index, e)}
-                  required
-                  className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-                />
-              </div>
+  <label className="block text-sm font-medium text-gray-700">Product Price</label>
+  <input
+    type="number"
+    name="productPrice"
+    placeholder="Product Price"
+    value={product.productPrice}
+    onChange={(e) => handleChange(index, e)}
+    onInput={(e) => {
+      // Allow only numbers and prevent other characters from being typed
+      const newValue = e.target.value;
+      if (!/^\d*\.?\d*$/.test(newValue)) {
+        e.preventDefault();
+      }
+    }}
+    required
+    className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+  />
+</div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">HSN Code</label>
                 <input

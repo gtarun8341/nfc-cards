@@ -1,3 +1,4 @@
+// Main Page Component
 "use client"; // Marking this as a Client Component
 
 import ProductCard from '../components/ProductCard'; // Import the ProductCard component
@@ -49,12 +50,8 @@ export default function OurProductsPage() {
         quantity,
         product: products.find(product => product._id === id)
     }));
-    useEffect(() => {
-        console.log("Updated adminId:", adminId);
-    }, [adminId]); // Log when adminId is updated
 
     const handleShopNow = () => {
-
         const purchaseData = {
             userId: adminId,
             products: cartItems.map(item => ({
@@ -62,7 +59,9 @@ export default function OurProductsPage() {
                 title: item.product.productName,     // Product name
                 price: item.product.productPrice,    // Product price
                 discount: item.product.discount,     // Product discount (if any)
-                quantity: item.quantity              // Quantity in the cart
+                quantity: item.quantity,              // Quantity in the cart
+                hsnCode: item.product.hsnCode,
+                gst: item.product.gst,
             }))
         };
         const encodedData = encodeURIComponent(JSON.stringify(purchaseData));
@@ -70,7 +69,7 @@ export default function OurProductsPage() {
     };
 
     return (
-        <div>
+        <div className="relative">
             <div className="container mx-auto p-6">
                 <h1 className="text-4xl font-bold mb-4">Our Products</h1>
                 <h2 className="text-3xl font-bold mb-4 text-center">More Products</h2>
@@ -86,8 +85,7 @@ export default function OurProductsPage() {
                                 key={product._id} 
                                 product={{
                                     id: product._id,
-                                    icon: `${api.defaults.baseURL}/uploads/adminproducts/${product.productImages[0] }`,
-                                    // icon: product.productImages[0] || 'https://via.placeholder.com/150',
+                                    icon: `${api.defaults.baseURL}/uploads/adminproducts/${product.productImages[0]}`,
                                     title: product.productName,
                                     description: product.productType,
                                     price: product.productPrice,
@@ -98,43 +96,54 @@ export default function OurProductsPage() {
                         ))}
                     </div>
                 )}
-
-                <div className="mt-8">
-                    <h2 className="text-2xl font-bold mb-2">Cart Summary</h2>
-                    {cartItems.length > 0 ? (
-                        <table className="min-w-full border border-gray-300">
-                            <thead>
-                                <tr className="bg-gray-200">
-                                    <th className="border px-4 py-2">Product</th>
-                                    <th className="border px-4 py-2">Quantity</th>
-                                    <th className="border px-4 py-2">Price</th>
-                                    <th className="border px-4 py-2">Discount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {cartItems.map(item => (
-                                    <tr key={item.id}>
-                                        <td className="border px-4 py-2">{item.product.productName}</td>
-                                        <td className="border px-4 py-2">{item.quantity}</td>
-                                        <td className="border px-4 py-2">{item.product.productPrice}</td>
-                                        <td className="border px-4 py-2">{item.product.discount || 'N/A'}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    ) : (
-                        <p>Your cart is empty.</p>
-                    )}
-                </div>
-
-                <button 
-                    onClick={handleShopNow} 
-                    className="mt-4 bg-green-500 text-white py-2 px-4 rounded w-full" 
-                    disabled={cartItems.length === 0}
-                >
-                    Shop Now
-                </button>
             </div>
+
+            {/* Floating Cart Summary */}
+{/* Floating Cart Summary */}
+{cartItems.length > 0 && (
+    <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-4 border-t border-gray-300 max-h-72 overflow-y-auto">
+        <div className="flex items-center justify-between mb-4">
+            <p className="text-lg font-bold">Cart Summary</p>
+            <button 
+                onClick={handleShopNow} 
+                className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+            >
+                Shop Now
+            </button>
+        </div>
+        <table className="w-full text-left border-collapse">
+            <thead>
+                <tr>
+                    <th className="border-b py-2 px-4">Product</th>
+                    <th className="border-b py-2 px-4">Quantity</th>
+                    <th className="border-b py-2 px-4">Price</th>
+                    <th className="border-b py-2 px-4">Discount</th>
+                    <th className="border-b py-2 px-4">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {cartItems.map((item) => (
+                    <tr key={item.id}>
+                        <td className="border-b py-2 px-4">{item.product.productName}</td>
+                        <td className="border-b py-2 px-4">{item.quantity}</td>
+                        <td className="border-b py-2 px-4">{item.product.productPrice}</td>
+                        <td className="border-b py-2 px-4">{item.product.discount || "0%"}</td>
+                        <td className="border-b py-2 px-4">
+                            {(
+                                item.quantity * 
+                                (item.product.productPrice - 
+                                    (item.product.productPrice * (parseFloat(item.product.discount || 0) / 100))
+                                )
+                            ).toFixed(2)}
+                        </td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    </div>
+)}
+
+
             <AllFooter />
         </div>
     );

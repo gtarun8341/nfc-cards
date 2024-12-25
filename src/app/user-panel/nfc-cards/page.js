@@ -246,8 +246,17 @@ const NFCCardsPage = () => {
 
     return (
         <div className="container mx-auto p-6">
-            <h1 className="text-3xl font-bold text-center mb-6 text-blue-600">Available NFC Card Templates</h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+ <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-blue-600">
+            Available NFC Card Templates
+        </h1>
+        <button
+            onClick={handlePurchaseClick}
+            className="bg-gradient-to-r from-green-500 to-blue-500 text-white font-semibold py-2 px-4 rounded-full shadow-lg hover:shadow-2xl hover:scale-105 transition-transform duration-300"
+        >
+            Purchase a Card
+        </button>
+    </div>            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {templates.length > 0 ? (
     templates.map((template) => (
         <div
@@ -311,12 +320,6 @@ const NFCCardsPage = () => {
     </p>
 )}
             </div>
-            <button
-                onClick={handlePurchaseClick}
-                className="fixed bottom-6 right-6 bg-green-500 text-white rounded-full p-4 shadow-lg hover:bg-green-600 transition duration-200"
-            >
-                Purchase a Card
-            </button>
 
             {/* Modal for Purchase */}
             {isModalOpen && (

@@ -35,7 +35,7 @@ const UserFormPage = () => {
     establishedYear: "",
     natureOfBusiness: "",
     gstNumber: "",
-    aboutCompany: "",
+    description: "",
     documents: [],
     bankName: "",
     accountNumber: "",
@@ -97,7 +97,7 @@ const UserFormPage = () => {
           establishedYear: data.aboutCompany.establishedYear,
           natureOfBusiness: data.aboutCompany.natureOfBusiness,
           gstNumber: data.aboutCompany.gstNumber,
-          aboutCompany: data.aboutCompany.description, // Assuming you want the description here
+          description: data.aboutCompany.description, // Assuming you want the description here
           // documents: data.aboutCompany.documents,
           // Bank Details
           bankName: data.bankDetails.bankName,
@@ -143,29 +143,73 @@ fetchUserDetails();
   };
 
   const handleSubmit = async () => {
-    console.log("Submit button clicked."); // Log when the submit button is clicked
-    console.log("Current Form Data:", formData); // Log current form data
-    const formDataForSubmit = new FormData();
+    console.log("Submit button clicked.");
+    console.log("Current Form Data:", formData);
+    if (!formData.id) {
 
+    // Define the required fields for the formData
+    const requiredFields = [
+      "companyName", "name", "designation", "contact1", "email", "website", 
+      "googleMap", "address", "logo", "facebook", "instagram", "linkedin", 
+      "twitter", "youtubeChannel", "gstNumber", "description", "bankName", 
+      "accountNumber", "branchName", "ifscCode", "accountHolderName", 
+      "gPayNumber", "paytmNumber", "phonePeNumber", "upiId", "accountType", 
+      "googleBusiness",  "establishedYear", "natureOfBusiness", 
+      "documents", "qrImages", "galleryImages", "products"
+  ];
+
+  // Initialize an empty array to hold error messages
+  let missingFields = [];
+
+  // Check if any required field in formData is missing
+  requiredFields.forEach(field => {
+      if (!formData[field] || (Array.isArray(formData[field]) && formData[field].length === 0)) {
+          missingFields.push(field);
+      }
+  });
+
+  // Validate products array (check each product in products array)
+  formData.products.forEach((product, index) => {
+      const productFields = ["productName", "productPrice", "productImage", "productType", "hsnCode", "gst"];
+      productFields.forEach(field => {
+          if (!product[field]) {
+              missingFields.push(`Product ${index + 1} - ${field}`);
+          }
+      });
+  });
+
+  // If there are missing fields, show an error message and prevent form submission
+  if (missingFields.length > 0) {
+    setErrorMessages(["Please fill in the following fields: ", ...missingFields]);
+    return;
+  }
+    }
+    const formDataForSubmit = new FormData();
+  
     Object.entries(formData).forEach(([key, value]) => {
       if (Array.isArray(value)) {
         if (key === "products") {
           value.forEach((product) => {
-            // Append product details
+            // Append product details as objects, NOT strings
             formDataForSubmit.append("products[]", JSON.stringify({
               productName: product.productName,
               productPrice: product.productPrice,
               productType: product.productType,
-              hsnCode:product.hsnCode,
-              gst:product.gst,
+              hsnCode: product.hsnCode,
+              gst: product.gst,
             }));
-            // Append the image file with its name
-            if (product.productImage) {
+  
+            // Append the image file only if it's a valid file (instanceof File)
+            if (product.productImage && product.productImage instanceof File) {
               formDataForSubmit.append("productImages[]", product.productImage, product.productImage.name);
             }
           });
         } else if (key === "galleryImages" || key === "documents" || key === "qrImages") {
-          value.forEach((file) => formDataForSubmit.append(key, file, file.name)); // Append files with their names
+          value.forEach((file) => {
+            if (file && file instanceof File) {
+              formDataForSubmit.append(key, file, file.name);
+            }
+          });
         } else if (key === "youtubeVideos") {
           value.forEach((video) => formDataForSubmit.append("youtubeVideos[]", video)); // Append YouTube URLs
         }
@@ -173,9 +217,9 @@ fetchUserDetails();
         formDataForSubmit.append(key, value);
       }
     });
-
+  
     console.log("FormData for Submit:", [...formDataForSubmit]);
-
+  
     try {
       const token = localStorage.getItem('authToken');
       const config = {
@@ -183,6 +227,7 @@ fetchUserDetails();
           Authorization: `Bearer ${token}`,
         },
       };
+  
       let response;
       if (formData.id) {
         // If prefilled (data exists), update the user details
@@ -196,17 +241,13 @@ fetchUserDetails();
         console.log("Response:", response.data);
       }
   
-      // const response = await api.post("/api/user-details/", formDataForSubmit, config);
-      
-      // setSuccessMessage("Form submitted successfully!");
-      // console.log("Response:", response.data); // Log the response
       window.location.reload(); // Refresh the page
     } catch (error) {
       console.error("Submission error:", error);
       setErrorMessages([...errorMessages, "Error submitting the form"]);
     }
   };
-
+  
   const nextStep = () => {
     const stepNames = [
       "Company Details",
@@ -262,6 +303,25 @@ fetchUserDetails();
   return (
     <div className="form-container">
       {/* Removed <form> tag */}
+      {formData.id && (
+      <div style={{
+        position: 'fixed',
+        top: 100,
+        backgroundColor: '#ffebcc',
+        padding: '10px',
+        border: '1px solid #ffa726',
+        borderRadius: '5px',
+        zIndex: 1000
+      }}>
+        <p style={{ margin: 0 }}>
+          <strong>Notice:</strong> Uploading new files or images 
+          </p>
+          <p style={{ margin: 0 }}>
+         will replace previously uploaded ones.
+        </p>
+      </div>
+    )}
+
       {steps[currentStep]}
 
       {/* Navigation buttons */}
@@ -294,11 +354,12 @@ fetchUserDetails();
         )}
       </div>
 
-      {/* Error/Success Messages */}
-      {errorMessages.length > 0 && (
-        <div className="error text-red-500">{errorMessages.join(", ")}</div>
-      )}
-      {successMessage && <div className="success text-green-500">{successMessage}</div>}
+{/* Error/Success Messages */}
+{errorMessages.length > 0 && (
+  <div className="error text-red-500">{errorMessages.join(", ")}</div>
+)}
+{successMessage && <div className="success text-green-500">{successMessage}</div>}
+
     </div>
   );
 };

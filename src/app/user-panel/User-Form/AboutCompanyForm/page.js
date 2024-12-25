@@ -7,7 +7,7 @@ const AboutCompanyForm = ({ onDataChange ,initialData}) => {
     establishedYear: "",
     natureOfBusiness: "",
     gstNumber: "",
-    aboutCompany: "",
+    description: "",
     documents: [],
   });
 
@@ -82,9 +82,9 @@ const AboutCompanyForm = ({ onDataChange ,initialData}) => {
           <div>
             <label className="block text-sm font-medium text-gray-700">About Company</label>
             <textarea
-              name="aboutCompany"
-              placeholder="About Company"
-              value={data.aboutCompany}
+              name="description"
+              placeholder="Description"
+              value={data.description}
               onChange={handleChange}
               required
               className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"

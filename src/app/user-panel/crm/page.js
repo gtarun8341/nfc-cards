@@ -20,6 +20,9 @@ const CRMPage = () => {
 
   const [crmEntries, setCrmEntries] = useState([]);
   const [isAdding, setIsAdding] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(''); // State for search input
 
   // Fetch existing CRM entries
   useEffect(() => {
@@ -41,21 +44,53 @@ const CRMPage = () => {
     fetchCRMEntries();
   }, []);
 
+  const filteredEntries = crmEntries.filter((entry) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      entry.name?.toLowerCase().includes(query) ||
+      entry.companyName?.toLowerCase().includes(query) ||
+      entry.phoneNumber?.toLowerCase().includes(query) ||
+      entry.date?.toLowerCase().includes(query) ||
+      entry.subject?.toLowerCase().includes(query)
+    );
+  });
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    const token = localStorage.getItem('authToken'); // Assuming token is stored here
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+  
     try {
-      const token = localStorage.getItem('authToken'); // Assuming token is stored here
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`, // Attach the token
-        },
-      };
-      const response = await api.post('/api/crm', formData, config); // POST request to save CRM data
-      alert('CRM data saved successfully!');
-
-      // Add the new entry to the state without re-fetching
-      setCrmEntries((prevEntries) => [...prevEntries, response.data.crmEntry]);
-
+      if (isEditing) {
+        // Update existing entry
+        const response = await api.put(`/api/crm/${editingId}`, formData, config);
+        alert('CRM entry updated successfully!');
+  
+        // Update entry in state without re-fetching
+        setCrmEntries((prevEntries) =>
+          prevEntries.map((entry) =>
+            entry._id === editingId ? response.data.crmEntry : entry
+          )
+        );
+  
+        setIsEditing(false);
+        setEditingId(null);
+      } else {
+        // Add new entry
+        const response = await api.post('/api/crm', formData, config);
+        alert('CRM entry added successfully!');
+        setCrmEntries((prevEntries) => [...prevEntries, response.data.crmEntry]);
+      }
+  
       // Clear form after submission
       setFormData({
         date: '',
@@ -70,14 +105,37 @@ const CRMPage = () => {
         actionItems: '',
         followUpNeeded: false,
       });
-      setIsAdding(false); // Hide the form after submission
+      setIsAdding(false); // Hide the form
     } catch (error) {
       console.error('Error saving CRM data:', error);
     }
   };
+  
 
+  const handleEdit = (entry) => {
+    const formattedDate = entry.date ? entry.date.split('T')[0] : '';
+
+    setFormData({
+      date: formattedDate, // Use formatted date
+      direction: entry.direction,
+      startTime: entry.startTime,
+      endTime: entry.endTime,
+      name: entry.name,
+      companyName: entry.companyName,
+      phoneNumber: entry.phoneNumber,
+      subject: entry.subject,
+      notes: entry.notes,
+      actionItems: entry.actionItems,
+      followUpNeeded: entry.followUpNeeded,
+    });
+    setEditingId(entry._id); // Store the ID of the entry being edited
+    setIsEditing(true); // Open the form in edit mode
+  };
+  
   const handleCancel = () => {
-    setIsAdding(false); // Close the form without saving
+    setIsAdding(false);
+    setIsEditing(false);
+    setEditingId(null);
     setFormData({
       date: '',
       direction: '',
@@ -92,13 +150,21 @@ const CRMPage = () => {
       followUpNeeded: false,
     });
   };
+  const formatDate = (isoDate) => {
+    const date = new Date(isoDate);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`; // Format as dd-mm-yyyy
+  };
+  
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white shadow-md rounded-lg overflow-hidden">
       <h1 className="text-2xl font-semibold text-center mb-4">CRM Integration</h1>
 
       {/* Add Button */}
-      {!isAdding && (
+      {!isAdding && !isEditing && (
         <div className="text-right mb-4">
           <button
             onClick={() => setIsAdding(true)}
@@ -110,7 +176,7 @@ const CRMPage = () => {
       )}
 
       {/* Form for adding new CRM entry */}
-      {isAdding && (
+      {(isAdding || isEditing) && (
         <form onSubmit={handleSubmit} className="space-y-4 mb-6">
           <div className="grid grid-cols-2 gap-4">
             {/* Date */}
@@ -270,8 +336,16 @@ const CRMPage = () => {
 
       {/* List of CRM Entries */}
       <div className="mt-6">
-        <h2 className="text-xl font-semibold mb-4">CRM Entries</h2>
-        {crmEntries.length === 0 ? (
+        <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Search by Company Name, Name, Phone Number, Date, or Subject"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          className="p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+        />
+      </div>
+      {filteredEntries.length === 0 ? (
           <p>No CRM entries available.</p>
         ) : (
           <table className="min-w-full border-collapse border border-gray-300">
@@ -288,13 +362,14 @@ const CRMPage = () => {
               <th className="p-2 text-left border-b">Notes</th>
               <th className="p-2 text-left border-b">Action Items</th>
               <th className="p-2 text-left border-b">Follow-up Needed</th>
+              <th className="p-2 text-left border-b">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {crmEntries.map((entry) => (
+          {filteredEntries.map((entry) => (
               <tr key={entry._id}>
-                <td className="p-2 border-b">{entry.date}</td>
-                <td className="p-2 border-b">{entry.direction}</td>
+<td className="p-2 border-b">{formatDate(entry.date)}</td>
+<td className="p-2 border-b">{entry.direction}</td>
                 <td className="p-2 border-b">{entry.startTime}</td>
                 <td className="p-2 border-b">{entry.endTime}</td>
                 <td className="p-2 border-b">{entry.name}</td>
@@ -304,6 +379,14 @@ const CRMPage = () => {
                 <td className="p-2 border-b">{entry.notes}</td>
                 <td className="p-2 border-b">{entry.actionItems}</td>
                 <td className="p-2 border-b">{entry.followUpNeeded ? 'Yes' : 'No'}</td>
+                <td className="p-2 border-b">
+        <button
+          onClick={() => handleEdit(entry)}
+          className="p-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+        >
+          Edit
+        </button>
+      </td>
               </tr>
             ))}
           </tbody>

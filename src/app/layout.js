@@ -1,22 +1,26 @@
 // src/app/layout.js
+"use client";  // Mark this component as a Client Component
+
 import './globals.css';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-
-export const metadata = {
-  title: 'NFC Card Website',
-  description: 'NFC card management and information website',
-};
+import { usePathname } from 'next/navigation'; // Updated import
 
 export default function RootLayout({ children }) {
+  const pathname = usePathname(); // Use usePathname instead of useRouter
+
+  // Check if the current page is a template page (using the dynamic route)
+  const isTemplatePage = pathname.includes('/templates/');
+
   return (
     <html lang="en">
       <body className="flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-grow"> {/* Adjust padding to match navbar height */}
+        {/* Render Navbar and Footer only if it's not a template page */}
+        {!isTemplatePage && <Navbar />}
+        <main className="flex-grow">
           {children}
         </main>
-        <Footer className="mt-auto" /> {/* Footer sticks to the bottom */}
+        {!isTemplatePage && <Footer className="mt-auto" />}
       </body>
     </html>
   );

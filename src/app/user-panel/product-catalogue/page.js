@@ -1,6 +1,5 @@
 "use client"; // Next.js Client Component
 import Image from 'next/image';
-
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import api from "../../apiConfig/axiosConfig"; // Ensure you have the right API config
@@ -19,6 +18,8 @@ const ProductCataloguePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editProductId, setEditProductId] = useState(null);
   const [userId, setUserId] = useState(null); // Add a state to store the ID
+  const [searchQuery, setSearchQuery] = useState(''); // State to store search query
+  const [error, setError] = useState(''); // State to store validation error
 
   useEffect(() => {
     fetchProducts(); // Fetch products when the component mounts
@@ -34,11 +35,30 @@ const ProductCataloguePage = () => {
     }
   };
 
-  // Add or update product function
+  // Add or update product function with validation
   const addOrUpdateProduct = async () => {
     const token = localStorage.getItem('authToken');
-    const formData = new FormData();
+    
+    // Validate form fields
+    if (!currentProduct.name || !currentProduct.type || !currentProduct.price || !currentProduct.hsnCode || !currentProduct.gst) {
+      setError('All fields are required.');
+      return;
+    }
 
+    if (isNaN(currentProduct.price)) {
+      setError('Price must be a valid number.');
+      return;
+    }
+
+    // If adding a product, ensure image is provided
+    if (!isEditing && !currentProduct.image) {
+      setError('Image is required when adding a product.');
+      return;
+    }
+
+    setError(''); // Reset error if validation passes
+
+    const formData = new FormData();
     formData.append('name', currentProduct.name);
     formData.append('type', currentProduct.type);
     formData.append('price', currentProduct.price);
@@ -60,15 +80,15 @@ const ProductCataloguePage = () => {
       let response; // Declare response here
 
       if (isEditing && editProductId) {
-        console.log(isEditing,editProductId,formData,"edit")
+        console.log(isEditing, editProductId, formData, "edit");
 
         // Update product if editing
-        response=await api.put(`/api/products/${editProductId}`, formData, config);
-        console.log(response)
+        response = await api.put(`/api/products/${editProductId}`, formData, config);
+        console.log(response);
       } else {
         // Add new product if not editing
-        console.log(formData)
-        response= await api.post('/api/products/', formData, config);
+        console.log(formData);
+        response = await api.post('/api/products/', formData, config);
       }
 
       resetForm();
@@ -80,13 +100,13 @@ const ProductCataloguePage = () => {
 
   // Fetch products
   const fetchProducts = async () => {
-    console.log(api.defaults.baseURL)
+    console.log(api.defaults.baseURL);
     const token = localStorage.getItem('authToken');
     try {
       const { data } = await api.get('/api/products/', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log(data)
+      console.log(data);
       setCatalogue(data.products);
       setUserId(data.id); // Store the ID in state
     } catch (error) {
@@ -112,7 +132,7 @@ const ProductCataloguePage = () => {
 
   // Delete product
   const deleteProduct = async (productId) => {
-    console.log(productId,"id")
+    console.log(productId, "id");
     const token = localStorage.getItem('authToken');
     try {
       await api.delete(`/api/products/${productId}`, {
@@ -126,14 +146,35 @@ const ProductCataloguePage = () => {
 
   // Reset form after submission
   const resetForm = () => {
-    setCurrentProduct({ name: '', type: '', price: '', image: null, hsnCode: '',gst: '' });
+    setCurrentProduct({ name: '', type: '', price: '', image: null, hsnCode: '', gst: '' });
     setIsEditing(false);
     setEditProductId(null);
   };
 
+  // Filter catalogue based on search query
+  const filteredCatalogue = catalogue.filter((product) =>
+    product.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.hsnCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.gst.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="container mx-auto p-6 bg-gray-50 rounded-lg shadow-lg">
       <h1 className="text-4xl font-bold text-center text-gray-800 mb-6">Product Catalogue</h1>
+
+      {/* Search Bar */}
+      <div className="mb-6">
+        <input
+          type="text"
+          placeholder="Search by Name, HSN Code or GST"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full p-3 border border-gray-300 rounded-md"
+        />
+      </div>
+
+      {/* Form Validation Error */}
+      {error && <div className="text-red-500 mb-4">{error}</div>}
 
       <form className="bg-white p-4 rounded-lg shadow-md mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -146,36 +187,35 @@ const ProductCataloguePage = () => {
             className="border border-gray-300 p-3 rounded-md"
             required
           />
-    <select
-      name="type"
-      value={currentProduct.type}
-      onChange={handleChange}
-      className="border border-gray-300 p-3 rounded-md"
-      required
-    >
-      <option value="" disabled>Select Type</option>
-      <option value="product">Product</option>
-      <option value="service">Service</option>
-    </select>
-    <input
-  type="text"
-  name="hsnCode"
-  placeholder="HSN Code"
-  value={currentProduct.hsnCode}
-  onChange={handleChange}
-  className="border border-gray-300 p-3 rounded-md"
-  required
-/>
-<input
-  type="text"
-  name="gst"
-  placeholder="GST "
-  value={currentProduct.gst}
-  onChange={handleChange}
-  className="border border-gray-300 p-3 rounded-md"
-  required
-/>
-
+          <select
+            name="type"
+            value={currentProduct.type}
+            onChange={handleChange}
+            className="border border-gray-300 p-3 rounded-md"
+            required
+          >
+            <option value="" disabled>Select Type</option>
+            <option value="product">Product</option>
+            <option value="service">Service</option>
+          </select>
+          <input
+            type="text"
+            name="hsnCode"
+            placeholder="HSN Code"
+            value={currentProduct.hsnCode}
+            onChange={handleChange}
+            className="border border-gray-300 p-3 rounded-md"
+            required
+          />
+          <input
+            type="text"
+            name="gst"
+            placeholder="GST"
+            value={currentProduct.gst}
+            onChange={handleChange}
+            className="border border-gray-300 p-3 rounded-md"
+            required
+          />
           <input
             type="text"
             name="price"
@@ -191,7 +231,6 @@ const ProductCataloguePage = () => {
             onChange={handleChange}
             className="border border-gray-300 p-3 rounded-md"
           />
-
         </div>
         <button
           type="button"
@@ -210,36 +249,35 @@ const ProductCataloguePage = () => {
               <th className="py-3 px-4 border-b">Type</th>
               <th className="py-3 px-4 border-b">Price</th>
               <th className="py-3 px-4 border-b">HSN Code</th>
-<th className="py-3 px-4 border-b">GST</th>
+              <th className="py-3 px-4 border-b">GST</th>
               <th className="py-3 px-4 border-b">Image</th>
               <th className="py-3 px-4 border-b">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {catalogue.map((product) => (
+            {filteredCatalogue.map((product) => (
               <tr key={product._id} className="hover:bg-gray-100">
                 <td className="py-3 px-4 border-b">{product.productName}</td>
                 <td className="py-3 px-4 border-b">{product.productType}</td>
                 <td className="py-3 px-4 border-b">{product.productPrice}</td>
                 <td className="py-3 px-4 border-b">{product.hsnCode}</td>
-<td className="py-3 px-4 border-b">{product.gst}</td>
+                <td className="py-3 px-4 border-b">{product.gst}</td>
                 <td className="py-3 px-4 border-b">
-                {product.productImages && product.productImages[0] && (() => {
-  const imageUrl = `${api.defaults.baseURL}/uploads/userDetails/${userId}/${product.productImages[0]}`;
-  console.log('Image URL:', imageUrl); // Log the URL
-  return (
-    <Image
-      src={imageUrl} // Use base URL for images
-      alt={product.productName}
-      width={500} // Set a reasonable default width
-      height={500}
-      layout="intrinsic"
-      className="h-16 w-16 object-cover"
-    />
-  );
-})()}
-
-</td>
+                  {product.productImages && product.productImages[0] && (() => {
+                    const imageUrl = `${api.defaults.baseURL}/uploads/userDetails/${userId}/${product.productImages[0]}`;
+                    console.log('Image URL:', imageUrl); // Log the URL
+                    return (
+                      <Image
+                        src={imageUrl} // Use base URL for images
+                        alt={product.productName}
+                        width={500} // Set a reasonable default width
+                        height={500}
+                        layout="intrinsic"
+                        className="h-16 w-16 object-cover"
+                      />
+                    );
+                  })()}
+                </td>
 
                 <td className="py-3 px-4 border-b flex space-x-2">
                   <button

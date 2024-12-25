@@ -19,6 +19,7 @@ const ProductSalesManagementPage = () => {
           params: { startDate, endDate },
           headers: { Authorization: `Bearer ${token}` }, // Add token in the request header
         });
+        console.log(response.data)
         setSalesData(response.data);
         prepareChartData(response.data); // Prepare chart data after fetching
       } catch (error) {

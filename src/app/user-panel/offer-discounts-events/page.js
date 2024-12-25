@@ -7,6 +7,7 @@ const OfferDiscountsEventsPage = () => {
   const [products, setProducts] = useState([]);
   const [currentDiscount, setCurrentDiscount] = useState({ productId: null, amount: '' });
   const [isEditing, setIsEditing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(''); // State for error message
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -17,7 +18,7 @@ const OfferDiscountsEventsPage = () => {
                 Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
             },
         };
-        const response = await api.get('/api/products',config); // Adjust the URL based on your API setup
+        const response = await api.get('/api/products', config); // Adjust the URL based on your API setup
         setProducts(response.data.products);
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -33,6 +34,14 @@ const OfferDiscountsEventsPage = () => {
   };
 
   const addOrUpdateDiscount = async () => {
+    // Validate that discount amount is a number
+    if (isNaN(currentDiscount.amount) || currentDiscount.amount === '') {
+      setErrorMessage('Discount amount must be a valid number.');
+      return; // Exit the function if the validation fails
+    }
+
+    setErrorMessage(''); // Clear any previous error message
+
     try {
       const token = localStorage.getItem('authToken'); // Retrieve the JWT token from localStorage
       const config = {
@@ -40,11 +49,12 @@ const OfferDiscountsEventsPage = () => {
               Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
           },
       };
+
       if (isEditing) {
         // Update existing discount
         await api.put(`/api/discount/${currentDiscount.productId}`, {
           discount: currentDiscount.amount,
-        },config);
+        }, config);
         setProducts((prevProducts) =>
           prevProducts.map((product) =>
             product._id === currentDiscount.productId
@@ -57,7 +67,7 @@ const OfferDiscountsEventsPage = () => {
         // Add new discount
         await api.put(`/api/discount/${currentDiscount.productId}`, {
           discount: currentDiscount.amount,
-        },config);
+        }, config);
         setProducts((prevProducts) =>
           prevProducts.map((product) =>
             product._id === currentDiscount.productId
@@ -75,6 +85,7 @@ const OfferDiscountsEventsPage = () => {
   const editDiscount = (product) => {
     setCurrentDiscount({ productId: product._id, amount: product.discount || '' });
     setIsEditing(true);
+    setErrorMessage(''); // Clear error when editing
   };
 
   const removeDiscount = async (productId) => {
@@ -85,7 +96,7 @@ const OfferDiscountsEventsPage = () => {
               Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
           },
       };
-      await api.put(`/api/discount/${productId}`, { discount: null },config);
+      await api.put(`/api/discount/${productId}`, { discount: null }, config);
       setProducts((prevProducts) =>
         prevProducts.map((product) =>
           product._id === productId ? { ...product, discount: null } : product
@@ -128,6 +139,10 @@ const OfferDiscountsEventsPage = () => {
           required
         />
         
+        {errorMessage && (
+          <div className="text-red-500 text-sm mt-2">{errorMessage}</div>
+        )}
+
         <button
           type="button"
           onClick={addOrUpdateDiscount}

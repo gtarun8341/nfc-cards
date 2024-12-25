@@ -23,10 +23,19 @@ const ContactManagementPage = () => {
 
   const [contacts, setContacts] = useState([]);
   const [isAdding, setIsAdding] = useState(false);
+  const [editContactId, setEditContactId] = useState(null); // Track contact being edited
+  const [searchQuery, setSearchQuery] = useState(''); // State to store search query
+  const [filteredContacts, setFilteredContacts] = useState([]);
 
   useEffect(() => {
     fetchContacts();
   }, []);
+
+  useEffect(() => {
+    filterContacts();
+  }, [contacts, searchQuery]); // Re-run filter when contacts or searchQuery change
+
+
 
   const fetchContacts = async () => {
     try {
@@ -43,6 +52,19 @@ const ContactManagementPage = () => {
     }
   };
 
+  const filterContacts = () => {
+    const query = searchQuery.toLowerCase();
+    const filtered = contacts.filter(contact => 
+      contact.name.toLowerCase().includes(query) ||
+      contact.profession.toLowerCase().includes(query) ||
+      contact.companyName.toLowerCase().includes(query) ||
+      contact.mobileNumber.toLowerCase().includes(query) ||
+      contact.email.toLowerCase().includes(query) ||
+      contact.website.toLowerCase().includes(query)
+    );
+    setFilteredContacts(filtered);
+  };
+
   const handleChange = (e) => {
     setContact((prevContact) => ({
       ...prevContact,
@@ -53,17 +75,30 @@ const ContactManagementPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('authToken'); // Assuming token is stored here
+      const token = localStorage.getItem('authToken');
       const config = {
         headers: {
-          Authorization: `Bearer ${token}`, // Attach the token
+          Authorization: `Bearer ${token}`,
         },
       };
-      await api.post('/api/contacts', contact, config); // POST request to save contact
-      alert('Contact saved successfully');
+
+      if (editContactId) {
+        // Update contact if editing
+        await api.put(
+          '/api/contacts/contacts',
+          { ...contact, contactId: editContactId },
+          config
+        );
+        alert('Contact updated successfully');
+      } else {
+        // Add new contact if not editing
+        await api.post('/api/contacts', contact, config);
+        alert('Contact added successfully');
+      }
+
       fetchContacts(); // Fetch updated contacts
-      setIsAdding(false); // Close the form after submission
-      setContact({ // Clear form after submission
+      setIsAdding(false);
+      setContact({
         name: '',
         reference: '',
         profession: '',
@@ -79,27 +114,18 @@ const ContactManagementPage = () => {
         state: '',
         pinCode: '',
       });
+      setEditContactId(null); // Reset edit mode
     } catch (error) {
       console.error('Error saving contact:', error);
     }
   };
 
-  // Reusable Input Field Component (same structure as CRMPage)
-  const InputField = ({ label, name, value, onChange, placeholder, required = false }) => (
-    <div className="flex flex-col space-y-2">
-      <label htmlFor={name} className="text-sm font-semibold text-gray-700">{label}</label>
-      <input
-        id={name}
-        type="text"
-        name={name}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        required={required}
-        className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      />
-    </div>
-  );
+  const handleEdit = (contactId) => {
+    const contactToEdit = contacts.find((contact) => contact._id === contactId);
+    setContact(contactToEdit); // Pre-fill the form with contact data
+    setEditContactId(contactId); // Set the edit contact ID
+    setIsAdding(true); // Show the form
+  };
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white shadow-md rounded-lg overflow-hidden">
@@ -115,118 +141,181 @@ const ContactManagementPage = () => {
       {isAdding && (
         <form onSubmit={handleSubmit} className="space-y-6 mb-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <InputField
-              label="Name"
-              name="name"
-              value={contact.name}
-              onChange={handleChange}
-              placeholder="Enter name"
-              required
-            />
-            <InputField
-              label="Reference"
-              name="reference"
-              value={contact.reference}
-              onChange={handleChange}
-              placeholder="Enter reference"
-            />
-            <InputField
-              label="Profession"
-              name="profession"
-              value={contact.profession}
-              onChange={handleChange}
-              placeholder="Enter profession"
-            />
-            <InputField
-              label="Industry"
-              name="industry"
-              value={contact.industry}
-              onChange={handleChange}
-              placeholder="Enter industry"
-            />
-            <InputField
-              label="Category"
-              name="category"
-              value={contact.category}
-              onChange={handleChange}
-              placeholder="Enter category"
-            />
-            <InputField
-              label="Designation"
-              name="designation"
-              value={contact.designation}
-              onChange={handleChange}
-              placeholder="Enter designation"
-            />
-            <InputField
-              label="Company"
-              name="companyName"
-              value={contact.companyName}
-              onChange={handleChange}
-              placeholder="Enter company name"
-            />
-            <InputField
-              label="Mobile"
-              name="mobileNumber"
-              value={contact.mobileNumber}
-              onChange={handleChange}
-              placeholder="Enter mobile number"
-              required
-            />
-            <InputField
-              label="Email"
-              name="email"
-              value={contact.email}
-              onChange={handleChange}
-              placeholder="Enter email"
-            />
-            <InputField
-              label="Website"
-              name="website"
-              value={contact.website}
-              onChange={handleChange}
-              placeholder="Enter website"
-            />
-            <InputField
-              label="Address"
-              name="address"
-              value={contact.address}
-              onChange={handleChange}
-              placeholder="Enter address"
-            />
-            <InputField
-              label="City"
-              name="city"
-              value={contact.city}
-              onChange={handleChange}
-              placeholder="Enter city"
-            />
-            <InputField
-              label="State"
-              name="state"
-              value={contact.state}
-              onChange={handleChange}
-              placeholder="Enter state"
-            />
-            <InputField
-              label="Pin Code"
-              name="pinCode"
-              value={contact.pinCode}
-              onChange={handleChange}
-              placeholder="Enter pin code"
-            />
+            <div>
+              <label className="block mb-1">Name</label>
+              <input
+                type="text"
+                name="name"
+                placeholder="Enter name"
+                value={contact.name}
+                onChange={handleChange}
+                className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
+                required
+              />
+            </div>
+            <div>
+              <label className="block mb-1">Reference</label>
+              <input
+                type="text"
+                name="reference"
+                placeholder="Enter reference"
+                value={contact.reference}
+                onChange={handleChange}
+                className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
+              />
+            </div>
+            <div>
+              <label className="block mb-1">Profession</label>
+              <input
+                type="text"
+                name="profession"
+                placeholder="Enter profession"
+                value={contact.profession}
+                onChange={handleChange}
+                className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
+              />
+            </div>
+            <div>
+              <label className="block mb-1">Industry</label>
+              <input
+                type="text"
+                name="industry"
+                placeholder="Enter industry"
+                value={contact.industry}
+                onChange={handleChange}
+                className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
+              />
+            </div>
+            <div>
+              <label className="block mb-1">Category</label>
+              <input
+                type="text"
+                name="category"
+                placeholder="Enter category"
+                value={contact.category}
+                onChange={handleChange}
+                className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
+              />
+            </div>
+            <div>
+              <label className="block mb-1">Designation</label>
+              <input
+                type="text"
+                name="designation"
+                placeholder="Enter designation"
+                value={contact.designation}
+                onChange={handleChange}
+                className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
+              />
+            </div>
+            <div>
+              <label className="block mb-1">Company</label>
+              <input
+                type="text"
+                name="companyName"
+                placeholder="Enter company name"
+                value={contact.companyName}
+                onChange={handleChange}
+                className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
+              />
+            </div>
+            <div>
+              <label className="block mb-1">Mobile</label>
+              <input
+                type="text"
+                name="mobileNumber"
+                placeholder="Enter mobile number"
+                value={contact.mobileNumber}
+                onChange={handleChange}
+                className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
+                required
+              />
+            </div>
+            <div>
+              <label className="block mb-1">Email</label>
+              <input
+                type="email"
+                name="email"
+                placeholder="Enter email"
+                value={contact.email}
+                onChange={handleChange}
+                className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
+              />
+            </div>
+            <div>
+              <label className="block mb-1">Website</label>
+              <input
+                type="text"
+                name="website"
+                placeholder="Enter website"
+                value={contact.website}
+                onChange={handleChange}
+                className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
+              />
+            </div>
+            <div>
+              <label className="block mb-1">Address</label>
+              <input
+                type="text"
+                name="address"
+                placeholder="Enter address"
+                value={contact.address}
+                onChange={handleChange}
+                className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
+              />
+            </div>
+            <div>
+              <label className="block mb-1">City</label>
+              <input
+                type="text"
+                name="city"
+                placeholder="Enter city"
+                value={contact.city}
+                onChange={handleChange}
+                className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
+              />
+            </div>
+            <div>
+              <label className="block mb-1">State</label>
+              <input
+                type="text"
+                name="state"
+                placeholder="Enter state"
+                value={contact.state}
+                onChange={handleChange}
+                className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
+              />
+            </div>
+            <div>
+              <label className="block mb-1">Pin Code</label>
+              <input
+                type="text"
+                name="pinCode"
+                placeholder="Enter pin code"
+                value={contact.pinCode}
+                onChange={handleChange}
+                className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
+              />
+            </div>
           </div>
           <button
             type="submit"
             className="mt-4 w-full p-2 bg-green-500 text-white rounded-md hover:bg-green-600"
           >
-            Save Contact
-          </button>
+            {editContactId ? 'Update Contact' : 'Save Contact'}
+            </button>
         </form>
       )}
 
-      <h2 className="text-xl font-semibold mt-8 mb-4">Contacts</h2>
       <div className="overflow-x-auto">
+              {/* Search Bar */}
+              <input
+        type="text"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        placeholder="Search by name, profession, company, mobile, email, or website"
+        className="mb-4 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
+      />
         <table className="min-w-full table-auto border-collapse bg-white shadow-md rounded-md">
           <thead>
             <tr className="border-b bg-gray-100">
@@ -244,10 +333,11 @@ const ContactManagementPage = () => {
               <th className="px-4 py-2 text-left">City</th>
               <th className="px-4 py-2 text-left">State</th>
               <th className="px-4 py-2 text-left">Pin Code</th>
+              <th className="px-4 py-2 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {contacts.map((contact, index) => (
+          {filteredContacts.map((contact, index) => (
               <tr key={index} className="border-b">
                 <td className="px-4 py-2">{contact.name}</td>
                 <td className="px-4 py-2">{contact.reference}</td>
@@ -263,6 +353,14 @@ const ContactManagementPage = () => {
                 <td className="px-4 py-2">{contact.city}</td>
                 <td className="px-4 py-2">{contact.state}</td>
                 <td className="px-4 py-2">{contact.pinCode}</td>
+                <td className="px-4 py-2">
+                  <button
+                    onClick={() => handleEdit(contact._id)}
+                    className="text-blue-500 hover:text-blue-700"
+                  >
+                    Edit
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

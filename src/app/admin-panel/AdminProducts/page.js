@@ -66,6 +66,7 @@ const ProductCataloguePage = () => {
     try {
       let response;
       if (isEditing && editProductId) {
+        console.log(editProductId)
         response = await api.put(`/api/addAdminProduct/update-product/${editProductId}`, formData, config);
       } else {
         response = await api.post('/api/addAdminProduct/add-product', formData, config);

@@ -71,7 +71,6 @@ const EnquiriesPage = () => {
                             <th className="py-2 px-4 text-left text-gray-600 font-semibold">Email</th>
                             <th className="py-2 px-4 text-left text-gray-600 font-semibold">Phone</th>
                             <th className="py-2 px-4 text-left text-gray-600 font-semibold">Message</th>
-                            <th className="py-2 px-4 text-left text-gray-600 font-semibold">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -81,14 +80,6 @@ const EnquiriesPage = () => {
                                 <td className="border-t py-2 px-4">{enquiry.email}</td>
                                 <td className="border-t py-2 px-4">{enquiry.phone}</td>
                                 <td className="border-t py-2 px-4">{enquiry.message}</td>
-                                <td className="border-t py-2 px-4 text-center">
-                                    <button
-                                        onClick={() => alert(`Downloading enquiry from ${enquiry.name}...`)}
-                                        className="bg-green-500 text-white px-3 py-1 rounded-md shadow hover:bg-green-600 transition duration-150"
-                                    >
-                                        Download
-                                    </button>
-                                </td>
                             </tr>
                         ))}
                     </tbody>

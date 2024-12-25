@@ -32,30 +32,46 @@ const ProductCard = ({ product, onAddToCart }) => {
     };
 
     return (
-        <div className="border rounded-lg p-4 shadow-lg">
-            <Image
-                src={product.icon}
-                alt={product.title}
-                width={500} // Set a reasonable default width
-                height={500}
-                layout="intrinsic"
-                className="mx-auto mb-4 w-full h-32 object-cover" // Full-width image
-            />
-            <h3 className="text-xl font-semibold text-center mb-2">{product.title}</h3>
-            <p className="text-gray-600 text-center mb-2">{product.description}</p>
-            <p className="text-lg font-bold text-center mb-2">{`Price: ${product.price}`}</p>
+        <div className="border rounded-lg p-4 shadow-lg max-w-sm w-full">
+            <div className="relative w-full h-48 mb-4"> {/* Fixed height for images */}
+                <Image
+                    src={product.icon}
+                    alt={product.title}
+                    layout="fill" // Use fill to make the image responsive
+                    objectFit="cover" // Cover ensures the image maintains aspect ratio
+                    className="rounded-t-lg"
+                />
+            </div>
+            <h3 className="text-xl font-semibold text-center mb-2 text-gray-800">{product.title}</h3>
+            <p className="text-gray-600 text-center mb-2 text-sm">{product.description}</p>
+            <p className="text-lg font-bold text-center text-green-600 mb-2">{`Price: ${product.price}`}</p>
             {product.discount && (
-                <p className="text-red-600 font-bold text-center">{`Discount: ${product.discount}`}</p> // Display discount if it exists
+                <p className="text-red-600 font-bold text-center text-sm">{`Discount: ${product.discount}`}</p>
             )}
-            
+
             {quantity > 0 ? (
                 <div className="flex items-center justify-center mt-4">
-                    <button onClick={handleDecrease} className="bg-gray-300 text-black py-1 px-2 rounded">-</button>
-                    <span className="mx-4">{quantity}</span>
-                    <button onClick={handleIncrease} className="bg-gray-300 text-black py-1 px-2 rounded">+</button>
+                    <button
+                        onClick={handleDecrease}
+                        className="bg-gray-300 text-black py-1 px-3 rounded hover:bg-gray-400"
+                    >
+                        -
+                    </button>
+                    <span className="mx-4 text-lg font-medium">{quantity}</span>
+                    <button
+                        onClick={handleIncrease}
+                        className="bg-gray-300 text-black py-1 px-3 rounded hover:bg-gray-400"
+                    >
+                        +
+                    </button>
                 </div>
             ) : (
-                <button onClick={handleAdd} className="mt-4 bg-blue-500 text-white py-2 px-4 rounded w-full">Add</button> // Button to add product
+                <button
+                    onClick={handleAdd}
+                    className="mt-4 bg-blue-500 text-white py-2 px-4 rounded w-full hover:bg-blue-600"
+                >
+                    Add
+                </button>
             )}
         </div>
     );

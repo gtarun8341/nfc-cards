@@ -34,6 +34,7 @@ import EnquiriesPage from './enquires/page';
 import OfferDiscountsEventsPage from './offer-discounts-events/page';
 import SoldProducts from './sold-products/page';
 import CardPurchases from './card-purchases/page';
+import ReviewPage from './Review/page';
 import api from '../apiConfig/axiosConfig'; // Import the axios instance
 
 const UserPanel = () => {
@@ -102,6 +103,7 @@ const UserPanel = () => {
     { name: 'CRM', path: 'crm', icon: AcademicCapIcon, onClick: () => setActiveForm('crm') },
     { name: 'Paper Business Cards Scan', path: 'paper-business-cards-scan', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('paper-business-cards-scan') },
     { name: 'Enquires', path: 'enquires', icon: InboxIcon, onClick: () => setActiveForm('enquires') },
+    { name: 'Reviews', path: 'Review', icon: InboxIcon, onClick: () => setActiveForm('Review') },
     { name: 'Offer / Discounts / Events', path: 'offer-discounts-events', icon: GiftIcon, onClick: () => setActiveForm('offer-discounts-events') },
   ];
 
@@ -199,6 +201,7 @@ const UserPanel = () => {
         {activeForm === 'crm' && <CRMPage />}
         {activeForm === 'paper-business-cards-scan' && <PaperBusinessCardsScanPage />}
         {activeForm === 'enquires' && <EnquiriesPage />}
+        {activeForm === 'Review' && <ReviewPage />}
         {activeForm === 'offer-discounts-events' && <OfferDiscountsEventsPage />}
         {activeForm === '' && <AccountFormPage />} {/* Default to Dashboard if no activeForm is set */}
 

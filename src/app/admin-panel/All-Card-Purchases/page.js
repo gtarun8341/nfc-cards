@@ -1,36 +1,80 @@
 "use client"; // Next.js Client Component
 
-import React, { useEffect, useState } from 'react';
-import api from '../../apiConfig/axiosConfig';
+import React, { useEffect, useState } from "react";
+import api from "../../apiConfig/axiosConfig";
 
 const AllCardPurchases = () => {
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [filteredPurchases, setFilteredPurchases] = useState([]);
 
-  useEffect(() => {
-    const fetchAllPurchases = async () => {
-      try {
-        const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`, // Attach the token
-          },
-        };
-        const { data } = await api.get('/api/cardPurchase/all-purchases', config);
-        setPurchases(data.purchases || []); // Handle data safely
-      } catch (error) {
-        console.error('Error fetching all card purchases:', error.message);
-        setPurchases([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchAllPurchases = async () => {
+    try {
+      const token = localStorage.getItem("adminAuthToken");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const { data } = await api.get("/api/cardPurchase/all-purchases", config);
 
+      // Sort purchases by newest first
+      const sortedPurchases = data.purchases
+        ? data.purchases.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          )
+        : [];
+      setPurchases(sortedPurchases);
+    } catch (error) {
+      console.error("Error fetching all card purchases:", error.message);
+      setPurchases([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchAllPurchases();
   }, []);
+
+  const updateStatus = async (id, newStatus) => {
+    try {
+      const token = localStorage.getItem("adminAuthToken");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const response = await api.patch(
+        `/api/cardPurchase/update-status/${id}`,
+        { status: newStatus },
+        config
+      );
+
+      const updatedPurchase = response.data.data;
+      fetchAllPurchases();
+
+      // Update the local state
+      setPurchases((prevPurchases) => {
+        const updatedPurchases = prevPurchases.map((purchase) =>
+          purchase.id === updatedPurchase.id
+            ? { ...purchase, status: updatedPurchase.status }
+            : purchase
+        );
+
+        // Re-sort by createdAt (newest first)
+        return updatedPurchases.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+      });
+    } catch (error) {
+      console.error("Error updating card purchase status:", error.message);
+      alert("Failed to update status. Please try again.");
+    }
+  };
 
   useEffect(() => {
     const filterData = () => {
@@ -38,16 +82,23 @@ const AllCardPurchases = () => {
 
       // Apply search filter
       if (searchTerm) {
-        filteredData = filteredData.filter(purchase =>
-          purchase.trackingId.includes(searchTerm) ||
-          purchase.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          purchase.user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        filteredData = filteredData.filter(
+          (purchase) =>
+            purchase.trackingId.includes(searchTerm) ||
+            purchase.user.name
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase()) ||
+            purchase.user.email
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase())
         );
       }
 
       // Apply status filter
       if (statusFilter) {
-        filteredData = filteredData.filter(purchase => purchase.status === statusFilter);
+        filteredData = filteredData.filter(
+          (purchase) => purchase.status === statusFilter
+        );
       }
 
       setFilteredPurchases(filteredData);
@@ -59,7 +110,7 @@ const AllCardPurchases = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <h1 className="text-2xl font-bold text-center mb-6">All Card Purchases</h1>
-      
+
       <div className="mb-4 flex justify-between">
         {/* Search Bar */}
         <input
@@ -69,7 +120,7 @@ const AllCardPurchases = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        
+
         {/* Status Filter */}
         <select
           className="p-2 border rounded"
@@ -92,7 +143,6 @@ const AllCardPurchases = () => {
           <table className="table-auto w-full bg-white shadow-md rounded-lg">
             <thead>
               <tr className="bg-green-500 text-white">
-                {/* Table headers */}
                 <th className="p-2">Tracking ID</th>
                 <th className="p-2">Card Type</th>
                 <th className="p-2">Template Name</th>
@@ -111,7 +161,6 @@ const AllCardPurchases = () => {
             <tbody>
               {filteredPurchases.map((purchase) => (
                 <tr key={purchase.id} className="border-t">
-                  {/* Table cells */}
                   <td className="p-2 text-center">{purchase.trackingId}</td>
                   <td className="p-2 text-center">{purchase.cardType}</td>
                   <td className="p-2 text-center">{purchase.templateName}</td>
@@ -120,7 +169,9 @@ const AllCardPurchases = () => {
                     <select
                       className="border p-1 rounded"
                       value={purchase.status}
-                      onChange={(e) => updateStatus(purchase.id, e.target.value)}
+                      onChange={(e) =>
+                        updateStatus(purchase.id, e.target.value)
+                      }
                     >
                       <option value="Pending">Pending</option>
                       <option value="Processing">Processing</option>
