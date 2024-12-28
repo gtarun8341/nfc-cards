@@ -209,6 +209,9 @@ const AdminTestimonialsPage = () => {
                     <Image
                       src={`${api.defaults.baseURL}/uploads/testimonials/${testimonial.image}`}
                       alt="testimonial"
+                      width={500} // Set a reasonable default width
+                      height={500}
+                      layout="intrinsic"
                       className="w-12 h-12 object-cover rounded-full"
                     />
                   )}
