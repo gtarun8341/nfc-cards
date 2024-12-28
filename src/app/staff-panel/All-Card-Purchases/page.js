@@ -12,13 +12,13 @@ const AllCardPurchases = () => {
 
   const fetchAllPurchases = async () => {
     try {
-      const token = localStorage.getItem("adminAuthToken");
+      const token = localStorage.getItem("staffAuthToken");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
-      const { data } = await api.get("/api/cardPurchase/all-purchases", config);
+      const { data } = await api.get("/api/cardPurchase/staff/all-purchases", config);
 
       // Sort purchases by newest first
       const sortedPurchases = data.purchases
@@ -41,7 +41,7 @@ const AllCardPurchases = () => {
 
   const updateStatus = async (id, newStatus) => {
     try {
-      const token = localStorage.getItem("adminAuthToken");
+      const token = localStorage.getItem("staffAuthToken");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -49,7 +49,7 @@ const AllCardPurchases = () => {
       };
 
       const response = await api.patch(
-        `/api/cardPurchase/update-status/${id}`,
+        `/api/cardPurchase/staff/update-status/${id}`,
         { status: newStatus },
         config
       );

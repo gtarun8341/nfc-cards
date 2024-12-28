@@ -7,6 +7,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [userRole, setUserRole] = useState("");
 
   // Toggles the mobile menu
   const toggleMenu = () => {
@@ -21,7 +22,22 @@ const Navbar = () => {
   // Check if the auth token exists in localStorage
   useEffect(() => {
     const authToken = localStorage.getItem("authToken");
-    setIsLoggedIn(!!authToken);
+    const adminAuthToken = localStorage.getItem("adminAuthToken");
+    const staffAuthToken = localStorage.getItem("staffAuthToken");
+
+    // Set login status
+    setIsLoggedIn(!!authToken || !!adminAuthToken || !!staffAuthToken);
+
+    // Set the role based on the token
+    if (adminAuthToken) {
+      setUserRole("admin");
+    } else if (staffAuthToken) {
+      setUserRole("staff");
+    } else if (authToken) {
+      setUserRole("user");
+    } else {
+      setUserRole(""); // No role if no tokens exist
+    }
   }, []);
 
   return (
@@ -82,11 +98,11 @@ const Navbar = () => {
                 </button>
               </Link>
             ) : (
-              <Link href={localStorage.getItem("adminAuthToken") ? "/admin-panel" : "/user-panel"}>
-                <button className="bg-white text-green-700 px-4 py-2 rounded-lg shadow-lg hover:bg-gray-100 transition">
-                  Panel
-                </button>
-              </Link>
+              <Link href={`/${userRole}-panel`}>
+              <button className="bg-white text-green-700 px-4 py-2 rounded-lg shadow-lg hover:bg-gray-100 transition">
+                {userRole.charAt(0).toUpperCase() + userRole.slice(1)} Panel
+              </button>
+            </Link>
             )}
           </div>
         </div>
@@ -165,11 +181,11 @@ const Navbar = () => {
                 </button>
               </Link>
             ) : (
-              <Link href={localStorage.getItem("adminAuthToken") ? "/admin-panel" : "/user-panel"}>
-                <button className="w-full bg-white text-green-700 px-4 py-2 rounded-lg shadow-lg hover:bg-gray-100 transition">
-                  Panel
-                </button>
-              </Link>
+              <Link href={`/${userRole}-panel`}>
+              <button className="bg-white text-green-700 px-4 py-2 rounded-lg shadow-lg hover:bg-gray-100 transition">
+                {userRole.charAt(0).toUpperCase() + userRole.slice(1)} Panel
+              </button>
+            </Link>
             )}
           </li>
         </ul>

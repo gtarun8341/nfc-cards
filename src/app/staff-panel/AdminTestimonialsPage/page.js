@@ -28,13 +28,13 @@ const AdminTestimonialsPage = () => {
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
-        const token = localStorage.getItem("adminAuthToken");
+        const token = localStorage.getItem("staffAuthToken");
         const config = {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         };
-        const response = await api.get("/api/testimonials/all", config);
+        const response = await api.get("/api/testimonials/staff/all", config);
         setTestimonials(response.data);
         setFilteredTestimonials(response.data);
         setLoading(false);
@@ -53,7 +53,7 @@ const AdminTestimonialsPage = () => {
   //   }
 
   //   try {
-  //     const token = localStorage.getItem("adminAuthToken");
+  //     const token = localStorage.getItem("staffAuthToken");
   //     const config = {
   //       headers: {
   //         Authorization: `Bearer ${token}`,
@@ -116,7 +116,7 @@ const AdminTestimonialsPage = () => {
 
   // const handleDeleteTestimonial = async (id) => {
   //   try {
-  //     const token = localStorage.getItem("adminAuthToken");
+  //     const token = localStorage.getItem("staffAuthToken");
   //     const config = {
   //       headers: {
   //         Authorization: `Bearer ${token}`,
@@ -137,7 +137,7 @@ const AdminTestimonialsPage = () => {
   //   }
 
   //   try {
-  //     const token = localStorage.getItem("adminAuthToken");
+  //     const token = localStorage.getItem("staffAuthToken");
   //     const config = {
   //       headers: {
   //         Authorization: `Bearer ${token}`,

@@ -13,14 +13,14 @@ const AdminPDFVisitingCardPage = () => {
     useEffect(() => {
         const fetchTemplates = async () => {
             try {
-                const token = localStorage.getItem('adminAuthToken'); // Retrieve the JWT token from localStorage
+                const token = localStorage.getItem('staffAuthToken'); // Retrieve the JWT token from localStorage
                 const config = {
                     headers: {
                         Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
                     },
                 };
                 // Fetch NFC card templates
-                const response = await api.get('/api/templates/admin/templates?type=pdf', config);
+                const response = await api.get('/api/templates/staff/templates?type=pdf', config);
                 setTemplates(response.data);
                 console.log(response.data);
 
@@ -40,7 +40,7 @@ const AdminPDFVisitingCardPage = () => {
 
     const previewTemplate = async (templateId) => {
         try {
-            const token = localStorage.getItem('adminAuthToken'); // Retrieve the JWT token again
+            const token = localStorage.getItem('staffAuthToken'); // Retrieve the JWT token again
             const config = {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -48,7 +48,7 @@ const AdminPDFVisitingCardPage = () => {
             };
 
             // Fetch the rendered template HTML for the iframe preview
-            const response = await api.get(`/api/templates/admin/render/${templateId}?type=pdf`, config);
+            const response = await api.get(`/api/templates/staff/render/${templateId}?type=pdf`, config);
             setPreviewHtml((prev) => ({ ...prev, [templateId]: response.data })); // Set the rendered HTML to state
         } catch (error) {
             console.error('Error fetching template preview:', error);
@@ -58,7 +58,7 @@ const AdminPDFVisitingCardPage = () => {
     // Handle template deletion
     // const handleDeleteTemplate = async (templateId) => {
     //     try {
-    //         const token = localStorage.getItem('adminAuthToken'); // Retrieve the JWT token again
+    //         const token = localStorage.getItem('staffAuthToken'); // Retrieve the JWT token again
     //         const config = {
     //             headers: {
     //                 Authorization: `Bearer ${token}`,
@@ -77,7 +77,7 @@ const AdminPDFVisitingCardPage = () => {
 
     const handleViewTemplate = async (templateId) => {
         try {
-            const token = localStorage.getItem('adminAuthToken'); // Retrieve the JWT token again
+            const token = localStorage.getItem('staffAuthToken'); // Retrieve the JWT token again
             const config = {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -85,7 +85,7 @@ const AdminPDFVisitingCardPage = () => {
             };
 
             // Fetch the rendered template HTML for the new window
-            const response = await api.get(`/api/templates/admin/render/${templateId}?type=pdf`, config);
+            const response = await api.get(`/api/templates/staff/render/${templateId}?type=pdf`, config);
             // Open a new window with the full template
             const newWindow = window.open();
             newWindow.document.write(response.data);
@@ -101,7 +101,7 @@ const AdminPDFVisitingCardPage = () => {
 
     return (
         <div className="container mx-auto p-6">
-            <h1 className="text-2xl font-bold mb-4">Admin - Manage pdf Templates</h1>
+            <h1 className="text-2xl font-bold mb-4">Staff - Manage pdf Templates</h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {templates.length > 0 ? (
                     templates.map((template) => (

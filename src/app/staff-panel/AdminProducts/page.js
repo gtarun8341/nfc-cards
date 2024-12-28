@@ -42,7 +42,7 @@ const ProductCataloguePage = () => {
 
   // Add or update product function
   const addOrUpdateProduct = async () => {
-    const token = localStorage.getItem('adminAuthToken');
+    const token = localStorage.getItem('staffAuthToken');
     const formData = new FormData();
 
     formData.append('name', currentProduct.name);
@@ -67,7 +67,7 @@ const ProductCataloguePage = () => {
       let response;
       if (isEditing && editProductId) {
         console.log(editProductId)
-        response = await api.put(`/api/addAdminProduct/update-product/${editProductId}`, formData, config);
+        response = await api.put(`/api/addAdminProduct/staff/update-product/${editProductId}`, formData, config);
       } else {
         response = await api.post('/api/addAdminProduct/add-product', formData, config);
       }
@@ -81,7 +81,7 @@ const ProductCataloguePage = () => {
 
   // Fetch products
   const fetchProducts = async () => {
-    const token = localStorage.getItem('adminAuthToken');
+    const token = localStorage.getItem('staffAuthToken');
     try {
       const { data } = await api.get('/api/addAdminProduct/all-products', {
         headers: { Authorization: `Bearer ${token}` },
@@ -136,7 +136,7 @@ const ProductCataloguePage = () => {
 
   // Delete product
   // const deleteProduct = async (productId) => {
-  //   const token = localStorage.getItem('adminAuthToken');
+  //   const token = localStorage.getItem('staffAuthToken');
   //   try {
   //     await api.delete(`/api/addAdminProduct/delete-product/${productId}`, {
   //       headers: { Authorization: `Bearer ${token}` },

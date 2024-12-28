@@ -13,13 +13,13 @@ const CustomerProfileManagementPage = () => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
+        const token = localStorage.getItem('staffAuthToken'); // Assuming token is stored here
         const config = {
           headers: {
             Authorization: `Bearer ${token}`, // Attach the token
           },
         };
-        const { data } = await api.get('/api/users/users', config); // Assuming '/api/users' is your route to fetch customers
+        const { data } = await api.get('/api/users/staff/users', config); // Assuming '/api/users' is your route to fetch customers
         setCustomers(data);
       } catch (error) {
         console.error('Error fetching customers:', error);
@@ -37,13 +37,13 @@ const CustomerProfileManagementPage = () => {
   // Update customer
   const handleUpdate = async (id) => {
     try {
-      const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
+      const token = localStorage.getItem('staffAuthToken'); // Assuming token is stored here
       const config = {
         headers: {
           Authorization: `Bearer ${token}`, // Attach the token
         },
       };
-      await api.put(`/api/users/users/${id}`, { name: updatedName }, config); // Assuming update route is '/api/users/:id'
+      await api.put(`/api/users/staff/users/${id}`, { name: updatedName }, config); // Assuming update route is '/api/users/:id'
       const updatedCustomers = customers.map((customer) =>
         customer._id === id ? { ...customer, name: updatedName } : customer
       );
@@ -57,7 +57,7 @@ const CustomerProfileManagementPage = () => {
   // Delete customer
   // const handleDelete = async (id) => {
   //   try {
-  //     const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
+  //     const token = localStorage.getItem('staffAuthToken'); // Assuming token is stored here
   //     const config = {
   //       headers: {
   //         Authorization: `Bearer ${token}`, // Attach the token

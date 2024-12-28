@@ -189,7 +189,15 @@ const UserPanel = () => {
           ))}
         {activeForm === 'card-purchases' && <CardPurchases />}
         {activeForm === 'purchase-history' && <PurchaseHistoryPage />}
-        {activeForm === 'product-catalogue' && <ProductCataloguePage />}
+        {/* {activeForm === 'product-catalogue' && <ProductCataloguePage />} */}
+        {activeForm === 'product-catalogue' &&
+          (userDetailsExist ? (
+            <ProductCataloguePage />
+          ) : (
+            <div className="text-center text-red-500">
+              Please complete your Company profile to access this page.
+            </div>
+          ))}
         {activeForm === 'product-sales-management' && <ProductSalesManagementPage />}
         {/* {activeForm === 'payment-management' && <PaymentManagementPage />} */}
         {activeForm === 'sold-products' && <SoldProducts />}
@@ -203,6 +211,14 @@ const UserPanel = () => {
         {activeForm === 'enquires' && <EnquiriesPage />}
         {activeForm === 'Review' && <ReviewPage />}
         {activeForm === 'offer-discounts-events' && <OfferDiscountsEventsPage />}
+        {activeForm === 'offer-discounts-events' &&
+          (userDetailsExist ? (
+            <OfferDiscountsEventsPage />
+          ) : (
+            <div className="text-center text-red-500">
+              Please complete your Company profile to access this page.
+            </div>
+          ))}
         {activeForm === '' && <AccountFormPage />} {/* Default to Dashboard if no activeForm is set */}
 
       </div>

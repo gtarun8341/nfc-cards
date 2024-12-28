@@ -11,14 +11,14 @@ const ContactDeveloperPage = () => {
   // Function to fetch complaints from the server
   const fetchComplaints = async () => {
     try {
-      const token = localStorage.getItem("adminAuthToken");
+      const token = localStorage.getItem("staffAuthToken");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
 
-      const response = await api.get("/api/contact-developer", config);
+      const response = await api.get("/api/contact-developer/staff", config);
       setComplaints(response.data);
       setFilteredComplaints(response.data);
     } catch (error) {
@@ -42,14 +42,14 @@ const ContactDeveloperPage = () => {
 
   const updateComplaintStatus = async (id, status) => {
     try {
-      const token = localStorage.getItem("adminAuthToken");
+      const token = localStorage.getItem("staffAuthToken");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
 
-      await api.put(`/api/contact-developer/${id}/status`, { status }, config);
+      await api.put(`/api/contact-developer/staff/${id}/status`, { status }, config);
       fetchComplaints();
     } catch (error) {
       console.error("Error updating complaint status:", error);
@@ -58,7 +58,7 @@ const ContactDeveloperPage = () => {
 
   // const deleteComplaint = async (id) => {
   //   try {
-  //     const token = localStorage.getItem("adminAuthToken");
+  //     const token = localStorage.getItem("staffAuthToken");
   //     const config = {
   //       headers: {
   //         Authorization: `Bearer ${token}`,

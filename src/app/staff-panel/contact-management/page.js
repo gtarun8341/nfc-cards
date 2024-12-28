@@ -16,13 +16,13 @@ const AdminContactManagementPage = () => {
 
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem("adminAuthToken"); // Assuming token is stored here
+      const token = localStorage.getItem("staffAuthToken"); // Assuming token is stored here
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await api.get("/api/contacts/contacts", config); // Fetch grouped user contacts
+      const response = await api.get("/api/contacts/staff/contacts", config); // Fetch grouped user contacts
       setContacts(response.data);
     } catch (error) {
       console.error("Error fetching contacts:", error);

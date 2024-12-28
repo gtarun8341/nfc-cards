@@ -28,6 +28,7 @@ export default function StaffAuthPage() {
       } else {
         // Redirect to staff panel
         router.push("/staff-panel");
+        
       }
     } else {
       alert("Login failed. Please try again.");

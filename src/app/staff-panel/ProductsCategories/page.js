@@ -16,14 +16,14 @@ const ProductsCategoriesPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const token = localStorage.getItem("adminAuthToken"); // Get the token
+        const token = localStorage.getItem("staffAuthToken"); // Get the token
         const config = {
           headers: {
             Authorization: `Bearer ${token}`, // Attach the token
           },
         };
         const response = await api.get(
-          "/api/user-details/admin/users-products",
+          "/api/user-details/staff/users-products",
           config
         );
         setProducts(response.data);
