@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import api from "../../apiConfig/axiosConfig";
+import Image from 'next/image';
 
 const AdminTestimonialsPage = () => {
   const [testimonials, setTestimonials] = useState([]);
