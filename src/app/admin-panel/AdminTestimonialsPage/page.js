@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import api from "../../apiConfig/axiosConfig";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 import Image from 'next/image';
 
 const AdminTestimonialsPage = () => {
@@ -26,6 +26,7 @@ const AdminTestimonialsPage = () => {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState(null); // For editing
+  const [showCalendar, setShowCalendar] = useState(false);
 
   useEffect(() => {
     const fetchTestimonials = async () => {
@@ -163,6 +164,13 @@ const AdminTestimonialsPage = () => {
     }
   };
 
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}/${month}/${day}`;
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-6">
       <h1 className="text-3xl font-semibold text-center mb-6">
@@ -273,14 +281,32 @@ const AdminTestimonialsPage = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Date</label>
-                <DatePicker
-                  selected={newTestimonial.date}
-                  onChange={(date) => setNewTestimonial({ ...newTestimonial, date })}
-                  dateFormat="yyyy/MM/dd"
-                  className="p-3 border border-gray-300 rounded-lg w-full"
-                />
-              </div>
+      <label className="block text-sm font-medium text-gray-700">Date</label>
+      <div className="relative">
+        {/* Input Field */}
+        <input
+          type="text"
+          readOnly
+          value={formatDate(newTestimonial.date)}
+          onClick={() => setShowCalendar(true)}
+          className="p-3 border border-gray-300 rounded-lg w-full bg-white cursor-pointer"
+        />
+
+        {/* Calendar */}
+        {showCalendar && (
+          <div className="absolute z-10 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg">
+            <Calendar
+              value={newTestimonial.date}
+              onChange={(date) => {
+                setNewTestimonial({ ...newTestimonial, date });
+                setShowCalendar(false); // Hide calendar after date selection
+              }}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">Subject</label>
                 <input
