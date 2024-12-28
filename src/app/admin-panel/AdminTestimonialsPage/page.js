@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import api from "../../apiConfig/axiosConfig";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
 import Image from 'next/image';
 
 const AdminTestimonialsPage = () => {
@@ -288,19 +288,21 @@ const AdminTestimonialsPage = () => {
           type="text"
           readOnly
           value={formatDate(newTestimonial.date)}
-          onClick={() => setShowCalendar(true)}
+          onClick={() => setShowCalendar(!showCalendar)}
           className="p-3 border border-gray-300 rounded-lg w-full bg-white cursor-pointer"
         />
 
         {/* Calendar */}
         {showCalendar && (
           <div className="absolute z-10 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg">
-            <Calendar
-              value={newTestimonial.date}
-              onChange={(date) => {
+            <DayPicker
+              mode="single"
+              selected={newTestimonial.date}
+              onSelect={(date) => {
                 setNewTestimonial({ ...newTestimonial, date });
                 setShowCalendar(false); // Hide calendar after date selection
               }}
+              className="p-2"
             />
           </div>
         )}
