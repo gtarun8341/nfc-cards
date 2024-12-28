@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from "react";
 import api from "../../apiConfig/axiosConfig";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 
 const AdminTestimonialsPage = () => {
   const [testimonials, setTestimonials] = useState([]);
@@ -204,10 +202,13 @@ const AdminTestimonialsPage = () => {
             {filteredTestimonials.map((testimonial) => (
               <tr key={testimonial._id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 border-b">
-                  {testimonial.image && (
-                    <img
+                {testimonial.image && (
+                    <Image
                       src={`${api.defaults.baseURL}/uploads/testimonials/${testimonial.image}`}
                       alt="testimonial"
+                      width={500} // Set a reasonable default width
+                      height={500}
+                      layout="intrinsic"
                       className="w-12 h-12 object-cover rounded-full"
                     />
                   )}
@@ -237,7 +238,7 @@ const AdminTestimonialsPage = () => {
         </table>
       )}
 
-      {modalOpen && (
+      {/* {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4">
           <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
             <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
@@ -372,7 +373,7 @@ const AdminTestimonialsPage = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };
