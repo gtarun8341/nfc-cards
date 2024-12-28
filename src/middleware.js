@@ -6,7 +6,8 @@ export function middleware(req) {
   // Define protected routes with their respective login URLs
   const protectedRoutes = [
     { path: '/user-panel', redirectUrl: '/auth', tokenKey: 'authToken' },
-    { path: '/admin-panel', redirectUrl: '/admin-auth', tokenKey: 'adminAuthToken' }
+    { path: '/admin-panel', redirectUrl: '/admin-auth', tokenKey: 'adminAuthToken' },
+    { path: '/staff-panel', redirectUrl: '/staff-auth', tokenKey: 'staffAuthToken' }
   ];
 
   console.log(`Incoming request to: ${pathname}`);
@@ -42,5 +43,5 @@ export function middleware(req) {
 }
 
 export const config = {
-  matcher: ['/user-panel/:path*', '/admin-panel/:path*'], // Protect `/user-panel` and `/admin-panel` routes
+  matcher: ['/user-panel/:path*', '/admin-panel/:path*', '/staff-panel/:path*'], // Protect `/user-panel` and `/admin-panel` routes
 };
