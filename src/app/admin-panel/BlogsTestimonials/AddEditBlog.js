@@ -1,13 +1,12 @@
 "use client"; // Next.js Client Component
 
 import { useState, useEffect } from "react";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Dialog } from "@headlessui/react";
-import { FaGripVertical, FaEdit, FaTrash } from "react-icons/fa"; // Import drag handle icon
+import { FaEdit, FaTrash, FaArrowUp, FaArrowDown } from "react-icons/fa"; // Import icons for actions
 import api from "../../apiConfig/axiosConfig";
 import Image from "next/image";
 
-const AddEditBlog = ({ setIsAddingOrEditing, blog,onBlogSave }) => {
+const AddEditBlog = ({ setIsAddingOrEditing, blog, onBlogSave }) => {
   const [form, setForm] = useState({ slug: "", title: "", content: [] });
   const [currentBlock, setCurrentBlock] = useState({ type: "text", data: "" });
   const [isEditingBlock, setIsEditingBlock] = useState(null);
@@ -39,14 +38,14 @@ const AddEditBlog = ({ setIsAddingOrEditing, blog,onBlogSave }) => {
         if (response.status === 200) {
           alert("Blog updated successfully!");
           setIsAddingOrEditing(false);
-          onBlogSave();  // Call the callback to refresh blogs
+          onBlogSave(); // Refresh blogs
         }
       } else {
         const response = await api.post("/api/blogRoutes/", form, config);
         if (response.status === 200) {
           alert("Blog added successfully!");
           setIsAddingOrEditing(false);
-          onBlogSave();  // Call the callback to refresh blogs
+          onBlogSave(); // Refresh blogs
         }
       }
     } catch (error) {
@@ -73,23 +72,30 @@ const AddEditBlog = ({ setIsAddingOrEditing, blog,onBlogSave }) => {
     setForm({ ...form, content: updatedContent });
   };
 
+  const handleMoveUp = (index) => {
+    if (index === 0) return;
+    const updatedContent = [...form.content];
+    const temp = updatedContent[index];
+    updatedContent[index] = updatedContent[index - 1];
+    updatedContent[index - 1] = temp;
+    setForm({ ...form, content: updatedContent });
+  };
+
+  const handleMoveDown = (index) => {
+    if (index === form.content.length - 1) return;
+    const updatedContent = [...form.content];
+    const temp = updatedContent[index];
+    updatedContent[index] = updatedContent[index + 1];
+    updatedContent[index + 1] = temp;
+    setForm({ ...form, content: updatedContent });
+  };
+
   const handleModalChange = (e) => {
     setModalData({ ...modalData, data: e.target.value });
   };
 
   const handleBlockTypeChange = (e) => {
     setModalData({ ...modalData, type: e.target.value });
-  };
-
-  const handleOnDragEnd = (result) => {
-    const { destination, source } = result;
-    if (!destination) return;
-
-    const reorderedBlocks = Array.from(form.content);
-    const [removed] = reorderedBlocks.splice(source.index, 1);
-    reorderedBlocks.splice(destination.index, 0, removed);
-
-    setForm({ ...form, content: reorderedBlocks });
   };
 
   return (
@@ -111,7 +117,6 @@ const AddEditBlog = ({ setIsAddingOrEditing, blog,onBlogSave }) => {
         className="border rounded-md p-2"
       />
 
-      {/* Add Block Section */}
       <div className="flex flex-col space-y-4">
         <select
           value={currentBlock.type}
@@ -126,7 +131,6 @@ const AddEditBlog = ({ setIsAddingOrEditing, blog,onBlogSave }) => {
           <option value="points">Points</option>
           <option value="important">Important Point</option>
         </select>
-
         <input
           type="text"
           placeholder={`Enter ${currentBlock.type}`}
@@ -134,83 +138,75 @@ const AddEditBlog = ({ setIsAddingOrEditing, blog,onBlogSave }) => {
           onChange={(e) => setCurrentBlock({ ...currentBlock, data: e.target.value })}
           className="border rounded-md p-2"
         />
-
         <button type="button" onClick={addBlock} className="bg-blue-500 text-white py-2 px-4 rounded">
           Add Block
         </button>
       </div>
 
-      {/* Blog Preview and Drag-and-Drop Blocks */}
       <div className="mt-6 bg-gray-100 p-4 rounded-md shadow-md">
         <h3 className="text-xl font-semibold mb-4">Blog Preview</h3>
         <h2 className="text-2xl font-bold">{form.title}</h2>
-        <DragDropContext onDragEnd={handleOnDragEnd}>
-          <Droppable droppableId="blocks">
-            {(provided) => (
-              <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-4">
-                {form.content.map((block, index) => (
-                  <Draggable key={index} draggableId={`block-${index}`} index={index}>
-                    {(provided) => (
-                      <div
-                        className="p-4 border rounded-md flex items-center space-x-2"
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                      >
-                        {/* Drag Handle Icon */}
-                        <FaGripVertical className="cursor-move" {...provided.dragHandleProps} />
-                        <div className="flex-grow">
-                          {block.type === "text" && <p>{block.data}</p>}
-                          {block.type === "image" && <Image src={block.data} alt="Image block" className="w-full h-64 object-cover" />}
-                          {block.type === "heading" && <h3 className="text-2xl font-bold">{block.data}</h3>}
-                          {block.type === "subheading" && <h4 className="text-xl font-semibold">{block.data}</h4>}
-                          {block.type === "sideheading" && <h5 className="text-lg font-medium text-gray-600">{block.data}</h5>}
-                          {block.type === "points" && (
-                            <ul className="list-disc pl-6">
-                              {block.data.map((point, i) => <li key={i}>{point}</li>)}
-                            </ul>
-                          )}
-                          {block.type === "important" && (
-                            <div className="bg-yellow-200 p-2 rounded-md">
-                              <strong>{block.data}</strong>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex space-x-2">
-                          <button
-                            type="button"
-                            onClick={() => handleBlockEdit(index)}
-                            className="bg-yellow-500 text-white py-1 px-2 rounded"
-                          >
-                            <FaEdit />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleBlockDelete(index)}
-                            className="bg-red-500 text-white py-1 px-2 rounded"
-                          >
-                            <FaTrash />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
+        <div className="space-y-4">
+          {form.content.map((block, index) => (
+            <div key={index} className="p-4 border rounded-md flex items-center space-x-2">
+              <div className="flex-grow">
+                {block.type === "text" && <p>{block.data}</p>}
+                {block.type === "image" && <Image src={block.data} alt="Image block" className="w-full h-64 object-cover" />}
+                {block.type === "heading" && <h3 className="text-2xl font-bold">{block.data}</h3>}
+                {block.type === "subheading" && <h4 className="text-xl font-semibold">{block.data}</h4>}
+                {block.type === "sideheading" && <h5 className="text-lg font-medium text-gray-600">{block.data}</h5>}
+                {block.type === "points" && (
+                  <ul className="list-disc pl-6">
+                    {block.data.map((point, i) => (
+                      <li key={i}>{point}</li>
+                    ))}
+                  </ul>
+                )}
+                {block.type === "important" && (
+                  <div className="bg-yellow-200 p-2 rounded-md">
+                    <strong>{block.data}</strong>
+                  </div>
+                )}
               </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+              <div className="flex space-x-2">
+                <button
+                  type="button"
+                  onClick={() => handleMoveUp(index)}
+                  className="bg-gray-300 text-gray-700 py-1 px-2 rounded"
+                >
+                  <FaArrowUp />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleMoveDown(index)}
+                  className="bg-gray-300 text-gray-700 py-1 px-2 rounded"
+                >
+                  <FaArrowDown />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleBlockEdit(index)}
+                  className="bg-yellow-500 text-white py-1 px-2 rounded"
+                >
+                  <FaEdit />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleBlockDelete(index)}
+                  className="bg-red-500 text-white py-1 px-2 rounded"
+                >
+                  <FaTrash />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <button
-        type="submit"
-        className="w-full py-2 px-4 text-white font-bold bg-green-500 rounded-md hover:bg-green-600"
-      >
+      <button type="submit" className="w-full py-2 px-4 text-white font-bold bg-green-500 rounded-md hover:bg-green-600">
         {blog ? "Update Blog" : "Add Blog"}
       </button>
 
-      {/* Modal for Block Editing */}
       <Dialog open={showModal} onClose={() => setShowModal(false)} className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
         <Dialog.Panel className="bg-white p-6 rounded-md shadow-md max-w-lg w-full">
           <h3 className="text-xl font-semibold mb-4">Edit Block</h3>
@@ -227,7 +223,6 @@ const AddEditBlog = ({ setIsAddingOrEditing, blog,onBlogSave }) => {
             <option value="points">Points</option>
             <option value="important">Important Point</option>
           </select>
-
           <input
             type="text"
             value={modalData.data}
