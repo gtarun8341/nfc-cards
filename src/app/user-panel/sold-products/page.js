@@ -11,7 +11,7 @@ const SoldProducts = () => {
   // Fetch sales data
   const fetchSalesData = useCallback(async () => {
     if (!token) return; // Ensure the token is available before making the API call
-    
+
     try {
       const response = await api.get('/api/order/user-sales-data', {
         headers: { Authorization: `Bearer ${token}` },
@@ -77,21 +77,35 @@ const SoldProducts = () => {
       <table className="w-full border-collapse">
         <thead>
           <tr>
-            {['Product Title', 'Quantity', 'Price', 'Total', 'GST on Purchase (%)', 'Price with GST', 'Payment Settled', 'Invoice Number', 'Tracking Number', 'Status'].map((header) => (
-              <th key={header} className="border p-3 bg-gray-100 text-sm font-medium text-gray-700">{header}</th>
+            {[
+              'Product Title',
+              'Quantity',
+              'Price',
+              'Total',
+              'GST on Purchase (%)',
+              'Price with GST',
+              'Payment Settled',
+              'Invoice Number',
+              'Tracking Number',
+              'Purchased User Details',
+              'Status',
+            ].map((header) => (
+              <th key={header} className="border p-3 bg-gray-100 text-sm font-medium text-gray-700">
+                {header}
+              </th>
             ))}
           </tr>
         </thead>
         <tbody>
           {filteredSales.length === 0 ? (
             <tr>
-              <td colSpan="10" className="py-3 px-4 text-center text-gray-500">
+              <td colSpan="11" className="py-3 px-4 text-center text-gray-500">
                 No sales found.
               </td>
             </tr>
           ) : (
             filteredSales.map((sale) => {
-              const priceWithGst = sale.gstOnPurchase 
+              const priceWithGst = sale.gstOnPurchase
                 ? (sale.totalAmount - (sale.totalAmount * sale.gstOnPurchase / 100)).toFixed(2)
                 : sale.totalAmount.toFixed(2);
 
@@ -118,6 +132,11 @@ const SoldProducts = () => {
                   <td className="border p-3 text-sm">{sale.paymentSettledToTemplateOwner ? 'Yes' : 'No'}</td>
                   <td className="border p-3 text-sm">{sale.invoiceNumber}</td>
                   <td className="border p-3 text-sm">{sale.trackingNumber}</td>
+                  <td className="border p-3 text-sm">
+                    <div>{sale.userDetails.name}</div>
+                    <div>{sale.userDetails.email}</div>
+                    <div>{sale.userDetails.phone}</div>
+                  </td>
                   <td className="border p-3 text-sm">
                     <select
                       value={sale.status}

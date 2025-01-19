@@ -97,7 +97,7 @@ const AdminPanel = () => {
         { name: 'User Contact Management', path: 'contact-management', icon: AdjustmentsHorizontalIcon, onClick: () => setActiveForm('contact-management') },
 
     // { name: 'SMS / WhatsApp Integration', path: 'sms-whatsapp', icon: AdjustmentsHorizontalIcon, onClick: () => setActiveForm('sms-whatsapp') },
-    { name: 'Blogs, Testimonials', path: 'blogs-testimonials', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('blogs-testimonials') },
+    { name: 'Blogs', path: 'blogs-testimonials', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('blogs-testimonials') },
     // { 
     //   name: 'Compliance Documents', 
     //   icon: CogIcon, 

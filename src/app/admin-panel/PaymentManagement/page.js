@@ -20,6 +20,7 @@ const PaymentManagementPage = () => {
         };
         const response = await api.get('/api/order/sales-data', config);
         setSales(response.data);
+        console.log(response.data);
         setFilteredSales(response.data); // Initialize filtered sales
       } catch (error) {
         console.error("Error fetching sales data:", error);
@@ -31,7 +32,7 @@ const PaymentManagementPage = () => {
   useEffect(() => {
     const filterSales = () => {
       let filtered = sales.filter((sale) => {
-        const searchMatch = 
+        const searchMatch =
           sale.products.some(product =>
             product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             product.price.toString().includes(searchTerm) ||
@@ -39,17 +40,20 @@ const PaymentManagementPage = () => {
             sale.productTemplateId?.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
             sale.productTemplateId?.phone.includes(searchTerm) ||
             sale.invoiceNumber.includes(searchTerm) ||
-            sale.trackingNumber.includes(searchTerm)
+            sale.trackingNumber.includes(searchTerm) ||
+            sale.userDetails?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            sale.userDetails?.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            sale.userDetails?.phone.includes(searchTerm) ||
+            sale.userDetails?.address.toLowerCase().includes(searchTerm.toLowerCase())
           );
         const statusMatch = statusFilter ? sale.status === statusFilter : true;
         return searchMatch && statusMatch;
       });
       setFilteredSales(filtered);
     };
-  
+
     filterSales();
   }, [searchTerm, statusFilter, sales]);
-  
 
   const updateSaleField = async (id, field, value) => {
     try {
@@ -86,7 +90,7 @@ const PaymentManagementPage = () => {
       <div className="mb-4 flex justify-between items-center">
         <input
           type="text"
-          placeholder="Search by Product Title, Seller, Invoice, or Tracking Number"
+          placeholder="Search by Product Title, Seller, Invoice, Tracking Number, or User Details"
           className="p-2 border rounded w-1/2"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -118,6 +122,7 @@ const PaymentManagementPage = () => {
               <th className="border p-2">Price</th>
               <th className="border p-2">Total</th>
               <th className="border p-2">Seller</th>
+              <th className="border p-2">User Details</th>
               <th className="border p-2">GST on Purchase (%)</th>
               <th className="border p-2">Price with GST</th>
               <th className="border p-2">Payment Settled</th>
@@ -143,6 +148,12 @@ const PaymentManagementPage = () => {
                   <div>{sale.productTemplateId?.name}</div>
                   <div>{sale.productTemplateId?.email}</div>
                   <div>{sale.productTemplateId?.phone}</div>
+                </td>
+                <td className="border p-2">
+                  <div>{sale.userDetails?.name}</div>
+                  <div>{sale.userDetails?.email}</div>
+                  <div>{sale.userDetails?.phone}</div>
+                  <div>{sale.userDetails?.address}</div>
                 </td>
                 <td className="border p-2">
                   <input

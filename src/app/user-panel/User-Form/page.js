@@ -356,9 +356,54 @@ fetchUserDetails();
 
 {/* Error/Success Messages */}
 {errorMessages.length > 0 && (
-  <div className="error text-red-500">{errorMessages.join(", ")}</div>
+  <div className="error-message p-4 mb-4 border-l-4 border-red-500 bg-red-100 text-red-700 rounded-lg">
+    <div className="flex items-center">
+      <span className="mr-2">
+        {/* Error Icon */}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5 text-red-600"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M18 12H6M12 6v12"
+          />
+        </svg>
+      </span>
+      <p>{errorMessages.join(", ")}</p>
+    </div>
+  </div>
 )}
-{successMessage && <div className="success text-green-500">{successMessage}</div>}
+
+{successMessage && (
+  <div className="success-message p-4 mb-4 border-l-4 border-green-500 bg-green-100 text-green-700 rounded-lg">
+    <div className="flex items-center">
+      <span className="mr-2">
+        {/* Success Icon */}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5 text-green-600"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M5 13l4 4L19 7"
+          />
+        </svg>
+      </span>
+      <p>{successMessage}</p>
+    </div>
+  </div>
+)}
 
     </div>
   );
