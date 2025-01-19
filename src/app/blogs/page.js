@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useSearchParams, useRouter } from "next/navigation";
+// import { useSearchParams, useRouter } from "next/navigation";
+import {  useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import api from "../apiConfig/axiosConfig"; // Import the axios instance
 
 const Blogs = () => {
-  const searchParams = useSearchParams();
+//   const searchParams = useSearchParams();
   const router = useRouter();
   const [selectedBlog, setSelectedBlog] = useState(null);
   const [blogs, setBlogs] = useState([]); // To hold the fetched blogs
@@ -42,12 +43,12 @@ const Blogs = () => {
     fetchBlogs();
   }, []);
   
-  // Effect to update selected blog when searchParams change
-  useEffect(() => {
-    const slug = searchParams.get("slug"); // Get slug from the query params
-    const blog = blogs.find((blog) => blog.slug === slug);
-    setSelectedBlog(blog || blogs[0]); // Default to the first blog if no slug is found
-  }, [searchParams, blogs]); // Re-run whenever blogs or searchParams change
+//   // Effect to update selected blog when searchParams change
+//   useEffect(() => {
+//     const slug = searchParams.get("slug"); // Get slug from the query params
+//     const blog = blogs.find((blog) => blog.slug === slug);
+//     setSelectedBlog(blog || blogs[0]); // Default to the first blog if no slug is found
+//   }, [searchParams, blogs]); // Re-run whenever blogs or searchParams change
 
   // Effect to search blogs as user types (debounced search)
   useEffect(() => {

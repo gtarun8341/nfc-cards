@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 const ViewBlog = ({ blog }) => {
   const renderContent = (content) => {
     return content.map((item, index) => {
@@ -5,7 +7,7 @@ const ViewBlog = ({ blog }) => {
         case "image":
           return (
             <div key={index} className="relative w-full h-64 mb-6">
-              <img src={item.data} alt={`Image for ${blog.title}`} className="rounded-md" />
+              <Image src={item.data} alt={`Image for ${blog.title}`} className="rounded-md" />
             </div>
           );
         case "text":

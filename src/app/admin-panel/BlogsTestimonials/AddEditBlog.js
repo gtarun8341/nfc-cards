@@ -5,6 +5,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Dialog } from "@headlessui/react";
 import { FaGripVertical, FaEdit, FaTrash } from "react-icons/fa"; // Import drag handle icon
 import api from "../../apiConfig/axiosConfig";
+import Image from "next/image";
 
 const AddEditBlog = ({ setIsAddingOrEditing, blog,onBlogSave }) => {
   const [form, setForm] = useState({ slug: "", title: "", content: [] });
@@ -160,7 +161,7 @@ const AddEditBlog = ({ setIsAddingOrEditing, blog,onBlogSave }) => {
                         <FaGripVertical className="cursor-move" {...provided.dragHandleProps} />
                         <div className="flex-grow">
                           {block.type === "text" && <p>{block.data}</p>}
-                          {block.type === "image" && <img src={block.data} alt="Image block" className="w-full h-64 object-cover" />}
+                          {block.type === "image" && <Image src={block.data} alt="Image block" className="w-full h-64 object-cover" />}
                           {block.type === "heading" && <h3 className="text-2xl font-bold">{block.data}</h3>}
                           {block.type === "subheading" && <h4 className="text-xl font-semibold">{block.data}</h4>}
                           {block.type === "sideheading" && <h5 className="text-lg font-medium text-gray-600">{block.data}</h5>}

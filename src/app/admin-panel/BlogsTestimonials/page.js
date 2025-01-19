@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import api from "../../apiConfig/axiosConfig";
 import AddEditBlog from "./AddEditBlog";
 import ViewBlog from "./ViewBlog";
+import Image from "next/image";
 
 const AdminPanel = () => {
   const [blogs, setBlogs] = useState([]);
