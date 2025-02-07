@@ -63,7 +63,7 @@ const AdminPanel = () => {
         { name: 'PDF Visiting Card', icon: UserIcon, onClick: () => setActiveForm('pdf-visiting-card') },
         { name: 'One Page Business Profile', icon: UserIcon, onClick: () => setActiveForm('one-page-business-profile') },
         { name: 'Physical Visiting Card', icon: UserIcon, onClick: () => setActiveForm('physical-visiting-card') },
-        // { name: 'Business Essentials', icon: UserIcon, onClick: () => setActiveForm('business-essentials') },
+        { name: 'Business Essentials', icon: UserIcon, onClick: () => setActiveForm('business-essentials') },
         // { name: 'Additional Services', icon: UserIcon, onClick: () => setActiveForm('additional-services') },
       ]
     },  
@@ -139,7 +139,7 @@ const AdminPanel = () => {
       {activeForm === 'one-page-business-profile' && <OnePageBusinessProfile />}
       {activeForm === 'physical-visiting-card' && <PhysicalVisitingCard />}
       {activeForm === 'All-Card-Purchases' && <AllCardPurchases />}
-      {/* {activeForm === 'business-essentials' && <BusinessEssentials />} */}
+      {activeForm === 'business-essentials' && <BusinessEssentials />}
       {/* {activeForm === 'additional-services' && <AdditionalServices />} */}
       {activeForm === 'generate-qr-code' && <GenerateQRCode />}
       {activeForm === 'generate-link' && <GenerateLink />}

@@ -92,6 +92,9 @@ const PurchasePlan = () => {
   return (
     <div className="min-h-screen bg-gray-100 py-10">
       <h1 className="text-3xl font-bold text-center mb-10">Choose Your Plan</h1>
+      <p className="text-center text-red-600 font-semibold mb-5">
+        ⚠️ This is a test mode. No real money will be deducted.
+      </p>
       <Pricing pricingData={pricingData} handlePayment={handlePayment} />
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
     </div>

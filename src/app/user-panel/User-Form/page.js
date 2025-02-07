@@ -8,6 +8,7 @@ import AboutCompanyForm from "./AboutCompanyForm/page";
 import BankDetailsForm from "./BankDetailsForm/page";
 import ProductDetailsForm from "./ProductDetailsForm/page";
 import GalleryImagesForm from "./GalleryImagesForm/page";
+import AdditionalForm from "./AdditionalForm/page";
 
 const UserFormPage = () => {
   const [formData, setFormData] = useState({
@@ -50,6 +51,22 @@ const UserFormPage = () => {
     qrImages: [],
     products: [], // Change this to an array for multiple products
     galleryImages: [], // Add galleryImages to the state
+    tagLine: "",
+    specialization: "",
+    slogan: "",
+    clientList: [],
+    successStory: "",
+    ourGive: "",
+    ourAsk: "",
+    vision: "",
+    mission: "",
+    awards: [],
+    certifications: [],
+    team: [],
+    annualSales: "",
+    turnover: "",
+    companyPolicies: "",
+    companyGrowth: "",
   });
 
   const [currentStep, setCurrentStep] = useState(0); // Track the current step
@@ -66,7 +83,6 @@ const UserFormPage = () => {
           },
         };
         const response = await api.get(`/api/user-details/`, config);
-        
         // Ensure to map the response to your form structure
         const data = response.data;
         setFormData({
@@ -113,6 +129,22 @@ const UserFormPage = () => {
           // Products and other fields...
           products: data.products || [], // Ensure it's an array
           galleryImages: data.galleryImages || [], // Ensure it's an array
+          tagLine: data.additionalForm?.tagLine || '',
+          specialization: data.additionalForm?.specialization || '',
+          slogan: data.additionalForm?.slogan || '',
+          successStory: data.additionalForm?.successStory || '',
+          ourGive: data.additionalForm?.ourGive || '',
+          ourAsk: data.additionalForm?.ourAsk || '',
+          vision: data.additionalForm?.vision || '',
+          mission: data.additionalForm?.mission || '',
+          awards: data.additionalForm?.awards || [], // Ensure it's an array
+          certifications: data.additionalForm?.certifications || [], // Ensure it's an array
+          annualSales: data.additionalForm?.annualSales || '',
+          turnover: data.additionalForm?.turnover || '',
+          companyPolicies: data.additionalForm?.companyPolicies || '',
+          companyGrowth: data.additionalForm?.companyGrowth || '',
+          clientList: data.additionalForm?.clientList || [], // Ensure it's an array
+          team: data.additionalForm?.team || [] // Ensure it's an array
         });
       } catch (error) {
         if (error.response && error.response.status === 404) {
@@ -155,7 +187,10 @@ fetchUserDetails();
       "accountNumber", "branchName", "ifscCode", "accountHolderName", 
       "gPayNumber", "paytmNumber", "phonePeNumber", "upiId", "accountType", 
       "googleBusiness",  "establishedYear", "natureOfBusiness", 
-      "documents", "qrImages", "galleryImages", "products"
+      "documents", "qrImages", "galleryImages", "products", "tagLine", "specialization", 
+      "slogan", "clientList", "successStory", "ourGive", "ourAsk", "vision", 
+      "mission", "awards", "certifications", "team", "annualSales", "turnover", 
+      "companyPolicies", "companyGrowth"
   ];
 
   // Initialize an empty array to hold error messages
@@ -176,6 +211,25 @@ fetchUserDetails();
               missingFields.push(`Product ${index + 1} - ${field}`);
           }
       });
+  });
+
+  formData.clientList.forEach((client, index) => {
+    const clientFields = ["name", "logo"];
+    clientFields.forEach(field => {
+      if (!client[field]) {
+        missingFields.push(`Client ${index + 1} - ${field}`);
+      }
+    });
+  });
+
+  // Validate team array (check each team member in team)
+  formData.team.forEach((teamMember, index) => {
+    const teamFields = ["name", "image"];
+    teamFields.forEach(field => {
+      if (!teamMember[field]) {
+        missingFields.push(`Team Member ${index + 1} - ${field}`);
+      }
+    });
   });
 
   // If there are missing fields, show an error message and prevent form submission
@@ -210,6 +264,32 @@ fetchUserDetails();
               formDataForSubmit.append(key, file, file.name);
             }
           });
+        }  else if (key === "awards" || key === "certifications") {
+          value.forEach((file) => {
+            if (file && file instanceof File) {
+              formDataForSubmit.append(key, file, file.name); // Append awards/certifications files
+            }
+          });
+        }else if (key === "clientList") {
+          value.forEach((client) => {
+            formDataForSubmit.append("clientList[]", JSON.stringify({
+              clientName: client.name,
+              clientLogo: client.logo ? client.logo.name : "", // If a logo is provided, attach it
+            }));
+            if (client.logo && client.logo instanceof File) {
+              formDataForSubmit.append("clientLogos[]", client.logo, client.logo.name);
+            }
+          });
+        } else if (key === "team") {
+          value.forEach((member) => {
+            formDataForSubmit.append("team[]", JSON.stringify({
+              memberName: member.name,
+              memberImage: member.image ? member.image.name : "", // Attach image if available
+            }));
+            if (member.image && member.image instanceof File) {
+              formDataForSubmit.append("teamImages[]", member.image, member.image.name);
+            }
+          });
         } else if (key === "youtubeVideos") {
           value.forEach((video) => formDataForSubmit.append("youtubeVideos[]", video)); // Append YouTube URLs
         }
@@ -241,7 +321,7 @@ fetchUserDetails();
         console.log("Response:", response.data);
       }
   
-      window.location.reload(); // Refresh the page
+      // window.location.reload(); // Refresh the page
     } catch (error) {
       console.error("Submission error:", error);
       setErrorMessages([...errorMessages, "Error submitting the form"]);
@@ -255,7 +335,8 @@ fetchUserDetails();
       "About Company",
       "Bank Details",
       "Product Details",
-      "Gallery Images"
+      "Gallery Images",
+      "Additonal form"
     ];
 
     // Log current step before updating
@@ -276,7 +357,8 @@ fetchUserDetails();
       "About Company",
       "Bank Details",
       "Product Details",
-      "Gallery Images"
+      "Gallery Images",
+      "Additonal form"
     ];
 
     // Log current step before updating
@@ -297,6 +379,7 @@ fetchUserDetails();
     <BankDetailsForm key="bank-details" onDataChange={handleFormDataChange} initialData={formData} />,
     <ProductDetailsForm key="product-details" onDataChange={handleFormDataChange} initialData={formData} />,
     <GalleryImagesForm key="gallery-images" onDataChange={handleFormDataChange} initialData={formData} />,
+    <AdditionalForm key="additional-form" onDataChange={handleFormDataChange} initialData={formData} />,
   ];
   
 
