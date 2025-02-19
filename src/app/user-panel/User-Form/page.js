@@ -321,7 +321,7 @@ fetchUserDetails();
         console.log("Response:", response.data);
       }
   
-      // window.location.reload(); // Refresh the page
+      window.location.reload(); // Refresh the page
     } catch (error) {
       console.error("Submission error:", error);
       setErrorMessages([...errorMessages, "Error submitting the form"]);

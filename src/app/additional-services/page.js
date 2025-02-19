@@ -3,76 +3,80 @@
 
 import Hero from '../components/Hero'; // Adjust the import path as necessary
 import AllFooter from '../components/AllFooter';
+import HomeSection from '../components/HomeSection';
 
-export default function additionalservices() {
-  const cardData = [
+export default function AdditionalServices() {
+  const sections = [
     {
-      title: "Social Media Marketing",
+      image: "https://via.placeholder.com/400x300",
+      description: {
+        title: "Social Media Marketing",
+        text: "Promote your brand effectively through social media platforms with tailored marketing strategies.",
+      },
       link: "https://www.shiveninfotech.com/digital-marketing-services/social-media-marketing-in-navi-mumbai/",
-      description: "Promote your brand effectively through social media platforms with tailored marketing strategies.",
     },
     {
-      title: "GMB Local SEO Optimization",
+      image: "https://via.placeholder.com/400x300",
+      description: {
+        title: "GMB Local SEO Optimization",
+        text: "Optimize your Google My Business listing to improve local search rankings and attract more customers.",
+      },
       link: "https://www.shiveninfotech.com/digital-marketing-services/gmb-local-seo-optimization/",
-      description: "Optimize your Google My Business listing to improve local search rankings and attract more customers.",
     },
     {
-      title: "Global SEO Service",
+      image: "https://via.placeholder.com/400x300",
+      description: {
+        title: "Global SEO Service",
+        text: "Expand your reach globally with expert SEO services that drive organic traffic to your website.",
+      },
       link: "https://www.shiveninfotech.com/digital-marketing-services/seo-services-in-navi-mumbai/",
-      description: "Expand your reach globally with expert SEO services that drive organic traffic to your website.",
     },
     {
-      title: "Google Promotions",
+      image: "https://via.placeholder.com/400x300",
+      description: {
+        title: "Google Promotions",
+        text: "Boost your business with targeted Google Ads campaigns for maximum online visibility.",
+      },
       link: "https://www.shiveninfotech.com/digital-marketing-services/google-promotions-agency-in-navi-mumbai/",
-      description: "Boost your business with targeted Google Ads campaigns for maximum online visibility.",
     },
     {
-      title: "Web Design Services",
+      image: "https://via.placeholder.com/400x300",
+      description: {
+        title: "Web Design Services",
+        text: "Create stunning, user-friendly websites that captivate your audience and elevate your brand.",
+      },
       link: "https://www.shiveninfotech.com/web-designing-services-in-navi-mumbai/",
-      description: "Create stunning, user-friendly websites that captivate your audience and elevate your brand.",
     },
     {
-      title: "Software Development",
+      image: "https://via.placeholder.com/400x300",
+      description: {
+        title: "Software Development",
+        text: "Get custom software solutions tailored to meet your specific business needs and goals.",
+      },
       link: "https://www.shiveninfotech.com/software-development/",
-      description: "Get custom software solutions tailored to meet your specific business needs and goals.",
     },
     {
-      title: "Mobile App Development",
+      image: "https://via.placeholder.com/400x300",
+      description: {
+        title: "Mobile App Development",
+        text: "Develop innovative and user-friendly mobile applications for Android and iOS platforms.",
+      },
       link: "https://www.shiveninfotech.com/mobile-app-development/",
-      description: "Develop innovative and user-friendly mobile applications for Android and iOS platforms.",
     },
     {
-      title: "Animation and Graphics",
+      image: "https://via.placeholder.com/400x300",
+      description: {
+        title: "Animation and Graphics",
+        text: "Enhance your digital presence with captivating animations and creative graphic designs.",
+      },
       link: "https://www.shiveninfotech.com/other-digital-services-in-navi-mumbai/",
-      description: "Enhance your digital presence with captivating animations and creative graphic designs.",
     },
   ];
 
   return (
     <div>
       <Hero />
-      <div className="container mx-auto p-6">
-        {/* Card Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {cardData.map((card, index) => (
-            <div
-              key={index}
-              className="border rounded-lg shadow-lg p-4 hover:shadow-xl transition-shadow"
-            >
-              <h3 className="text-xl font-semibold mb-2">{card.title}</h3>
-              <p className="mb-4">{card.description}</p>
-              <a
-                href={card.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                Learn More
-              </a>
-            </div>
-          ))}
-        </div>
-      </div>
+      <HomeSection sections={sections} />
       <AllFooter />
     </div>
   );

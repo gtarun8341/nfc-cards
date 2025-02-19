@@ -24,6 +24,7 @@ const AdditionalForm = ({ onDataChange, initialData }) => {
 
   useEffect(() => {
     if (initialData) {
+      console.log(initialData)
       setData((prevData) => ({
         ...prevData,
         ...initialData,
