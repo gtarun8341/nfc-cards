@@ -46,156 +46,77 @@ const BankDetailsForm = ({ onDataChange,initialData }) => {
     }
   };
 
-  return (
-    <div className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg overflow-hidden">
-      <h2 className="text-2xl font-semibold text-center mb-4">Bank Details</h2>
-      <div className="overflow-y-auto">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2"> {/* Two columns layout on medium screens */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Bank Name</label>
-            <input
-              type="text"
-              name="bankName"
-              placeholder="Bank Name"
-              value={data.bankName}
-              onChange={handleChange}
-              required
-              className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Account Number</label>
-            <input
-              type="text"
-              name="accountNumber"
-              placeholder="Account Number"
-              value={data.accountNumber}
-              onChange={handleChange}
-              required
-              className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Branch Name</label>
-            <input
-              type="text"
-              name="branchName"
-              placeholder="Branch Name"
-              value={data.branchName}
-              onChange={handleChange}
-              required
-              className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">IFSC Code</label>
-            <input
-              type="text"
-              name="ifscCode"
-              placeholder="IFSC Code"
-              value={data.ifscCode}
-              onChange={handleChange}
-              required
-              className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Account Holder Name</label>
-            <input
-              type="text"
-              name="accountHolderName"
-              placeholder="Account Holder Name"
-              value={data.accountHolderName}
-              onChange={handleChange}
-              required
-              className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Google Pay Number</label>
-            <input
-              type="text"
-              name="gPayNumber"
-              placeholder="Google Pay Number"
-              value={data.gPayNumber}
-              onChange={handleChange}
-              className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Paytm Number</label>
-            <input
-              type="text"
-              name="paytmNumber"
-              placeholder="Paytm Number"
-              value={data.paytmNumber}
-              onChange={handleChange}
-              className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">PhonePe Number</label>
-            <input
-              type="text"
-              name="phonePeNumber"
-              placeholder="PhonePe Number"
-              value={data.phonePeNumber}
-              onChange={handleChange}
-              className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">UPI ID</label>
-            <input
-              type="text"
-              name="upiId"
-              placeholder="UPI ID"
-              value={data.upiId}
-              onChange={handleChange}
-              className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-            />
-          </div>
-          <div className="md:col-span-2"> {/* Full width for the account type dropdown */}
-            <label className="block text-sm font-medium text-gray-700">Account Type</label>
+    return (
+      <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-xl border border-gray-200">
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Bank Details</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[ 
+            { label: "Bank Name", name: "bankName", type: "text", required: true },
+            { label: "Account Number", name: "accountNumber", type: "text", required: true },
+            { label: "Branch Name", name: "branchName", type: "text", required: true },
+            { label: "IFSC Code", name: "ifscCode", type: "text", required: true },
+            { label: "Account Holder Name", name: "accountHolderName", type: "text", required: true },
+            { label: "Google Pay Number", name: "gPayNumber", type: "text", required: false },
+            { label: "Paytm Number", name: "paytmNumber", type: "text", required: false },
+            { label: "PhonePe Number", name: "phonePeNumber", type: "text", required: false },
+            { label: "UPI ID", name: "upiId", type: "text", required: false },
+          ].map(({ label, name, type, required }) => (
+            <div key={name} className="w-full">
+              <label className="block text-sm font-medium text-gray-700" htmlFor={name}>{label}</label>
+              <input
+                type={type}
+                name={name}
+                id={name}
+                placeholder={`Enter ${label}`}
+                value={data[name] || ''}
+                onChange={handleChange}
+                required={required}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-400 focus:outline-none"
+              />
+            </div>
+          ))}
+          
+          <div className="col-span-1 md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700" htmlFor="accountType">Account Type</label>
             <select
               name="accountType"
-              value={data.accountType}
+              id="accountType"
+              value={data.accountType || ''}
               onChange={handleChange}
-              className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-400 focus:outline-none"
             >
               <option value="">Select Account Type</option>
               <option value="savings">Savings</option>
               <option value="current">Current</option>
             </select>
           </div>
-          <div className="md:col-span-2"> {/* Full width for the QR code upload */}
-            <label className="block text-sm font-medium text-gray-700">QR Code Images (Max 4)</label>
+          
+          <div className="col-span-1 md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700" htmlFor="qrImages">QR Code Images (Max 4)</label>
             <input
               type="file"
               name="qrImages"
+              id="qrImages"
               accept="image/*"
               multiple
               onChange={handleChange}
-              className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-400 focus:outline-none"
             />
           </div>
-          {/* Displaying uploaded QR code image names */}
-          <div className="md:col-span-2 mt-4">
-            {data.qrImages.length > 0 && (
-              <div>
-                <h3 className="text-sm font-medium text-gray-700">Uploaded QR Code Images:</h3>
-                <ul className="mt-2 list-disc pl-5">
-                  {data.qrImages.map((file, index) => (
-                    <li key={index} className="text-gray-600">{file.name}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
+          
+          {data.qrImages && data.qrImages.length > 0 && (
+            <div className="col-span-1 md:col-span-2 mt-4">
+              <h3 className="text-sm font-medium text-gray-700">Uploaded QR Code Images:</h3>
+              <ul className="mt-2 list-disc pl-5">
+                {data.qrImages.map((file, index) => (
+                  <li key={index} className="text-gray-600">{file.name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
-    </div>
-  );
-};
-
-export default BankDetailsForm;
+    );
+  };
+  
+  export default BankDetailsForm;

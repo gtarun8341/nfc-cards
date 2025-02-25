@@ -9,6 +9,7 @@ import BankDetailsForm from "./BankDetailsForm/page";
 import ProductDetailsForm from "./ProductDetailsForm/page";
 import GalleryImagesForm from "./GalleryImagesForm/page";
 import AdditionalForm from "./AdditionalForm/page";
+import { CheckCircle,AlertCircle } from "lucide-react";
 
 const UserFormPage = () => {
   const [formData, setFormData] = useState({
@@ -68,6 +69,7 @@ const UserFormPage = () => {
     companyPolicies: "",
     companyGrowth: "",
   });
+  const [loading, setLoading] = useState(true); // Loading state
 
   const [currentStep, setCurrentStep] = useState(0); // Track the current step
   const [errorMessages, setErrorMessages] = useState([]);
@@ -146,6 +148,7 @@ const UserFormPage = () => {
           clientList: data.additionalForm?.clientList || [], // Ensure it's an array
           team: data.additionalForm?.team || [] // Ensure it's an array
         });
+        setLoading(false); // Stop loading once data is set
       } catch (error) {
         if (error.response && error.response.status === 404) {
             // Handle 404 error (User details not found)
@@ -155,12 +158,21 @@ const UserFormPage = () => {
             console.error("Error fetching user details:", error);
             setErrorMessages((prevMessages) => [...prevMessages, "Error fetching user details"]);
         }
+        setLoading(false); // Stop loading even if there's an error
+
     }
 };
 
 fetchUserDetails();
 }, []);
-  
+if (loading) {
+  return (
+    <div className="flex justify-center items-center h-screen">
+<div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
+<p className="ml-3 text-lg font-semibold">Loading user data...</p>
+    </div>
+  );
+}
   const handleFormDataChange = (sectionData) => {
     setFormData((prevData) => {
       if (sectionData.products) {
@@ -179,64 +191,128 @@ fetchUserDetails();
     console.log("Current Form Data:", formData);
     if (!formData.id) {
 
-    // Define the required fields for the formData
-    const requiredFields = [
-      "companyName", "name", "designation", "contact1", "email", "website", 
-      "googleMap", "address", "logo", "facebook", "instagram", "linkedin", 
-      "twitter", "youtubeChannel", "gstNumber", "description", "bankName", 
-      "accountNumber", "branchName", "ifscCode", "accountHolderName", 
-      "gPayNumber", "paytmNumber", "phonePeNumber", "upiId", "accountType", 
-      "googleBusiness",  "establishedYear", "natureOfBusiness", 
-      "documents", "qrImages", "galleryImages", "products", "tagLine", "specialization", 
-      "slogan", "clientList", "successStory", "ourGive", "ourAsk", "vision", 
-      "mission", "awards", "certifications", "team", "annualSales", "turnover", 
-      "companyPolicies", "companyGrowth"
-  ];
+  //   // Define the required fields for the formData
+  //   const requiredFields = [
+  //     "companyName", "name", "designation", "contact1", "email", "website", 
+  //     "googleMap", "address", "logo", "facebook", "instagram", "linkedin", 
+  //     "twitter", "youtubeChannel", "gstNumber", "description", "bankName", 
+  //     "accountNumber", "branchName", "ifscCode", "accountHolderName", 
+  //     "gPayNumber", "paytmNumber", "phonePeNumber", "upiId", "accountType", 
+  //     "googleBusiness",  "establishedYear", "natureOfBusiness", 
+  //     "documents", "qrImages", "galleryImages", "products", "tagLine", "specialization", 
+  //     "slogan", "clientList", "successStory", "ourGive", "ourAsk", "vision", 
+  //     "mission", "awards", "certifications", "team", "annualSales", "turnover", 
+  //     "companyPolicies", "companyGrowth"
+  // ];
 
-  // Initialize an empty array to hold error messages
-  let missingFields = [];
+  // // Initialize an empty array to hold error messages
+  // let missingFields = [];
 
-  // Check if any required field in formData is missing
-  requiredFields.forEach(field => {
+  // // Check if any required field in formData is missing
+  // requiredFields.forEach(field => {
+  //     if (!formData[field] || (Array.isArray(formData[field]) && formData[field].length === 0)) {
+  //         missingFields.push(field);
+  //     }
+  // });
+
+  // // Validate products array (check each product in products array)
+  // formData.products.forEach((product, index) => {
+  //     const productFields = ["productName", "productPrice", "productImage", "productType", "hsnCode", "gst"];
+  //     productFields.forEach(field => {
+  //         if (!product[field]) {
+  //             missingFields.push(`Product ${index + 1} - ${field}`);
+  //         }
+  //     });
+  // });
+
+  // formData.clientList.forEach((client, index) => {
+  //   const clientFields = ["name", "logo"];
+  //   clientFields.forEach(field => {
+  //     if (!client[field]) {
+  //       missingFields.push(`Client ${index + 1} - ${field}`);
+  //     }
+  //   });
+  // });
+
+  // // Validate team array (check each team member in team)
+  // formData.team.forEach((teamMember, index) => {
+  //   const teamFields = ["name", "image"];
+  //   teamFields.forEach(field => {
+  //     if (!teamMember[field]) {
+  //       missingFields.push(`Team Member ${index + 1} - ${field}`);
+  //     }
+  //   });
+  // });
+  const stepFields = {
+    0: ["companyName", "name", "designation", "contact1","contact2","whatsapp1","whatsapp2", "email", "website", "googleMap", "address", "logo"],
+    1: ["facebook", "instagram", "linkedin", "twitter", "youtubeChannel", "googleBusiness","otherProfile","youtubeVideos"],
+    2: ["gstNumber", "description", "establishedYear", "natureOfBusiness","documents"],
+    3: ["bankName", "accountNumber", "branchName", "ifscCode", "accountHolderName", "gPayNumber", "paytmNumber", "phonePeNumber", "upiId", "accountType", "qrImages"],
+    4: ["products"], // Products will be validated separately
+    5: ["galleryImages"],
+    6: ["tagLine", "specialization", "slogan", "annualSales", "turnover", "successStory", "ourGive", "ourAsk", "vision", "mission", "companyPolicies", "companyGrowth", "awards", "certifications", "team","clientList"]
+  };
+  
+  // Store errors for each step
+  let stepErrors = {};
+  
+  // Loop through steps and collect missing fields per step
+  Object.entries(stepFields).forEach(([step, fields]) => {
+    stepErrors[step] = [];
+  
+    fields.forEach(field => {
       if (!formData[field] || (Array.isArray(formData[field]) && formData[field].length === 0)) {
-          missingFields.push(field);
+        stepErrors[step].push(field);
       }
-  });
-
-  // Validate products array (check each product in products array)
-  formData.products.forEach((product, index) => {
-      const productFields = ["productName", "productPrice", "productImage", "productType", "hsnCode", "gst"];
-      productFields.forEach(field => {
+    });
+  
+    // Validate products (Step 4)
+    if (step == 4 && formData.products) {
+      formData.products.forEach((product, index) => {
+        ["productName", "productPrice", "productImage", "productType", "hsnCode", "gst"].forEach(field => {
           if (!product[field]) {
-              missingFields.push(`Product ${index + 1} - ${field}`);
+            stepErrors[step].push(`Product ${index + 1} - ${field}`);
           }
+        });
       });
+    }
+  
+    // Validate clients (Step 6)
+    if (step == 6 && formData.clientList) {
+      formData.clientList.forEach((client, index) => {
+        ["name", "logo"].forEach(field => {
+          if (!client[field]) {
+            stepErrors[step].push(`Client ${index + 1} - ${field}`);
+          }
+        });
+      });
+    }
+  
+    // Validate team members (Step 6)
+    if (step == 6 && formData.team) {
+      formData.team.forEach((teamMember, index) => {
+        ["name", "image"].forEach(field => {
+          if (!teamMember[field]) {
+            stepErrors[step].push(`Team Member ${index + 1} - ${field}`);
+          }
+        });
+      });
+    }
   });
-
-  formData.clientList.forEach((client, index) => {
-    const clientFields = ["name", "logo"];
-    clientFields.forEach(field => {
-      if (!client[field]) {
-        missingFields.push(`Client ${index + 1} - ${field}`);
-      }
-    });
-  });
-
-  // Validate team array (check each team member in team)
-  formData.team.forEach((teamMember, index) => {
-    const teamFields = ["name", "image"];
-    teamFields.forEach(field => {
-      if (!teamMember[field]) {
-        missingFields.push(`Team Member ${index + 1} - ${field}`);
-      }
-    });
-  });
-
-  // If there are missing fields, show an error message and prevent form submission
-  if (missingFields.length > 0) {
-    setErrorMessages(["Please fill in the following fields: ", ...missingFields]);
+  
+  // Store errors in state
+  setErrorMessages(stepErrors);
+  
+  // Prevent submission if any step has errors
+  if (Object.values(stepErrors).some(errors => errors.length > 0)) {
     return;
   }
+  
+  // If there are missing fields, show an error message and prevent form submission
+  // if (missingFields.length > 0) {
+  //   setErrorMessages(["Please fill in the following fields: ", ...missingFields]);
+  //   return;
+  // }
     }
     const formDataForSubmit = new FormData();
   
@@ -386,29 +462,15 @@ fetchUserDetails();
   return (
     <div className="form-container">
       {/* Removed <form> tag */}
-      {formData.id && (
-      <div style={{
-        position: 'fixed',
-        top: 100,
-        backgroundColor: '#ffebcc',
-        padding: '10px',
-        border: '1px solid #ffa726',
-        borderRadius: '5px',
-        zIndex: 1000
-      }}>
-        <p style={{ margin: 0 }}>
-          <strong>Notice:</strong> Uploading new files or images 
-          </p>
-          <p style={{ margin: 0 }}>
-         will replace previously uploaded ones.
-        </p>
+    {/* Notice Message (Moved Inside with Margin) */}
+    {formData.id && (
+      <div className="bg-yellow-200 border border-yellow-500 text-yellow-700 rounded-lg p-3 mb-4">
+        <p className="m-0 font-semibold">⚠️ Notice:</p>
+        <p className="m-0">Uploading new files or images will replace previously uploaded ones.</p>
       </div>
     )}
 
-      {steps[currentStep]}
-
-      {/* Navigation buttons */}
-      <div className="flex justify-between mt-4">
+  <div className="flex justify-between mt-4">
         {currentStep > 0 && (
           <button
             type="button"
@@ -436,30 +498,21 @@ fetchUserDetails();
           </button>
         )}
       </div>
+      {steps[currentStep]}
+
+      {/* Navigation buttons */}
+    
 
 {/* Error/Success Messages */}
-{errorMessages.length > 0 && (
-  <div className="error-message p-4 mb-4 border-l-4 border-red-500 bg-red-100 text-red-700 rounded-lg">
-    <div className="flex items-center">
-      <span className="mr-2">
-        {/* Error Icon */}
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 text-red-600"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M18 12H6M12 6v12"
-          />
-        </svg>
-      </span>
-      <p>{errorMessages.join(", ")}</p>
-    </div>
+
+{errorMessages[currentStep] && errorMessages[currentStep].length > 0 && (
+  <div className="bg-red-200 border border-red-500 text-red-700 p-2 rounded mb-4">
+    <p className="font-bold">Please fill in the following fields:</p>
+    <ul className="list-disc ml-5">
+      {errorMessages[currentStep].map((error, index) => (
+        <li key={index}>{error}</li>
+      ))}
+    </ul>
   </div>
 )}
 
@@ -468,20 +521,7 @@ fetchUserDetails();
     <div className="flex items-center">
       <span className="mr-2">
         {/* Success Icon */}
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 text-green-600"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M5 13l4 4L19 7"
-          />
-        </svg>
+        <CheckCircle className="h-5 w-5 text-green-600" />
       </span>
       <p>{successMessage}</p>
     </div>

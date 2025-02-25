@@ -61,118 +61,117 @@ const ProductDetailsForm = ({ onDataChange, initialData }) => {
     onDataChange(updatedProducts);
   };
 
-  return (
-    <div className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg overflow-hidden">
-      <h2 className="text-2xl font-semibold text-center mb-4">Product Details</h2>
-      <div className="grid grid-cols-1 gap-4">
-        {products.map((product, index) => (
-          <div
-            key={index}
-            className="border p-4 rounded-lg mb-4 transition-transform duration-200 hover:shadow-lg"
-          >
-            <h3 className="text-lg font-semibold mb-2">Product Set {index + 1}</h3>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Product Name</label>
-                <input
-                  type="text"
-                  name="productName"
-                  placeholder="Product Name"
-                  value={product.productName}
-                  onChange={(e) => handleChange(index, e)}
-                  required
-                  className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-                />
+    return (
+      <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-xl border border-gray-200">
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Product Details</h2>
+        <div className="grid grid-cols-1 gap-6">
+          {products.map((product, index) => (
+            <div
+              key={index}
+              className="border p-6 rounded-xl shadow-sm hover:shadow-lg transition-transform duration-200"
+            >
+              <h3 className="text-lg font-semibold text-gray-700 mb-4">Product Set {index + 1}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Product Name</label>
+                  <input
+                    type="text"
+                    name="productName"
+                    placeholder="Product Name"
+                    value={product.productName}
+                    onChange={(e) => handleChange(index, e)}
+                    required
+                    className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Product Price</label>
+                  <input
+                    type="number"
+                    name="productPrice"
+                    placeholder="Product Price"
+                    value={product.productPrice}
+                    onChange={(e) => handleChange(index, e)}
+                    onInput={(e) => {
+                      const newValue = e.target.value;
+                      if (!/^\d*\.?\d*$/.test(newValue)) {
+                        e.preventDefault();
+                      }
+                    }}
+                    required
+                    className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">HSN Code</label>
+                  <input
+                    type="text"
+                    name="hsnCode"
+                    placeholder="HSN Code"
+                    value={product.hsnCode}
+                    onChange={(e) => handleChange(index, e)}
+                    required
+                    className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">GST (%)</label>
+                  <input
+                    type="number"
+                    name="gst"
+                    placeholder="GST Percentage"
+                    value={product.gst}
+                    onChange={(e) => handleChange(index, e)}
+                    required
+                    className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700">Product Image</label>
+                  <input
+                    type="file"
+                    name="productImage"
+                    accept="image/*"
+                    onChange={(e) => handleChange(index, e)}
+                    className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Product Type</label>
+                  <select
+                    name="productType"
+                    value={product.productType}
+                    onChange={(e) => handleChange(index, e)}
+                    className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+                  >
+                    <option value="">Select Product Type</option>
+                    <option value="product">Product</option>
+                    <option value="service">Service</option>
+                  </select>
+                </div>
               </div>
-              <div>
-  <label className="block text-sm font-medium text-gray-700">Product Price</label>
-  <input
-    type="number"
-    name="productPrice"
-    placeholder="Product Price"
-    value={product.productPrice}
-    onChange={(e) => handleChange(index, e)}
-    onInput={(e) => {
-      // Allow only numbers and prevent other characters from being typed
-      const newValue = e.target.value;
-      if (!/^\d*\.?\d*$/.test(newValue)) {
-        e.preventDefault();
-      }
-    }}
-    required
-    className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-  />
-</div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">HSN Code</label>
-                <input
-                  type="text"
-                  name="hsnCode"
-                  placeholder="HSN Code"
-                  value={product.hsnCode}
-                  onChange={(e) => handleChange(index, e)}
-                  required
-                  className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">GST (%)</label>
-                <input
-                  type="number"
-                  name="gst"
-                  placeholder="GST Percentage"
-                  value={product.gst}
-                  onChange={(e) => handleChange(index, e)}
-                  required
-                  className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Product Image</label>
-                <input
-                  type="file"
-                  name="productImage"
-                  accept="image/*"
-                  onChange={(e) => handleChange(index, e)}
-                  className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Product Type</label>
-                <select
-                  name="productType"
-                  value={product.productType}
-                  onChange={(e) => handleChange(index, e)}
-                  className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+              {products.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => deleteProduct(index)}
+                  className="mt-6 w-full p-3 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
                 >
-                  <option value="">Select Product Type</option>
-                  <option value="product">Product</option>
-                  <option value="service">Service</option>
-                </select>
-              </div>
+                  Delete Product Set
+                </button>
+              )}
             </div>
-            {products.length > 1 && (
-              <button
-                type="button"
-                onClick={() => deleteProduct(index)}
-                className="mt-4 w-full p-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-              >
-                Delete Product Set
-              </button>
-            )}
-          </div>
-        ))}
-        <button
-          type="button"
-          onClick={addProduct}
-          className="mt-4 w-full p-2 bg-green-500 text-white rounded-md hover:bg-green-600"
-        >
-          Add Product Set
-        </button>
+          ))}
+          <button
+            type="button"
+            onClick={addProduct}
+            className="mt-6 w-full p-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition"
+          >
+            Add New Product Set
+          </button>
+        </div>
       </div>
-    </div>
-  );
-};
-
-export default ProductDetailsForm;
+    );
+  };
+  
+  export default ProductDetailsForm;
+  

@@ -73,28 +73,29 @@ const AdditionalForm = ({ onDataChange, initialData }) => {
     onDataChange({ team: updatedTeam });
   };
 
-  return (
-    <div className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg overflow-hidden">
-      <h2 className="text-2xl font-semibold text-center mb-4">Additional Details</h2>
-      <div className="overflow-y-auto">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {[{ label: "Tag Line", name: "tagLine" },
-            { label: "Specialization", name: "specialization" },
-            { label: "Slogan", name: "slogan" },
-            { label: "Annual Sales", name: "annualSales" },
-            { label: "Turnover", name: "turnover" }].map((field) => (
-            <div key={field.name}>
-              <label className="block text-sm font-medium text-gray-700">{field.label}</label>
-              <input
-                type="text"
-                name={field.name}
-                placeholder={field.label}
-                value={data[field.name]}
-                onChange={handleChange}
-                className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-              />
-            </div>
-          ))}
+    return (
+      <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-xl border border-gray-200">
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Additional Details</h2>
+        <div className="grid grid-cols-2 gap-6">
+        {[{ label: "Tag Line", name: "tagLine" },
+          { label: "Specialization", name: "specialization" },
+          { label: "Slogan", name: "slogan" },
+          { label: "Annual Sales", name: "annualSales" },
+          { label: "Turnover", name: "turnover" }].map((field) => (
+          <div key={field.name} className="border p-4 rounded-xl shadow-sm hover:shadow-lg transition-transform duration-200">
+            <label className="block text-sm font-medium text-gray-700">{field.label}</label>
+            <input
+              type="text"
+              name={field.name}
+              placeholder={field.label}
+              value={data[field.name]}
+              onChange={handleChange}
+              className="mt-1 p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            />
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 gap-6">
           {[{ label: "Success Story", name: "successStory" },
             { label: "Our Give", name: "ourGive" },
             { label: "Our Ask", name: "ourAsk" },
@@ -102,20 +103,20 @@ const AdditionalForm = ({ onDataChange, initialData }) => {
             { label: "Mission", name: "mission" },
             { label: "Company Policies", name: "companyPolicies" },
             { label: "Company Growth", name: "companyGrowth" }].map((field) => (
-            <div key={field.name} className="md:col-span-2">
+            <div key={field.name} className="border p-4 rounded-xl shadow-sm hover:shadow-lg transition-transform duration-200">
               <label className="block text-sm font-medium text-gray-700">{field.label}</label>
               <textarea
                 name={field.name}
                 placeholder={field.label}
                 value={data[field.name]}
                 onChange={handleChange}
-                className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+                className="mt-1 p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
               />
             </div>
           ))}
           {[{ label: "Awards & Recognition (Images)", name: "awards" },
             { label: "Certifications / Registrations (Images)", name: "certifications" }].map((field) => (
-            <div key={field.name} className="md:col-span-2">
+            <div key={field.name} className="border p-4 rounded-xl shadow-sm hover:shadow-lg transition-transform duration-200">
               <label className="block text-sm font-medium text-gray-700">{field.label}</label>
               <input
                 type="file"
@@ -123,11 +124,11 @@ const AdditionalForm = ({ onDataChange, initialData }) => {
                 accept="image/*"
                 multiple
                 onChange={handleChange}
-                className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+                className="mt-1 p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
               />
             </div>
           ))}
-          <div className="md:col-span-2">
+          <div className="border p-4 rounded-xl shadow-sm hover:shadow-lg transition-transform duration-200">
             <h3 className="text-lg font-semibold">Client List</h3>
             {data.clientList.map((client, index) => (
               <div key={index} className="flex gap-2">
@@ -136,7 +137,7 @@ const AdditionalForm = ({ onDataChange, initialData }) => {
                   placeholder="Client Name"
                   value={client.name}
                   onChange={(e) => handleClientChange(index, "name", e.target.value)}
-                  className="p-2 border border-gray-300 rounded-md"
+                  className="p-2 w-full border border-gray-300 rounded-md"
                 />
                 <input
                   type="file"
@@ -148,7 +149,7 @@ const AdditionalForm = ({ onDataChange, initialData }) => {
             ))}
             <button onClick={handleAddClient} className="mt-2 p-2 bg-green-500 text-white rounded-md">+ Add Client</button>
           </div>
-          <div className="md:col-span-2">
+          <div className="border p-4 rounded-xl shadow-sm hover:shadow-lg transition-transform duration-200">
             <h3 className="text-lg font-semibold">Our Team</h3>
             {data.team.map((member, index) => (
               <div key={index} className="flex gap-2">
@@ -157,7 +158,7 @@ const AdditionalForm = ({ onDataChange, initialData }) => {
                   placeholder="Team Member Name"
                   value={member.name}
                   onChange={(e) => handleTeamChange(index, "name", e.target.value)}
-                  className="p-2 border border-gray-300 rounded-md"
+                  className="p-2 w-full border border-gray-300 rounded-md"
                 />
                 <input
                   type="file"
@@ -171,8 +172,8 @@ const AdditionalForm = ({ onDataChange, initialData }) => {
           </div>
         </div>
       </div>
-    </div>
-  );
-};
-
-export default AdditionalForm;
+    );
+  };
+  
+  export default AdditionalForm;
+  
