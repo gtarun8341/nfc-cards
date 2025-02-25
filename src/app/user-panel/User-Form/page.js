@@ -191,58 +191,7 @@ if (loading) {
     console.log("Current Form Data:", formData);
     if (!formData.id) {
 
-  //   // Define the required fields for the formData
-  //   const requiredFields = [
-  //     "companyName", "name", "designation", "contact1", "email", "website", 
-  //     "googleMap", "address", "logo", "facebook", "instagram", "linkedin", 
-  //     "twitter", "youtubeChannel", "gstNumber", "description", "bankName", 
-  //     "accountNumber", "branchName", "ifscCode", "accountHolderName", 
-  //     "gPayNumber", "paytmNumber", "phonePeNumber", "upiId", "accountType", 
-  //     "googleBusiness",  "establishedYear", "natureOfBusiness", 
-  //     "documents", "qrImages", "galleryImages", "products", "tagLine", "specialization", 
-  //     "slogan", "clientList", "successStory", "ourGive", "ourAsk", "vision", 
-  //     "mission", "awards", "certifications", "team", "annualSales", "turnover", 
-  //     "companyPolicies", "companyGrowth"
-  // ];
 
-  // // Initialize an empty array to hold error messages
-  // let missingFields = [];
-
-  // // Check if any required field in formData is missing
-  // requiredFields.forEach(field => {
-  //     if (!formData[field] || (Array.isArray(formData[field]) && formData[field].length === 0)) {
-  //         missingFields.push(field);
-  //     }
-  // });
-
-  // // Validate products array (check each product in products array)
-  // formData.products.forEach((product, index) => {
-  //     const productFields = ["productName", "productPrice", "productImage", "productType", "hsnCode", "gst"];
-  //     productFields.forEach(field => {
-  //         if (!product[field]) {
-  //             missingFields.push(`Product ${index + 1} - ${field}`);
-  //         }
-  //     });
-  // });
-
-  // formData.clientList.forEach((client, index) => {
-  //   const clientFields = ["name", "logo"];
-  //   clientFields.forEach(field => {
-  //     if (!client[field]) {
-  //       missingFields.push(`Client ${index + 1} - ${field}`);
-  //     }
-  //   });
-  // });
-
-  // // Validate team array (check each team member in team)
-  // formData.team.forEach((teamMember, index) => {
-  //   const teamFields = ["name", "image"];
-  //   teamFields.forEach(field => {
-  //     if (!teamMember[field]) {
-  //       missingFields.push(`Team Member ${index + 1} - ${field}`);
-  //     }
-  //   });
-  // });
   const stepFields = {
     0: ["companyName", "name", "designation", "contact1","contact2","whatsapp1","whatsapp2", "email", "website", "googleMap", "address", "logo"],
     1: ["facebook", "instagram", "linkedin", "twitter", "youtubeChannel", "googleBusiness","otherProfile","youtubeVideos"],
@@ -308,11 +257,6 @@ if (loading) {
     return;
   }
   
-  // If there are missing fields, show an error message and prevent form submission
-  // if (missingFields.length > 0) {
-  //   setErrorMessages(["Please fill in the following fields: ", ...missingFields]);
-  //   return;
-  // }
     }
     const formDataForSubmit = new FormData();
   
