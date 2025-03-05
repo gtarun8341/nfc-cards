@@ -462,12 +462,12 @@ if (loading) {
   return (
     <div className="form-container">
 
-    {formData.id && (
+    {/* {formData.id && (
       <div className="bg-yellow-200 border border-yellow-500 text-yellow-700 rounded-lg p-3 mb-4">
         <p className="m-0 font-semibold">⚠️ Notice:</p>
         <p className="m-0">Uploading new files or images will replace previously uploaded ones.</p>
       </div>
-    )}
+    )} */}
 
   <div className="flex justify-between mt-4">
         {currentStep > 0 && (
@@ -500,7 +500,13 @@ if (loading) {
       {steps[currentStep]}
 
     
-
+      {formData.id && (
+      <div className="bg-yellow-200 border border-yellow-500 text-yellow-700 rounded-lg p-3 mt-4">
+        <p className="m-0 font-semibold">⚠️ Please Note:</p>
+    <p className="m-0">1. Previously uploaded files are saved, and there is no need to reload them.</p>
+    <p className="m-0">2. Uploading new images will replace previously uploaded images.</p>
+    <p className="m-0">3. You need to fill all the fields.</p>      </div>
+    )}
 
 {errorMessages[currentStep] && errorMessages[currentStep].length > 0 && (
   <div className="bg-red-200 border border-red-500 text-red-700 p-2 rounded mb-4">
