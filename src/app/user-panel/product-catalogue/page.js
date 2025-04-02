@@ -13,6 +13,7 @@ const ProductCataloguePage = () => {
     image: null,
     hsnCode: '',
     gst: '',
+    units: "",
   });
   
   const [isEditing, setIsEditing] = useState(false);
@@ -40,7 +41,7 @@ const ProductCataloguePage = () => {
     const token = localStorage.getItem('authToken');
     
     // Validate form fields
-    if (!currentProduct.name || !currentProduct.type || !currentProduct.price || !currentProduct.hsnCode || !currentProduct.gst) {
+    if (!currentProduct.name || !currentProduct.type || !currentProduct.price || !currentProduct.hsnCode || !currentProduct.gst || !currentProduct.units) {
       setError('All fields are required.');
       return;
     }
@@ -64,6 +65,7 @@ const ProductCataloguePage = () => {
     formData.append('price', currentProduct.price);
     formData.append('hsnCode', currentProduct.hsnCode);
     formData.append('gst', currentProduct.gst);
+    formData.append('units', currentProduct.units);
     
     if (currentProduct.image) {
       formData.append('productImages[]', currentProduct.image); // Append image file if available
@@ -123,6 +125,7 @@ const ProductCataloguePage = () => {
       image: null,
       hsnCode: product.hsnCode,
       gst: product.gst,
+      units: product.units,
       currentImage: product.productImages?.[0] || null,
     });
     
@@ -146,7 +149,7 @@ const ProductCataloguePage = () => {
 
   // Reset form after submission
   const resetForm = () => {
-    setCurrentProduct({ name: '', type: '', price: '', image: null, hsnCode: '', gst: '' });
+    setCurrentProduct({ name: '', type: '', price: '', image: null, hsnCode: '', gst: '', units: '' });
     setIsEditing(false);
     setEditProductId(null);
   };
@@ -225,6 +228,19 @@ const ProductCataloguePage = () => {
             className="border border-gray-300 p-3 rounded-md"
             required
           />
+                <select
+                  name="units"
+                  value={currentProduct.units}
+                  onChange={handleChange}
+                  className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+                >
+                  <option value="">Select Units</option>
+                  <option value="kg">Kilograms (kg)</option>
+                  <option value="g">Grams (g)</option>
+                  <option value="litre">Litres (L)</option>
+                  <option value="ml">Millilitres (ml)</option>
+                  <option value="piece">Piece</option>
+                </select>
           <input
             type="file"
             name="image"
@@ -250,6 +266,7 @@ const ProductCataloguePage = () => {
               <th className="py-3 px-4 border-b">Price</th>
               <th className="py-3 px-4 border-b">HSN Code</th>
               <th className="py-3 px-4 border-b">GST</th>
+              <th className="py-3 px-4 border-b">UNITS</th>
               <th className="py-3 px-4 border-b">Image</th>
               <th className="py-3 px-4 border-b">Actions</th>
             </tr>
@@ -262,6 +279,7 @@ const ProductCataloguePage = () => {
                 <td className="py-3 px-4 border-b">{product.productPrice}</td>
                 <td className="py-3 px-4 border-b">{product.hsnCode}</td>
                 <td className="py-3 px-4 border-b">{product.gst}</td>
+                <td className="py-3 px-4 border-b">{product.units}</td>
                 <td className="py-3 px-4 border-b">
                   {product.productImages && product.productImages[0] && (() => {
                     const imageUrl = `${api.defaults.baseURL}/uploads/userDetails/${userId}/${product.productImages[0]}`;

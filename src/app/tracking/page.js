@@ -7,6 +7,7 @@ export default function TrackOrderPage() {
     const [trackingNumber, setTrackingNumber] = useState("");
     const [orderDetails, setOrderDetails] = useState(null);
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     const handleTrackingInput = (e) => {
         setTrackingNumber(e.target.value);
@@ -22,12 +23,37 @@ export default function TrackOrderPage() {
             setOrderDetails(null);
         }
     };
-console.log(api.defaults.baseURL)
-const handleDownloadInvoice = () => {
-    const downloadUrl = `${api.defaults.baseURL}/api/orderPaymentRoutes/download-invoice/${trackingNumber}`;
-    window.open(downloadUrl, '_blank');
-};
 
+    const handleDownloadInvoice = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch(`${api.defaults.baseURL}/api/orderPaymentRoutes/download-invoice/${trackingNumber}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/pdf",
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to download invoice");
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `invoice_${trackingNumber}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Error downloading invoice:", error);
+            setError("Failed to download invoice. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 p-4">
@@ -77,8 +103,9 @@ const handleDownloadInvoice = () => {
                         <button
                             onClick={handleDownloadInvoice}
                             className="mt-4 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-200 transition-colors"
+                            disabled={loading}
                         >
-                            Download Invoice
+                            {loading ? "Downloading..." : "Download Invoice"}
                         </button>
                     </div>
                 )}

@@ -16,6 +16,7 @@ const ProductCataloguePage = () => {
     image: null,
     hsnCode: '',
     gst: '',
+    units: '',
     discount: '',
   });
 
@@ -50,6 +51,7 @@ const ProductCataloguePage = () => {
     formData.append('price', currentProduct.price);
     formData.append('hsnCode', currentProduct.hsnCode);
     formData.append('gst', currentProduct.gst);
+    formData.append('units', currentProduct.units);
     formData.append('discount', currentProduct.discount);
 
     if (currentProduct.image) {
@@ -127,6 +129,7 @@ const ProductCataloguePage = () => {
       image: null,
       hsnCode: product.hsnCode,
       gst: product.gst,
+      units: product.units,
       discount: product.discount,
       currentImage: product.productImages?.[0] || null,
     });
@@ -149,7 +152,7 @@ const ProductCataloguePage = () => {
 
   // Reset form after submission
   const resetForm = () => {
-    setCurrentProduct({ name: '', type: '', price: '', image: null, hsnCode: '', gst: '', discount: '' });
+    setCurrentProduct({ name: '', type: '', price: '', image: null, hsnCode: '', gst: '', discount: '',units: '' });
     setIsEditing(false);
     setEditProductId(null);
   };
@@ -199,6 +202,20 @@ const ProductCataloguePage = () => {
             <option value="" disabled>Select Type</option>
             <option value="product">Product</option>
             <option value="service">Service</option>
+          </select>
+          <select
+            name="units"
+            value={currentProduct.units}
+            onChange={handleChange}
+            className="border border-gray-300 p-3 rounded-md"
+            required
+          >
+                 <option value="">Select Units</option>
+                  <option value="kg">Kilograms (kg)</option>
+                  <option value="g">Grams (g)</option>
+                  <option value="litre">Litres (L)</option>
+                  <option value="ml">Millilitres (ml)</option>
+                  <option value="piece">Piece</option>
           </select>
           <input
             type="text"
@@ -262,6 +279,7 @@ const ProductCataloguePage = () => {
               <th className="py-3 px-4 border-b">Discount</th>
               <th className="py-3 px-4 border-b">HSN Code</th>
 <th className="py-3 px-4 border-b">GST</th>
+<th className="py-3 px-4 border-b">UNITS</th>
               <th className="py-3 px-4 border-b">Image</th>
               <th className="py-3 px-4 border-b">Actions</th>
             </tr>
@@ -275,6 +293,7 @@ const ProductCataloguePage = () => {
                 <td className="py-3 px-4 border-b">{product.discount}</td>
                 <td className="py-3 px-4 border-b">{product.hsnCode}</td>
 <td className="py-3 px-4 border-b">{product.gst}</td>
+<td className="py-3 px-4 border-b">{product.units}</td>
                 <td className="py-3 px-4 border-b">
                 {product.productImages && product.productImages[0] && (() => {
   const imageUrl = `${api.defaults.baseURL}/uploads/adminproducts/${product.productImages[0]}`;

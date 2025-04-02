@@ -41,14 +41,15 @@ const GenerateLinkPage = () => {
 
   // Filtering templates based on search term
   const filteredTemplates = userTemplates.filter((template) => {
-    const { name, email, phone, templateId } = template.userDetails;
+    const { name, email, phone } = template.userDetails;
     const search = searchTerm.toLowerCase();
 
     return (
       name.toLowerCase().includes(search) ||
       email.toLowerCase().includes(search) ||
       phone.toLowerCase().includes(search) ||
-      template.templateId.toLowerCase().includes(search)
+      template.templateId?.toLowerCase().includes(search) ||
+      template.templateName?.toLowerCase().includes(search) // Filter by template name
     );
   });
 
@@ -60,7 +61,7 @@ const GenerateLinkPage = () => {
       <div className="mb-5">
         <input
           type="text"
-          placeholder="Search by name, email, phone, or template ID..."
+          placeholder="Search by name, email, phone, template ID, or template name..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="border px-4 py-2 rounded-lg w-full"
@@ -76,6 +77,7 @@ const GenerateLinkPage = () => {
               <th className="px-4 py-2 border">Email</th>
               <th className="px-4 py-2 border">Phone</th>
               <th className="px-4 py-2 border">Template ID</th>
+              <th className="px-4 py-2 border">Template Name</th> {/* New Column */}
               <th className="px-4 py-2 border">Generated Link</th>
             </tr>
           </thead>
@@ -86,6 +88,7 @@ const GenerateLinkPage = () => {
                 <td className="px-4 py-2 border">{template.userDetails.email}</td>
                 <td className="px-4 py-2 border">{template.userDetails.phone}</td>
                 <td className="px-4 py-2 border">{template.templateId}</td>
+                <td className="px-4 py-2 border">{template.templateName || 'Unknown'}</td> {/* Template Name */}
                 <td className="px-4 py-2 border text-center">
                   <button
                     onClick={() => handleLinkDisplay(template.generatedLink, index)}

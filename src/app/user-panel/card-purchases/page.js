@@ -1,21 +1,22 @@
 "use client"; // Next.js Client Component
 
-import React, { useEffect, useState } from 'react';
-import api from '../../apiConfig/axiosConfig';
+import React, { useEffect, useState } from "react";
+import api from "../../apiConfig/axiosConfig";
 
 const CardPurchases = () => {
-  const [purchases, setPurchases] = useState([]); // Ensure purchases is an array
+  const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [downloading, setDownloading] = useState(null);
+  const [error, setError] = useState(null);
 
-  // Filtered purchases based on search and status filter
   const filteredPurchases = purchases.filter((purchase) => {
     const matchesSearchQuery =
       purchase.trackingId.toLowerCase().includes(searchQuery.toLowerCase()) ||
       purchase.cardType.toLowerCase().includes(searchQuery.toLowerCase()) ||
       purchase.templateName.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesStatusFilter =
       !statusFilter || purchase.status === statusFilter;
 
@@ -25,32 +26,56 @@ const CardPurchases = () => {
   useEffect(() => {
     const fetchPurchases = async () => {
       try {
-        const token = localStorage.getItem('authToken');
-
-        const { data } = await api.get('/api/cardPurchase/card-purchase', {
-          headers: {
-            Authorization: `Bearer ${token}`, // Ensure the token is stored and accessible
-          },
+        const token = localStorage.getItem("authToken");
+        const { data } = await api.get("/api/cardPurchase/card-purchase", {
+          headers: { Authorization: `Bearer ${token}` },
         });
-
-        // Ensure the data is set to purchases
-        setPurchases(data.purchases || []); // Safely handle unexpected response structure
+        setPurchases(data.purchases || []);
       } catch (error) {
-        console.error('Error fetching card purchases:', error.message);
-        setPurchases([]); // Ensure purchases is reset in case of error
+        console.error("Error fetching card purchases:", error.message);
+        setPurchases([]);
       } finally {
         setLoading(false);
       }
     };
-
     fetchPurchases();
   }, []);
+
+  const handleDownloadInvoice = async (trackingId) => {
+    setDownloading(trackingId);
+    setError(null);
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch(
+        `${api.defaults.baseURL}/api/cardPurchase/download-invoice/${trackingId}`,
+        {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/pdf" },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to download invoice");
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `invoice_${trackingId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading invoice:", error);
+      setError(`Failed to download invoice for ${trackingId}`);
+    } finally {
+      setDownloading(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <h1 className="text-2xl font-bold text-center mb-6">My Card Purchases</h1>
-
-      {/* Search Bar */}
       <div className="mb-4 flex justify-center space-x-4">
         <input
           type="text"
@@ -59,8 +84,6 @@ const CardPurchases = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="p-2 border rounded w-1/3"
         />
-
-        {/* Status Filter Dropdown */}
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -72,7 +95,6 @@ const CardPurchases = () => {
           <option value="Completed">Completed</option>
         </select>
       </div>
-
       {loading ? (
         <div className="text-center">Loading...</div>
       ) : filteredPurchases.length === 0 ? (
@@ -88,6 +110,7 @@ const CardPurchases = () => {
                 <th className="p-2">Price</th>
                 <th className="p-2">Status</th>
                 <th className="p-2">Created At</th>
+                <th className="p-2">Invoice</th>
               </tr>
             </thead>
             <tbody>
@@ -99,17 +122,29 @@ const CardPurchases = () => {
                   <td className="p-2 text-center">₹{purchase.price}</td>
                   <td
                     className={`p-2 text-center ${
-                      purchase.status === 'Pending'
-                        ? 'text-yellow-500'
-                        : purchase.status === 'Processing'
-                        ? 'text-blue-500'
-                        : 'text-green-500'
+                      purchase.status === "Pending"
+                        ? "text-yellow-500"
+                        : purchase.status === "Processing"
+                        ? "text-blue-500"
+                        : "text-green-500"
                     }`}
                   >
                     {purchase.status}
                   </td>
                   <td className="p-2 text-center">
                     {new Date(purchase.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="p-2 text-center">
+                    <button
+                      onClick={() => handleDownloadInvoice(purchase.trackingId)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700"
+                      disabled={downloading === purchase.trackingId}
+                    >
+                      {downloading === purchase.trackingId ? "Downloading..." : "Download"}
+                    </button>
+                    {error && downloading === purchase.trackingId && (
+                      <p className="text-red-500 text-sm mt-1">{error}</p>
+                    )}
                   </td>
                 </tr>
               ))}

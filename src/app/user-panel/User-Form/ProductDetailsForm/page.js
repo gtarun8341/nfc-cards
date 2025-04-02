@@ -11,6 +11,7 @@ const ProductDetailsForm = ({ onDataChange, initialData }) => {
       productType: "",
       hsnCode: "",
       gst: "",
+      units: "",
     },
   ]);
 
@@ -25,6 +26,8 @@ const ProductDetailsForm = ({ onDataChange, initialData }) => {
           productType: product.productType || "",
           hsnCode: product.hsnCode || "",
           gst: product.gst || "",
+          units: product.units || "",
+
         }))
       );
     }
@@ -51,6 +54,8 @@ const ProductDetailsForm = ({ onDataChange, initialData }) => {
         productType: "",
         hsnCode: "",
         gst: "",
+        units: "",
+
       },
     ]);
   };
@@ -149,6 +154,22 @@ const ProductDetailsForm = ({ onDataChange, initialData }) => {
                     <option value="service">Service</option>
                   </select>
                 </div>
+                <div>
+                <label className="block text-sm font-medium text-gray-700">Units</label>
+                <select
+                  name="units"
+                  value={product.units}
+                  onChange={(e) => handleChange(index, e)}
+                  className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+                >
+                  <option value="">Select Units</option>
+                  <option value="kg">Kilograms (kg)</option>
+                  <option value="g">Grams (g)</option>
+                  <option value="litre">Litres (L)</option>
+                  <option value="ml">Millilitres (ml)</option>
+                  <option value="piece">Piece</option>
+                </select>
+              </div>
               </div>
               {products.length > 1 && (
                 <button

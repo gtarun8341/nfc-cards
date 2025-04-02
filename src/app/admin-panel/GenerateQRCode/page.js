@@ -10,7 +10,6 @@ const QRCodePage = () => {
   const [showQRCode, setShowQRCode] = useState(false);
   const [userTemplates, setUserTemplates] = useState([]); // To store fetched templates
   const [searchTerm, setSearchTerm] = useState(''); // For search functionality
-  const [filterValue, setFilterValue] = useState(''); // For filter functionality
 
   // Fetching user's selected templates with links and user details
   useEffect(() => {
@@ -54,20 +53,16 @@ const QRCodePage = () => {
 
   // Filtering and searching
   const filteredTemplates = userTemplates.filter((template) => {
-    const { name, email, phone, templateId } = template.userDetails;
+    const { name, email, phone } = template.userDetails;
     const search = searchTerm.toLowerCase();
-    const filter = filterValue.toLowerCase();
 
-    // Search and filter logic
-    const matchesSearch =
+    return (
       name.toLowerCase().includes(search) ||
       email.toLowerCase().includes(search) ||
       phone.toLowerCase().includes(search) ||
-      template.templateId.toLowerCase().includes(search);
-
-    const matchesFilter = filter ? name.toLowerCase().includes(filter) : true;
-
-    return matchesSearch && matchesFilter;
+      template.templateId?.toLowerCase().includes(search) ||
+      template.templateName?.toLowerCase().includes(search) // Search by Template Name
+    );
   });
 
   return (
@@ -75,17 +70,15 @@ const QRCodePage = () => {
       <h2 className="text-2xl font-semibold text-center mb-5">Generate QR Code</h2>
 
       {/* Search bar */}
-      <div className="mb-5 ">
+      <div className="mb-5">
         <input
           type="text"
-          placeholder="Search by name, email, phone, or template ID..."
+          placeholder="Search by name, email, phone, template ID, or template name..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="border px-4 py-2 rounded-lg w-full"
         />
-
       </div>
-
 
       {/* Display the user's templates in a table format */}
       {filteredTemplates.length > 0 ? (
@@ -96,6 +89,7 @@ const QRCodePage = () => {
               <th className="px-4 py-2 border">Email</th>
               <th className="px-4 py-2 border">Phone</th>
               <th className="px-4 py-2 border">Template ID</th>
+              <th className="px-4 py-2 border">Template Name</th> {/* New Column */}
               <th className="px-4 py-2 border">Actions</th>
             </tr>
           </thead>
@@ -106,6 +100,7 @@ const QRCodePage = () => {
                 <td className="px-4 py-2 border">{template.userDetails.email}</td>
                 <td className="px-4 py-2 border">{template.userDetails.phone}</td>
                 <td className="px-4 py-2 border">{template.templateId}</td>
+                <td className="px-4 py-2 border">{template.templateName || 'Unknown'}</td> {/* Template Name */}
                 <td className="px-4 py-2 border text-center">
                   {showQRCode === index ? (
                     <div>

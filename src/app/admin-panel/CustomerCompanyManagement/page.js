@@ -109,6 +109,7 @@ const CustomerCompanyManagementPage = () => {
           product.hsnCode || "N/A",
           product.gst || "N/A",
           product.discount || "N/A",
+          product.units || "N/A",
         ]);
       });
     } else {
@@ -314,6 +315,7 @@ const CustomerCompanyManagementPage = () => {
                     <div>Type: {product.productType}</div>
                     <div>HsnCode: {product.hsnCode}</div>
                     <div>GST: {product.gst}</div>
+                    <div>UNITS: {product.units}</div>
                     <div>Image:  <Image
                       key={index}
                       src={`${api.defaults.baseURL}/uploads/userDetails/${selectedCompany.userId}/${product.productImages}`}

@@ -8,6 +8,8 @@ const AboutCompanyForm = ({ onDataChange, initialData }) => {
     natureOfBusiness: "",
     gstNumber: "",
     description: "",
+    termsAndConditions: "",
+    messages: "",
     documents: [],
   });
 
@@ -82,6 +84,28 @@ const AboutCompanyForm = ({ onDataChange, initialData }) => {
             name="description"
             placeholder="Description"
             value={data.description}
+            onChange={handleChange}
+            required
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-400 focus:outline-none"
+          />
+        </div>
+        <div className="col-span-1 md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700">Terms and Conditions</label>
+          <textarea
+            name="termsAndConditions"
+            placeholder="Enter Terms and Conditions"
+            value={data.termsAndConditions}
+            onChange={handleChange}
+            required
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-400 focus:outline-none"
+          />
+        </div>
+        <div className="col-span-1 md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700">Messages</label>
+          <textarea
+            name="messages"
+            placeholder="Enter Messages"
+            value={data.messages}
             onChange={handleChange}
             required
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-400 focus:outline-none"

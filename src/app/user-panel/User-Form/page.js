@@ -38,6 +38,8 @@ const UserFormPage = () => {
     natureOfBusiness: "",
     gstNumber: "",
     description: "",
+    termsAndConditions: "",
+    messages: "",
     documents: [],
     bankName: "",
     accountNumber: "",
@@ -116,6 +118,8 @@ const UserFormPage = () => {
           natureOfBusiness: data.aboutCompany.natureOfBusiness,
           gstNumber: data.aboutCompany.gstNumber,
           description: data.aboutCompany.description, // Assuming you want the description here
+          termsAndConditions: data.aboutCompany.termsAndConditions,
+          messages: data.aboutCompany.messages,
           // documents: data.aboutCompany.documents,
           // Bank Details
           bankName: data.bankDetails.bankName,
@@ -246,7 +250,7 @@ if (loading) {
   const stepFields = {
     0: ["companyName", "name", "designation", "contact1","contact2","whatsapp1","whatsapp2", "email", "website", "googleMap", "address", "logo"],
     1: ["facebook", "instagram", "linkedin", "twitter", "youtubeChannel", "googleBusiness","otherProfile","youtubeVideos"],
-    2: ["gstNumber", "description", "establishedYear", "natureOfBusiness","documents"],
+    2: ["gstNumber", "description","termsAndConditions","messages", "establishedYear", "natureOfBusiness","documents"],
     3: ["bankName", "accountNumber", "branchName", "ifscCode", "accountHolderName", "gPayNumber", "paytmNumber", "phonePeNumber", "upiId", "accountType", "qrImages"],
     4: ["products"], // Products will be validated separately
     5: ["galleryImages"],
@@ -269,7 +273,7 @@ if (loading) {
     // Validate products (Step 4)
     if (step == 4 && formData.products) {
       formData.products.forEach((product, index) => {
-        ["productName", "productPrice", "productImage", "productType", "hsnCode", "gst"].forEach(field => {
+        ["productName", "productPrice", "productImage", "productType", "hsnCode", "gst", "units"].forEach(field => {
           if (!product[field]) {
             stepErrors[step].push(`Product ${index + 1} - ${field}`);
           }
@@ -327,6 +331,7 @@ if (loading) {
               productType: product.productType,
               hsnCode: product.hsnCode,
               gst: product.gst,
+              units: product.units,
             }));
   
             // Append the image file only if it's a valid file (instanceof File)

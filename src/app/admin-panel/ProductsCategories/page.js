@@ -112,6 +112,7 @@ const ProductsCategoriesPage = () => {
                     <th className="px-4 py-2 border-b text-left">Product Name</th>
                     <th className="px-4 py-2 border-b text-left">Price</th>
                     <th className="px-4 py-2 border-b text-left">Type</th>
+                    <th className="px-4 py-2 border-b text-left">UNITS</th>
                     <th className="px-4 py-2 border-b text-left">Discount</th>
                   </tr>
                 </thead>
@@ -123,6 +124,7 @@ const ProductsCategoriesPage = () => {
                         ₹{product.productPrice}
                       </td>
                       <td className="px-4 py-2 border-b">{product.productType}</td>
+                      <td className="px-4 py-2 border-b">{product.units}</td>
                       <td className="px-4 py-2 border-b">
                         {product.discount > 0
                           ? `${product.discount}%`

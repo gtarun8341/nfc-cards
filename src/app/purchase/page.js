@@ -113,18 +113,28 @@ function PurchaseContent({ router }) {
     const calculateRowTotal = (item) => {
         const price = Number(item.price);
         const quantity = Number(item.quantity);
-        const discountValue = item.discount ? 
-        (typeof item.discount === 'string' && item.discount.includes('%') ? 
-            parseFloat(item.discount.replace('%', '')) : 
-            parseFloat(item.discount)) 
-        : 0;
-        const discountAmount = (price * discountValue) / 100;
-        return (price * quantity) - discountAmount;
+        
+        // Calculate discount
+        const discountValue = item.discount 
+            ? (typeof item.discount === 'string' && item.discount.includes('%') 
+                ? parseFloat(item.discount.replace('%', '')) 
+                : parseFloat(item.discount)) 
+            : 0;
+        
+        const discountAmount = (price * quantity * discountValue) / 100;
+        const totalAfterDiscount = (price * quantity) - discountAmount;
+    
+        // Calculate GST
+        const gstValue = item.gst ? parseFloat(item.gst) : 0; 
+        const gstAmount = (totalAfterDiscount * gstValue) / 100;
+    
+        return totalAfterDiscount + gstAmount;
     };
-
+    
     const calculateTotalPrice = () => {
         return purchaseData.reduce((total, item) => total + calculateRowTotal(item), 0);
     };
+    
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
@@ -160,6 +170,7 @@ function PurchaseContent({ router }) {
                                             <th className="border px-4 py-2 text-left font-medium text-gray-700">Quantity</th>
                                             <th className="border px-4 py-2 text-left font-medium text-gray-700">Price</th>
                                             <th className="border px-4 py-2 text-left font-medium text-gray-700">Discount</th>
+                                            <th className="border px-4 py-2 text-left font-medium text-gray-700">GST</th>
                                             <th className="border px-4 py-2 text-left font-medium text-gray-700">Total</th>
                                         </tr>
                                     </thead>
@@ -170,13 +181,14 @@ function PurchaseContent({ router }) {
                                                 <td className="border px-4 py-3">{item.quantity}</td>
                                                 <td className="border px-4 py-3">{item.price}</td>
                                                 <td className="border px-4 py-3">{item.discount ? `${item.discount}` : 'N/A'}</td>
+                                                <td className="border px-4 py-3">{item.gst ? `${item.gst}` : 'N/A'}</td>
                                                 <td className="border px-4 py-3 font-medium">{calculateRowTotal(item)}</td>
                                             </tr>
                                         ))}
                                     </tbody>
                                 </table>                        
                                 <div className="text-right font-semibold text-lg text-gray-700 mb-6">
-                                    Total Price: {calculateTotalPrice()}
+                                    Total Price: {calculateTotalPrice().toFixed(2)}
                                 </div>
 
                                 <h2 className="text-2xl font-semibold mb-6 text-gray-700">User Information</h2>
