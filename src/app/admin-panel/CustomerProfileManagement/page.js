@@ -8,6 +8,9 @@ const CustomerProfileManagementPage = () => {
   const [editCustomer, setEditCustomer] = useState(null);
   const [updatedName, setUpdatedName] = useState('');
   const [searchTerm, setSearchTerm] = useState(''); // For search functionality
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [selectedCustomerId, setSelectedCustomerId] = useState(null);
 
   // Fetch customers when the component loads
   useEffect(() => {
@@ -67,6 +70,28 @@ const CustomerProfileManagementPage = () => {
       setCustomers(customers.filter((customer) => customer._id !== id));
     } catch (error) {
       console.error('Error deleting customer:', error);
+    }
+  };
+  const handleResetPassword = (id) => {
+    setSelectedCustomerId(id);
+    setNewPassword('');
+    setShowPasswordModal(true);
+  };
+
+  const submitPasswordReset = async () => {
+    try {
+      const token = localStorage.getItem('adminAuthToken');
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      await api.put(`/api/users/users/${selectedCustomerId}/resetPassword`, { newPassword }, config);
+      alert('Password updated successfully');
+      setShowPasswordModal(false);
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      alert('Failed to reset password');
     }
   };
 
@@ -133,6 +158,12 @@ const CustomerProfileManagementPage = () => {
                   </button>
                 )}
                 <button
+                  onClick={() => handleResetPassword(customer._id)}
+                  className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                >
+                  Reset Password
+                </button>
+                <button
                   onClick={() => handleDelete(customer._id)}
                   className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                 >
@@ -143,6 +174,34 @@ const CustomerProfileManagementPage = () => {
           ))}
         </tbody>
       </table>
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-md w-96">
+            <h3 className="text-lg font-bold mb-4">Reset Password</h3>
+            <input
+              type="password"
+              placeholder="Enter new password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="border w-full px-3 py-2 mb-4 rounded"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowPasswordModal(false)}
+                className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitPasswordReset}
+                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              >
+                Update
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
