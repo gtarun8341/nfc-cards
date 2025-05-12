@@ -29,6 +29,8 @@ function PurchaseContent({ router }) {
         pincode:' ',
     });
     const [trackingNumber, setTrackingNumber] = useState(null); // State for tracking number
+    const [loading, setLoading] = useState(false); // For Download Invoice button
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const data = searchParams.get('data');
@@ -135,6 +137,38 @@ function PurchaseContent({ router }) {
         return purchaseData.reduce((total, item) => total + calculateRowTotal(item), 0);
     };
     
+    const handleDownloadInvoice = async () => {
+        if (!trackingNumber) return alert("Tracking number not available");
+
+        setLoading(true);
+        try {
+            const response = await fetch(`${api.defaults.baseURL}/api/orderPaymentRoutes/download-invoice/${trackingNumber}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/pdf",
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to download invoice");
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `invoice_${trackingNumber}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Error downloading invoice:", error);
+            alert("Failed to download invoice. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
@@ -157,6 +191,16 @@ function PurchaseContent({ router }) {
                         >
                             Go to Tracking Page
                         </button>
+                        <button
+                            onClick={handleDownloadInvoice}
+                            className="ml-4 px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 disabled:opacity-50"
+                            disabled={loading}
+                        >
+                            {loading ? "Downloading..." : "Download Invoice"}
+                        </button>
+                        {error && (
+                    <p className="mt-4 text-xl text-red-500 font-semibold">{error}</p>
+                )}
                     </div>
                 ) : (
                     <>

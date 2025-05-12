@@ -20,7 +20,7 @@ export default function AuthPage() {
         // User successfully logged in
         document.cookie = `adminAuthToken=${response.data.token}; path=/`; // Set auth token as a cookie
         localStorage.setItem('adminAuthToken', response.data.token);
-        router.push('/admin-panel');
+        router.push('/admin-panel/Dashboard');
       } else {
         alert('Login failed. Please try again.');
       }

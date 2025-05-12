@@ -27,16 +27,25 @@ export default function AuthPage() {
           // User has an active plan 
           document.cookie = `authToken=${response.data.token}; path=/`; // Set auth token as a cookie 
           localStorage.setItem('authToken', response.data.token); 
-          router.push('/user-panel'); 
-        } else { 
-          // User doesn't have an active plan 
-          alert(response.data.message); // Alert the message from the backend 
-          localStorage.setItem('_id', response.data._id); 
-          localStorage.setItem('userName', response.data.name); 
-          localStorage.setItem('userEmail', response.data.email); 
-          localStorage.setItem('userPhone', response.data.phone); 
-          router.push('/purchase-plan'); 
+          router.push('/user-panel/Edit-Account'); 
         } 
+        // else { 
+        //   // User doesn't have an active plan 
+        //   alert(response.data.message); // Alert the message from the backend 
+        //   localStorage.setItem('_id', response.data._id); 
+        //   localStorage.setItem('userName', response.data.name); 
+        //   localStorage.setItem('userEmail', response.data.email); 
+        //   localStorage.setItem('userPhone', response.data.phone); 
+        //   router.push('/purchase-plan'); 
+        // } 
+        else if (response.data.message?.includes('expired')) {
+          alert(response.data.message);
+          localStorage.setItem('_id', response.data._id);
+          localStorage.setItem('userName', response.data.name);
+          localStorage.setItem('userEmail', response.data.email);
+          localStorage.setItem('userPhone', response.data.phone);
+          router.push('/purchase-plan');
+        }
       } else { 
         // Registration successful 
         alert('Registration successful! Please log in to continue.'); 

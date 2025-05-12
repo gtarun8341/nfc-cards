@@ -467,73 +467,73 @@ if (loading) {
   return (
     <div className="form-container">
 
-    {/* {formData.id && (
-      <div className="bg-yellow-200 border border-yellow-500 text-yellow-700 rounded-lg p-3 mb-4">
-        <p className="m-0 font-semibold">⚠️ Notice:</p>
-        <p className="m-0">Uploading new files or images will replace previously uploaded ones.</p>
-      </div>
-    )} */}
-
-  <div className="flex justify-between mt-4">
-        {currentStep > 0 && (
-          <button
-            type="button"
-            onClick={prevStep}
-            className="bg-gray-300 hover:bg-gray-400 text-white font-bold py-2 px-4 rounded"
-          >
-            Previous
-          </button>
-        )}
-        {currentStep < steps.length - 1 ? (
-          <button
-            type="button"
-            onClick={nextStep}
-            className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
-          >
-            Next
-          </button>
-        ) : (
-          <button
-            type="button" // Change to button type
-            onClick={handleSubmit} // Call the handleSubmit function
-            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-          >
-            Submit
-          </button>
-        )}
-      </div>
-      {steps[currentStep]}
-
-    
-      {formData.id && (
-      <div className="bg-yellow-200 border border-yellow-500 text-yellow-700 rounded-lg p-3 mt-4">
-        <p className="m-0 font-semibold">⚠️ Please Note:</p>
-    <p className="m-0">1. Previously uploaded files are saved, and there is no need to reload them.</p>
-    <p className="m-0">2. Uploading new images will replace previously uploaded images.</p>
-    <p className="m-0">3. You need to fill all the fields.</p>      </div>
-    )}
-
-{errorMessages[currentStep] && errorMessages[currentStep].length > 0 && (
-  <div className="bg-red-200 border border-red-500 text-red-700 p-2 rounded mb-4">
-    <p className="font-bold">Please fill in the following fields:</p>
-    <ul className="list-disc ml-5">
-      {errorMessages[currentStep].map((error, index) => (
-        <li key={index}>{error}</li>
-      ))}
-    </ul>
-  </div>
-)}
-
-{successMessage && (
-  <div className="success-message p-4 mb-4 border-l-4 border-green-500 bg-green-100 text-green-700 rounded-lg">
-    <div className="flex items-center">
-      <span className="mr-2">
-        <CheckCircle className="h-5 w-5 text-green-600" />
-      </span>
-      <p>{successMessage}</p>
+<>
+  {/* Sticky Button Bar */}
+  <div className="sticky top-16 z-40 flex justify-between w-full px-4 py-2 bg-transparent pointer-events-none">
+    <div className="flex w-full justify-between pointer-events-auto">
+      {currentStep > 0 && (
+        <button
+          type="button"
+          onClick={prevStep}
+          className="bg-gray-300 hover:bg-gray-400 text-white font-bold py-2 px-4 rounded"
+        >
+          Previous
+        </button>
+      )}
+      {currentStep < steps.length - 1 ? (
+        <button
+          type="button"
+          onClick={nextStep}
+          className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+        >
+          Next
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={handleSubmit}
+          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+        >
+          Submit
+        </button>
+      )}
     </div>
   </div>
-)}
+
+  {/* Main Form Content */}
+  <div className="form-container pt-0 px-4">
+    {steps[currentStep]}
+
+    {formData.id && (
+      <div className="bg-yellow-200 border border-yellow-500 text-yellow-700 rounded-lg p-3 mt-4">
+        <p className="font-semibold">⚠️ Please Note:</p>
+        <p>1. Previously uploaded files are saved, and there is no need to reload them.</p>
+        <p>2. Uploading new images will replace previously uploaded images.</p>
+        <p>3. You need to fill all the fields.</p>
+      </div>
+    )}
+
+    {errorMessages[currentStep]?.length > 0 && (
+      <div className="bg-red-200 border border-red-500 text-red-700 p-2 rounded my-4">
+        <p className="font-bold">Please fill in the following fields:</p>
+        <ul className="list-disc ml-5">
+          {errorMessages[currentStep].map((error, index) => (
+            <li key={index}>{error}</li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    {successMessage && (
+      <div className="p-4 mb-4 border-l-4 border-green-500 bg-green-100 text-green-700 rounded-lg">
+        <div className="flex items-center">
+          <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+          <p>{successMessage}</p>
+        </div>
+      </div>
+    )}
+  </div>
+</>
 
     </div>
   );

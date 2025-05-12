@@ -171,7 +171,7 @@ const ProductDetailsForm = ({ onDataChange, initialData }) => {
                 </select>
               </div>
               </div>
-              {products.length > 1 && (
+              {/* {products.length > 1 && (
                 <button
                   type="button"
                   onClick={() => deleteProduct(index)}
@@ -179,7 +179,7 @@ const ProductDetailsForm = ({ onDataChange, initialData }) => {
                 >
                   Delete Product Set
                 </button>
-              )}
+              )} */}
             </div>
           ))}
           <button

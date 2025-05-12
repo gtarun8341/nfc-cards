@@ -27,7 +27,7 @@ export default function StaffAuthPage() {
         router.push("staff-panel/change-password");
       } else {
         // Redirect to staff panel
-        router.push("/staff-panel");
+        router.push("/staff-panel/Dashboard");
         
       }
     } else {
