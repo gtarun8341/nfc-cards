@@ -101,7 +101,7 @@ const AdminNFCCardsPage = () => {
 
     return (
         <div className="container mx-auto p-6">
-            <h1 className="text-2xl font-bold mb-4">Admin - Manage NFC Card Templates</h1>
+            <h1 className="text-2xl font-bold mb-4">Staff - Manage NFC Card Templates</h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {templates.length > 0 ? (
                     templates.map((template) => (

@@ -11,7 +11,7 @@ export default function RootLayout({ children }) {
 
   // Check if the current page is a template page (using the dynamic route)
   const isTemplatePage = pathname.includes('/templates/');
-
+ 
   return (
     <html lang="en">
       <body className="flex flex-col min-h-screen">
