@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import api from "../../apiConfig/axiosConfig"; // Ensure you have the right API config
-import CompanyDetailsForm from "./CompanyDetailsForm/page";
-import SocialMediaForm from "./SocialMediaForm/page";
-import AboutCompanyForm from "./AboutCompanyForm/page";
-import BankDetailsForm from "./BankDetailsForm/page";
-import ProductDetailsForm from "./ProductDetailsForm/page";
-import GalleryImagesForm from "./GalleryImagesForm/page";
-import AdditionalForm from "./AdditionalForm/page";
+import CompanyDetailsForm from "../../components/CompanyDetailsForm";
+import SocialMediaForm from "../../components/SocialMediaForm";
+import AboutCompanyForm from "../../components/AboutCompanyForm";
+import BankDetailsForm from "../../components/BankDetailsForm";
+import ProductDetailsForm from "../../components/ProductDetailsForm";
+import GalleryImagesForm from "../../components/GalleryImagesForm";
+import AdditionalForm from "../../components/AdditionalForm";
 import { CheckCircle,AlertCircle } from "lucide-react";
 
 const UserFormPage = () => {
