@@ -1,31 +1,33 @@
 "use client"; // Next.js Client Component
 
-import { useState, useEffect } from 'react';
-import api from '../../apiConfig/axiosConfig'; // Adjust the path as needed
+import { useState, useEffect } from "react";
+import api from "../../apiConfig/axiosConfig"; // Adjust the path as needed
+import * as XLSX from "xlsx";
 
 const CustomerProfileManagementPage = () => {
   const [customers, setCustomers] = useState([]);
   const [editCustomer, setEditCustomer] = useState(null);
-  const [updatedName, setUpdatedName] = useState('');
-  const [searchTerm, setSearchTerm] = useState(''); // For search functionality
+  const [updatedName, setUpdatedName] = useState("");
+  const [searchTerm, setSearchTerm] = useState(""); // For search functionality
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [newPassword, setNewPassword] = useState('');
+  const [newPassword, setNewPassword] = useState("");
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
 
   // Fetch customers when the component loads
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
+        const token = localStorage.getItem("adminAuthToken"); // Assuming token is stored here
         const config = {
           headers: {
             Authorization: `Bearer ${token}`, // Attach the token
           },
         };
-        const { data } = await api.get('/api/users/users', config); // Assuming '/api/users' is your route to fetch customers
+        const { data } = await api.get("/api/users/users", config); // Assuming '/api/users' is your route to fetch customers
+        console.log(data);
         setCustomers(data);
       } catch (error) {
-        console.error('Error fetching customers:', error);
+        console.error("Error fetching customers:", error);
       }
     };
     fetchCustomers();
@@ -40,7 +42,7 @@ const CustomerProfileManagementPage = () => {
   // Update customer
   const handleUpdate = async (id) => {
     try {
-      const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
+      const token = localStorage.getItem("adminAuthToken"); // Assuming token is stored here
       const config = {
         headers: {
           Authorization: `Bearer ${token}`, // Attach the token
@@ -53,14 +55,14 @@ const CustomerProfileManagementPage = () => {
       setCustomers(updatedCustomers);
       setEditCustomer(null);
     } catch (error) {
-      console.error('Error updating customer:', error);
+      console.error("Error updating customer:", error);
     }
   };
 
   // Delete customer
   const handleDelete = async (id) => {
     try {
-      const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
+      const token = localStorage.getItem("adminAuthToken"); // Assuming token is stored here
       const config = {
         headers: {
           Authorization: `Bearer ${token}`, // Attach the token
@@ -69,41 +71,65 @@ const CustomerProfileManagementPage = () => {
       await api.delete(`/api/users/users/${id}`, config); // Assuming delete route is '/api/users/:id'
       setCustomers(customers.filter((customer) => customer._id !== id));
     } catch (error) {
-      console.error('Error deleting customer:', error);
+      console.error("Error deleting customer:", error);
     }
   };
   const handleResetPassword = (id) => {
     setSelectedCustomerId(id);
-    setNewPassword('');
+    setNewPassword("");
     setShowPasswordModal(true);
+  };
+  const handleDownloadExcel = () => {
+    const exportData = customers.map((customer) => ({
+      Name: customer.name,
+      Email: customer.email,
+      Phone: customer.phone || "-",
+      Company: customer.companyName || "-",
+      Profession: customer.profession || "-",
+      CreatedAt: new Date(customer.createdAt).toLocaleString(),
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Customer Data");
+
+    const fileName = `All_Customers_Details.xlsx`;
+    XLSX.writeFile(workbook, fileName);
   };
 
   const submitPasswordReset = async () => {
     try {
-      const token = localStorage.getItem('adminAuthToken');
+      const token = localStorage.getItem("adminAuthToken");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
-      await api.put(`/api/users/users/${selectedCustomerId}/resetPassword`, { newPassword }, config);
-      alert('Password updated successfully');
+      await api.put(
+        `/api/users/users/${selectedCustomerId}/resetPassword`,
+        { newPassword },
+        config
+      );
+      alert("Password updated successfully");
       setShowPasswordModal(false);
     } catch (error) {
-      console.error('Error resetting password:', error);
-      alert('Failed to reset password');
+      console.error("Error resetting password:", error);
+      alert("Failed to reset password");
     }
   };
 
   // Filter customers based on search term
-  const filteredCustomers = customers.filter((customer) =>
-    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.email.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCustomers = customers.filter(
+    (customer) =>
+      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="max-w-4xl mx-auto p-5 border rounded shadow-lg bg-white">
-      <h2 className="text-2xl font-semibold text-center mb-5">Customer Profile Management</h2>
+      <h2 className="text-2xl font-semibold text-center mb-5">
+        Customer Profile Management
+      </h2>
 
       {/* Search Bar */}
       <div className="mb-5">
@@ -114,6 +140,12 @@ const CustomerProfileManagementPage = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="border px-4 py-2 rounded w-full"
         />
+        <button
+          onClick={handleDownloadExcel}
+          className="ml-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        >
+          Download Excel
+        </button>
       </div>
 
       {/* Customer Table */}
@@ -122,7 +154,16 @@ const CustomerProfileManagementPage = () => {
           <tr>
             <th className="py-2 px-4 bg-gray-100 text-left border-b">Name</th>
             <th className="py-2 px-4 bg-gray-100 text-left border-b">Email</th>
-            <th className="py-2 px-4 bg-gray-100 text-left border-b">Actions</th>
+            <th className="py-2 px-4 bg-gray-100 text-left border-b">Phone</th>
+            <th className="py-2 px-4 bg-gray-100 text-left border-b">
+              Company
+            </th>
+            <th className="py-2 px-4 bg-gray-100 text-left border-b">
+              Profession
+            </th>
+            <th className="py-2 px-4 bg-gray-100 text-left border-b">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -141,6 +182,9 @@ const CustomerProfileManagementPage = () => {
                 )}
               </td>
               <td className="py-2 px-4">{customer.email}</td>
+              <td className="py-2 px-4">{customer.phone || "-"}</td>
+              <td className="py-2 px-4">{customer.companyName || "-"}</td>
+              <td className="py-2 px-4">{customer.profession || "-"}</td>
               <td className="py-2 px-4">
                 {editCustomer?._id === customer._id ? (
                   <button

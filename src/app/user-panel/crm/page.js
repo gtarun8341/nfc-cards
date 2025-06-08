@@ -1,20 +1,21 @@
 "use client"; // Next.js Client Component
 
-import React, { useState, useEffect } from 'react';
-import api from '../../apiConfig/axiosConfig'; // Adjust the path as needed
+import React, { useState, useEffect } from "react";
+import api from "../../apiConfig/axiosConfig"; // Adjust the path as needed
+import * as XLSX from "xlsx";
 
 const CRMPage = () => {
   const [formData, setFormData] = useState({
-    date: '',
-    direction: '', // Incoming or Outgoing
-    startTime: '',
-    endTime: '',
-    name: '',
-    companyName: '',
-    phoneNumber: '',
-    subject: '',
-    notes: '',
-    actionItems: '',
+    date: "",
+    direction: "", // Incoming or Outgoing
+    startTime: "",
+    endTime: "",
+    name: "",
+    companyName: "",
+    phoneNumber: "",
+    subject: "",
+    notes: "",
+    actionItems: "",
     followUpNeeded: false,
   });
 
@@ -22,22 +23,22 @@ const CRMPage = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [searchQuery, setSearchQuery] = useState(''); // State for search input
+  const [searchQuery, setSearchQuery] = useState(""); // State for search input
 
   // Fetch existing CRM entries
   useEffect(() => {
     const fetchCRMEntries = async () => {
       try {
-        const token = localStorage.getItem('authToken'); // Assuming token is stored here
+        const token = localStorage.getItem("authToken"); // Assuming token is stored here
         const config = {
           headers: {
             Authorization: `Bearer ${token}`, // Attach the token
           },
         };
-        const response = await api.get('/api/crm', config); // GET request to fetch CRM data
+        const response = await api.get("/api/crm", config); // GET request to fetch CRM data
         setCrmEntries(response.data);
       } catch (error) {
-        console.error('Error fetching CRM entries:', error);
+        console.error("Error fetching CRM entries:", error);
       }
     };
 
@@ -61,59 +62,114 @@ const CRMPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    const token = localStorage.getItem('authToken'); // Assuming token is stored here
+
+    const token = localStorage.getItem("authToken"); // Assuming token is stored here
     const config = {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     };
-  
+
     try {
       if (isEditing) {
         // Update existing entry
-        const response = await api.put(`/api/crm/${editingId}`, formData, config);
-        alert('CRM entry updated successfully!');
-  
+        const response = await api.put(
+          `/api/crm/${editingId}`,
+          formData,
+          config
+        );
+        alert("CRM entry updated successfully!");
+
         // Update entry in state without re-fetching
         setCrmEntries((prevEntries) =>
           prevEntries.map((entry) =>
             entry._id === editingId ? response.data.crmEntry : entry
           )
         );
-  
+
         setIsEditing(false);
         setEditingId(null);
       } else {
         // Add new entry
-        const response = await api.post('/api/crm', formData, config);
-        alert('CRM entry added successfully!');
-        setCrmEntries((prevEntries) => [...prevEntries, response.data.crmEntry]);
+        const response = await api.post("/api/crm", formData, config);
+        alert("CRM entry added successfully!");
+        setCrmEntries((prevEntries) => [
+          ...prevEntries,
+          response.data.crmEntry,
+        ]);
       }
-  
+
       // Clear form after submission
       setFormData({
-        date: '',
-        direction: '',
-        startTime: '',
-        endTime: '',
-        name: '',
-        companyName: '',
-        phoneNumber: '',
-        subject: '',
-        notes: '',
-        actionItems: '',
+        date: "",
+        direction: "",
+        startTime: "",
+        endTime: "",
+        name: "",
+        companyName: "",
+        phoneNumber: "",
+        subject: "",
+        notes: "",
+        actionItems: "",
         followUpNeeded: false,
       });
       setIsAdding(false); // Hide the form
     } catch (error) {
-      console.error('Error saving CRM data:', error);
+      console.error("Error saving CRM data:", error);
     }
   };
-  
+  const handleDelete = async (id) => {
+    const token = localStorage.getItem("authToken");
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    if (confirm("Are you sure you want to delete this entry?")) {
+      try {
+        await api.delete(`/api/crm/${id}`, config);
+        alert("Deleted successfully!");
+
+        // Remove from local state
+        setCrmEntries((prevEntries) =>
+          prevEntries.filter((entry) => entry._id !== id)
+        );
+      } catch (error) {
+        console.error("Delete error:", error);
+      }
+    }
+  };
+
+  const handleDownload = (entry) => {
+    const entryData = [
+      {
+        Date: formatDate(entry.date),
+        Direction: entry.direction,
+        "Start Time": entry.startTime,
+        "End Time": entry.endTime,
+        Name: entry.name,
+        "Company Name": entry.companyName,
+        "Phone Number": entry.phoneNumber,
+        Subject: entry.subject,
+        Notes: entry.notes,
+        "Action Items": entry.actionItems,
+        "Follow-up Needed": entry.followUpNeeded ? "Yes" : "No",
+      },
+    ];
+
+    // Create a new workbook and worksheet
+    const worksheet = XLSX.utils.json_to_sheet(entryData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "CRM Entry");
+
+    // Generate a binary string and trigger download
+    const fileName = `${entry.name || "entry"}_CRM.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+  };
 
   const handleEdit = (entry) => {
-    const formattedDate = entry.date ? entry.date.split('T')[0] : '';
+    const formattedDate = entry.date ? entry.date.split("T")[0] : "";
 
     setFormData({
       date: formattedDate, // Use formatted date
@@ -131,37 +187,38 @@ const CRMPage = () => {
     setEditingId(entry._id); // Store the ID of the entry being edited
     setIsEditing(true); // Open the form in edit mode
   };
-  
+
   const handleCancel = () => {
     setIsAdding(false);
     setIsEditing(false);
     setEditingId(null);
     setFormData({
-      date: '',
-      direction: '',
-      startTime: '',
-      endTime: '',
-      name: '',
-      companyName: '',
-      phoneNumber: '',
-      subject: '',
-      notes: '',
-      actionItems: '',
+      date: "",
+      direction: "",
+      startTime: "",
+      endTime: "",
+      name: "",
+      companyName: "",
+      phoneNumber: "",
+      subject: "",
+      notes: "",
+      actionItems: "",
       followUpNeeded: false,
     });
   };
   const formatDate = (isoDate) => {
     const date = new Date(isoDate);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
     return `${day}-${month}-${year}`; // Format as dd-mm-yyyy
   };
-  
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white shadow-md rounded-lg overflow-hidden">
-      <h1 className="text-2xl font-semibold text-center mb-4">CRM Integration</h1>
+      <h1 className="text-2xl font-semibold text-center mb-4">
+        CRM Integration
+      </h1>
 
       {/* Add Button */}
       {!isAdding && !isEditing && (
@@ -186,7 +243,9 @@ const CRMPage = () => {
                 type="date"
                 name="date"
                 value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, date: e.target.value })
+                }
                 className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
                 required
               />
@@ -197,7 +256,9 @@ const CRMPage = () => {
               <select
                 name="direction"
                 value={formData.direction}
-                onChange={(e) => setFormData({ ...formData, direction: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, direction: e.target.value })
+                }
                 className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
                 required
               >
@@ -213,7 +274,9 @@ const CRMPage = () => {
                 type="time"
                 name="startTime"
                 value={formData.startTime}
-                onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, startTime: e.target.value })
+                }
                 className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
                 required
               />
@@ -225,7 +288,9 @@ const CRMPage = () => {
                 type="time"
                 name="endTime"
                 value={formData.endTime}
-                onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, endTime: e.target.value })
+                }
                 className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
                 required
               />
@@ -238,7 +303,9 @@ const CRMPage = () => {
                 name="name"
                 placeholder="Name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
                 required
               />
@@ -251,7 +318,9 @@ const CRMPage = () => {
                 name="companyName"
                 placeholder="Company Name"
                 value={formData.companyName}
-                onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, companyName: e.target.value })
+                }
                 className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
               />
             </div>
@@ -263,7 +332,9 @@ const CRMPage = () => {
                 name="phoneNumber"
                 placeholder="Phone Number"
                 value={formData.phoneNumber}
-                onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, phoneNumber: e.target.value })
+                }
                 className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
               />
             </div>
@@ -275,7 +346,9 @@ const CRMPage = () => {
                 name="subject"
                 placeholder="Subject"
                 value={formData.subject}
-                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, subject: e.target.value })
+                }
                 className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
                 required
               />
@@ -287,7 +360,9 @@ const CRMPage = () => {
                 name="notes"
                 placeholder="Notes"
                 value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, notes: e.target.value })
+                }
                 className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
               />
             </div>
@@ -298,7 +373,9 @@ const CRMPage = () => {
                 name="actionItems"
                 placeholder="Action Items"
                 value={formData.actionItems}
-                onChange={(e) => setFormData({ ...formData, actionItems: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, actionItems: e.target.value })
+                }
                 className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
               />
             </div>
@@ -307,8 +384,13 @@ const CRMPage = () => {
               <label className="block mb-1">Follow-up Needed?</label>
               <select
                 name="followUpNeeded"
-                value={formData.followUpNeeded ? 'Yes' : 'No'}
-                onChange={(e) => setFormData({ ...formData, followUpNeeded: e.target.value === 'Yes' })}
+                value={formData.followUpNeeded ? "Yes" : "No"}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    followUpNeeded: e.target.value === "Yes",
+                  })
+                }
                 className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
               >
                 <option value="No">No</option>
@@ -337,59 +419,73 @@ const CRMPage = () => {
       {/* List of CRM Entries */}
       <div className="mt-6">
         <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Search by Company Name, Name, Phone Number, Date, or Subject"
-          value={searchQuery}
-          onChange={handleSearchChange}
-          className="p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-        />
-      </div>
-      {filteredEntries.length === 0 ? (
+          <input
+            type="text"
+            placeholder="Search by Company Name, Name, Phone Number, Date, or Subject"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+          />
+        </div>
+        {filteredEntries.length === 0 ? (
           <p>No CRM entries available.</p>
         ) : (
           <table className="min-w-full border-collapse border border-gray-300">
-          <thead>
-            <tr>
-              <th className="p-2 text-left border-b">Date</th>
-              <th className="p-2 text-left border-b">Direction</th>
-              <th className="p-2 text-left border-b">Start Time</th>
-              <th className="p-2 text-left border-b">End Time</th>
-              <th className="p-2 text-left border-b">Name</th>
-              <th className="p-2 text-left border-b">Company Name</th>
-              <th className="p-2 text-left border-b">Phone Number</th>
-              <th className="p-2 text-left border-b">Subject</th>
-              <th className="p-2 text-left border-b">Notes</th>
-              <th className="p-2 text-left border-b">Action Items</th>
-              <th className="p-2 text-left border-b">Follow-up Needed</th>
-              <th className="p-2 text-left border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-          {filteredEntries.map((entry) => (
-              <tr key={entry._id}>
-<td className="p-2 border-b">{formatDate(entry.date)}</td>
-<td className="p-2 border-b">{entry.direction}</td>
-                <td className="p-2 border-b">{entry.startTime}</td>
-                <td className="p-2 border-b">{entry.endTime}</td>
-                <td className="p-2 border-b">{entry.name}</td>
-                <td className="p-2 border-b">{entry.companyName}</td>
-                <td className="p-2 border-b">{entry.phoneNumber}</td>
-                <td className="p-2 border-b">{entry.subject}</td>
-                <td className="p-2 border-b">{entry.notes}</td>
-                <td className="p-2 border-b">{entry.actionItems}</td>
-                <td className="p-2 border-b">{entry.followUpNeeded ? 'Yes' : 'No'}</td>
-                <td className="p-2 border-b">
-        <button
-          onClick={() => handleEdit(entry)}
-          className="p-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
-        >
-          Edit
-        </button>
-      </td>
+            <thead>
+              <tr>
+                <th className="p-2 text-left border-b">Date</th>
+                <th className="p-2 text-left border-b">Direction</th>
+                <th className="p-2 text-left border-b">Start Time</th>
+                <th className="p-2 text-left border-b">End Time</th>
+                <th className="p-2 text-left border-b">Name</th>
+                <th className="p-2 text-left border-b">Company Name</th>
+                <th className="p-2 text-left border-b">Phone Number</th>
+                <th className="p-2 text-left border-b">Subject</th>
+                <th className="p-2 text-left border-b">Notes</th>
+                <th className="p-2 text-left border-b">Action Items</th>
+                <th className="p-2 text-left border-b">Follow-up Needed</th>
+                <th className="p-2 text-left border-b">Actions</th>
               </tr>
-            ))}
-          </tbody>
+            </thead>
+            <tbody>
+              {filteredEntries.map((entry) => (
+                <tr key={entry._id}>
+                  <td className="p-2 border-b">{formatDate(entry.date)}</td>
+                  <td className="p-2 border-b">{entry.direction}</td>
+                  <td className="p-2 border-b">{entry.startTime}</td>
+                  <td className="p-2 border-b">{entry.endTime}</td>
+                  <td className="p-2 border-b">{entry.name}</td>
+                  <td className="p-2 border-b">{entry.companyName}</td>
+                  <td className="p-2 border-b">{entry.phoneNumber}</td>
+                  <td className="p-2 border-b">{entry.subject}</td>
+                  <td className="p-2 border-b">{entry.notes}</td>
+                  <td className="p-2 border-b">{entry.actionItems}</td>
+                  <td className="p-2 border-b">
+                    {entry.followUpNeeded ? "Yes" : "No"}
+                  </td>
+                  <td className="p-2 border-b space-x-2">
+                    <button
+                      onClick={() => handleEdit(entry)}
+                      className="p-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(entry._id)}
+                      className="p-1 bg-red-500 text-white rounded-md hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                    <button
+                      onClick={() => handleDownload(entry)}
+                      className="p-1 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                    >
+                      Download
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         )}
       </div>

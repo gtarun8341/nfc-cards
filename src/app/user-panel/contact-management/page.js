@@ -1,30 +1,31 @@
 "use client"; // Next.js Client Component
 
-import React, { useState, useEffect } from 'react';
-import api from '../../apiConfig/axiosConfig'; // Adjust the path as needed
+import React, { useState, useEffect } from "react";
+import api from "../../apiConfig/axiosConfig"; // Adjust the path as needed
+import * as XLSX from "xlsx";
 
 const ContactManagementPage = () => {
   const [contact, setContact] = useState({
-    name: '',
-    reference: '',
-    profession: '',
-    industry: '',
-    category: '',
-    designation: '',
-    companyName: '',
-    mobileNumber: '',
-    email: '',
-    website: '',
-    address: '',
-    city: '',
-    state: '',
-    pinCode: '',
+    name: "",
+    reference: "",
+    profession: "",
+    industry: "",
+    category: "",
+    designation: "",
+    companyName: "",
+    mobileNumber: "",
+    email: "",
+    website: "",
+    address: "",
+    city: "",
+    state: "",
+    pinCode: "",
   });
 
   const [contacts, setContacts] = useState([]);
   const [isAdding, setIsAdding] = useState(false);
   const [editContactId, setEditContactId] = useState(null); // Track contact being edited
-  const [searchQuery, setSearchQuery] = useState(''); // State to store search query
+  const [searchQuery, setSearchQuery] = useState(""); // State to store search query
   const [filteredContacts, setFilteredContacts] = useState([]);
 
   useEffect(() => {
@@ -35,32 +36,31 @@ const ContactManagementPage = () => {
     filterContacts();
   }, [contacts, searchQuery]); // Re-run filter when contacts or searchQuery change
 
-
-
   const fetchContacts = async () => {
     try {
-      const token = localStorage.getItem('authToken'); // Assuming token is stored here
+      const token = localStorage.getItem("authToken"); // Assuming token is stored here
       const config = {
         headers: {
           Authorization: `Bearer ${token}`, // Attach the token
         },
       };
-      const response = await api.get('/api/contacts', config); // GET request to fetch contacts
+      const response = await api.get("/api/contacts", config); // GET request to fetch contacts
       setContacts(response.data);
     } catch (error) {
-      console.error('Error fetching contacts:', error);
+      console.error("Error fetching contacts:", error);
     }
   };
 
   const filterContacts = () => {
     const query = searchQuery.toLowerCase();
-    const filtered = contacts.filter(contact => 
-      contact.name.toLowerCase().includes(query) ||
-      contact.profession.toLowerCase().includes(query) ||
-      contact.companyName.toLowerCase().includes(query) ||
-      contact.mobileNumber.toLowerCase().includes(query) ||
-      contact.email.toLowerCase().includes(query) ||
-      contact.website.toLowerCase().includes(query)
+    const filtered = contacts.filter(
+      (contact) =>
+        contact.name.toLowerCase().includes(query) ||
+        contact.profession.toLowerCase().includes(query) ||
+        contact.companyName.toLowerCase().includes(query) ||
+        contact.mobileNumber.toLowerCase().includes(query) ||
+        contact.email.toLowerCase().includes(query) ||
+        contact.website.toLowerCase().includes(query)
     );
     setFilteredContacts(filtered);
   };
@@ -71,11 +71,59 @@ const ContactManagementPage = () => {
       [e.target.name]: e.target.value,
     }));
   };
+  const handleDownload = (contact) => {
+    const contactData = [
+      {
+        Name: contact.name,
+        Reference: contact.reference,
+        Profession: contact.profession,
+        Industry: contact.industry,
+        Category: contact.category,
+        Designation: contact.designation,
+        "Company Name": contact.companyName,
+        "Mobile Number": contact.mobileNumber,
+        Email: contact.email,
+        Website: contact.website,
+        Address: contact.address,
+        City: contact.city,
+        State: contact.state,
+        "Pin Code": contact.pinCode,
+      },
+    ];
+
+    const worksheet = XLSX.utils.json_to_sheet(contactData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Contact Info");
+
+    const fileName = `${contact.name || "contact"}_Details.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+  };
+  const handleDelete = async (contactId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this contact?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const token = localStorage.getItem("authToken");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      await api.delete(`/api/contacts/contacts/${contactId}`, config);
+      alert("Contact deleted successfully.");
+      fetchContacts(); // Refresh list
+    } catch (error) {
+      console.error("Error deleting contact:", error);
+      alert("Failed to delete contact.");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem("authToken");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -85,38 +133,38 @@ const ContactManagementPage = () => {
       if (editContactId) {
         // Update contact if editing
         await api.put(
-          '/api/contacts/contacts',
+          "/api/contacts/contacts",
           { ...contact, contactId: editContactId },
           config
         );
-        alert('Contact updated successfully');
+        alert("Contact updated successfully");
       } else {
         // Add new contact if not editing
-        await api.post('/api/contacts', contact, config);
-        alert('Contact added successfully');
+        await api.post("/api/contacts", contact, config);
+        alert("Contact added successfully");
       }
 
       fetchContacts(); // Fetch updated contacts
       setIsAdding(false);
       setContact({
-        name: '',
-        reference: '',
-        profession: '',
-        industry: '',
-        category: '',
-        designation: '',
-        companyName: '',
-        mobileNumber: '',
-        email: '',
-        website: '',
-        address: '',
-        city: '',
-        state: '',
-        pinCode: '',
+        name: "",
+        reference: "",
+        profession: "",
+        industry: "",
+        category: "",
+        designation: "",
+        companyName: "",
+        mobileNumber: "",
+        email: "",
+        website: "",
+        address: "",
+        city: "",
+        state: "",
+        pinCode: "",
       });
       setEditContactId(null); // Reset edit mode
     } catch (error) {
-      console.error('Error saving contact:', error);
+      console.error("Error saving contact:", error);
     }
   };
 
@@ -129,13 +177,15 @@ const ContactManagementPage = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white shadow-md rounded-lg overflow-hidden">
-      <h1 className="text-2xl font-semibold text-center mb-4">Contact Management</h1>
+      <h1 className="text-2xl font-semibold text-center mb-4">
+        Contact Management
+      </h1>
 
       <button
         onClick={() => setIsAdding(!isAdding)}
         className="mb-4 w-full p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
       >
-        {isAdding ? 'Cancel' : 'Add New Contact'}
+        {isAdding ? "Cancel" : "Add New Contact"}
       </button>
 
       {isAdding && (
@@ -302,20 +352,20 @@ const ContactManagementPage = () => {
             type="submit"
             className="mt-4 w-full p-2 bg-green-500 text-white rounded-md hover:bg-green-600"
           >
-            {editContactId ? 'Update Contact' : 'Save Contact'}
-            </button>
+            {editContactId ? "Update Contact" : "Save Contact"}
+          </button>
         </form>
       )}
 
       <div className="overflow-x-auto">
-              {/* Search Bar */}
-              <input
-        type="text"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        placeholder="Search by name, profession, company, mobile, email, or website"
-        className="mb-4 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
-      />
+        {/* Search Bar */}
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search by name, profession, company, mobile, email, or website"
+          className="mb-4 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300 w-full"
+        />
         <table className="min-w-full table-auto border-collapse bg-white shadow-md rounded-md">
           <thead>
             <tr className="border-b bg-gray-100">
@@ -337,7 +387,7 @@ const ContactManagementPage = () => {
             </tr>
           </thead>
           <tbody>
-          {filteredContacts.map((contact, index) => (
+            {filteredContacts.map((contact, index) => (
               <tr key={index} className="border-b">
                 <td className="px-4 py-2">{contact.name}</td>
                 <td className="px-4 py-2">{contact.reference}</td>
@@ -353,12 +403,24 @@ const ContactManagementPage = () => {
                 <td className="px-4 py-2">{contact.city}</td>
                 <td className="px-4 py-2">{contact.state}</td>
                 <td className="px-4 py-2">{contact.pinCode}</td>
-                <td className="px-4 py-2">
+                <td className="px-4 py-2 flex gap-2">
                   <button
                     onClick={() => handleEdit(contact._id)}
                     className="text-blue-500 hover:text-blue-700"
                   >
                     Edit
+                  </button>
+                  <button
+                    onClick={() => handleDownload(contact)}
+                    className="text-green-600 hover:text-green-800"
+                  >
+                    Download
+                  </button>
+                  <button
+                    onClick={() => handleDelete(contact._id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    Delete
                   </button>
                 </td>
               </tr>

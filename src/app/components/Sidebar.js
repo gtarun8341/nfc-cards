@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import {
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
   ArrowRightOnRectangleIcon,
-} from '@heroicons/react/24/outline';
+} from "@heroicons/react/24/outline";
 
 const Sidebar = ({ menuItems, onLogout, isSidebarOpen, setIsSidebarOpen }) => {
   const [openSubmenu, setOpenSubmenu] = useState(null);
@@ -24,7 +24,7 @@ const Sidebar = ({ menuItems, onLogout, isSidebarOpen, setIsSidebarOpen }) => {
   return (
     <div
       className={`bg-gray-800 text-white flex flex-col justify-between p-4 transition-width duration-300 ${
-        isSidebarOpen ? 'w-64' : 'w-20'
+        isSidebarOpen ? "w-64" : "w-20"
       } h-screen`}
     >
       {/* Sidebar Toggle Button */}
@@ -42,13 +42,13 @@ const Sidebar = ({ menuItems, onLogout, isSidebarOpen, setIsSidebarOpen }) => {
       {/* Scrollable Menu Items */}
       <div
         className="space-y-4 flex-grow overflow-y-auto"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {menuItems.map((item, index) => (
           <div key={index}>
             <button
               className={`flex items-center w-full py-2 px-4 rounded-md hover:bg-gray-700 ${
-                pathname === item.path ? 'bg-gray-700 font-semibold' : ''
+                pathname === item.path ? "bg-gray-700 font-semibold" : ""
               }`}
               onClick={() => {
                 if (item.path) router.push(item.path);
@@ -66,14 +66,18 @@ const Sidebar = ({ menuItems, onLogout, isSidebarOpen, setIsSidebarOpen }) => {
                   <button
                     key={subIndex}
                     className={`flex items-center w-full py-2 px-4 rounded-md hover:bg-gray-600 ${
-                      pathname === subItem.path ? 'bg-gray-600 font-semibold' : ''
+                      pathname === subItem.path
+                        ? "bg-gray-600 font-semibold"
+                        : ""
                     }`}
                     onClick={() => {
                       if (subItem.path) router.push(subItem.path);
                     }}
                   >
                     <subItem.icon className="h-5 w-5" />
-                    {isSidebarOpen && <span className="ml-4">{subItem.name}</span>}
+                    {isSidebarOpen && (
+                      <span className="ml-4">{subItem.name}</span>
+                    )}
                   </button>
                 ))}
               </div>

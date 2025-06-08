@@ -79,8 +79,14 @@ const Navbar = () => {
                     { name: "NFC Card", href: "/nfc-card" },
                     { name: "PDF Card", href: "/pdf-card" },
                     { name: "Physical Card", href: "/physical-card" },
-                    { name: "Business Profile", href: "/one-page-bussiness-profile" },
-                    { name: "Business Essentials", href: "/bussiness-essentials" },
+                    {
+                      name: "Business Profile",
+                      href: "/one-page-bussiness-profile",
+                    },
+                    {
+                      name: "Business Essentials",
+                      href: "/bussiness-essentials",
+                    },
                   ].map((item, index) => (
                     <li key={index}>
                       <Link
@@ -104,7 +110,11 @@ const Navbar = () => {
             { name: "Shop Now", href: "/our-products" },
             { name: "Track Product", href: "/tracking" },
           ].map((item, index) => (
-            <Link key={index} href={item.href} className="hover:text-gray-200 hover:underline transition">
+            <Link
+              key={index}
+              href={item.href}
+              className="hover:text-gray-200 hover:underline transition"
+            >
               {item.name}
             </Link>
           ))}
@@ -118,7 +128,7 @@ const Navbar = () => {
                 </button>
               </Link>
             ) : (
-              <Link href={`/${userRole}-panel`}>
+              <Link href={`/${userRole}-panel/Dashboard`}>
                 <button className="bg-white text-green-700 px-4 py-2 rounded-lg shadow-lg hover:bg-gray-100 transition">
                   {userRole.charAt(0).toUpperCase() + userRole.slice(1)} Panel
                 </button>
@@ -128,20 +138,39 @@ const Navbar = () => {
         </div>
 
         {/* Hamburger Menu for Mobile */}
-        <button onClick={toggleMenu} className="md:hidden text-white focus:outline-none">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+        <button
+          onClick={toggleMenu}
+          className="md:hidden text-white focus:outline-none"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M4 6h16M4 12h16m-7 6h7"
+            />
           </svg>
         </button>
       </div>
 
       {/* Mobile Menu */}
       <div
-        className={`${isOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"} bg-green-600 text-white md:hidden overflow-hidden transition-all duration-300 ease-in-out`}
+        className={`${
+          isOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+        } bg-green-600 text-white md:hidden overflow-hidden transition-all duration-300 ease-in-out`}
       >
         <ul className="space-y-4 py-4 px-6">
           <li>
-            <button onClick={toggleDropdown} className="block hover:text-gray-300 transition">
+            <button
+              onClick={toggleDropdown}
+              className="block hover:text-gray-300 transition"
+            >
               Our Cards
             </button>
             {dropdownOpen && (
@@ -151,8 +180,14 @@ const Navbar = () => {
                     { name: "NFC Card", href: "/nfc-card" },
                     { name: "PDF Card", href: "/pdf-card" },
                     { name: "Physical Card", href: "/physical-card" },
-                    { name: "Business Profile", href: "/one-page-bussiness-profile" },
-                    { name: "Business Essentials", href: "/bussiness-essentials" },
+                    {
+                      name: "Business Profile",
+                      href: "/one-page-bussiness-profile",
+                    },
+                    {
+                      name: "Business Essentials",
+                      href: "/bussiness-essentials",
+                    },
                   ].map((item, index) => (
                     <li key={index}>
                       <Link
@@ -177,7 +212,10 @@ const Navbar = () => {
             { name: "Track Product", href: "/tracking" },
           ].map((item, index) => (
             <li key={index}>
-              <Link href={item.href} className="block hover:text-gray-300 transition">
+              <Link
+                href={item.href}
+                className="block hover:text-gray-300 transition"
+              >
                 {item.name}
               </Link>
             </li>
@@ -192,7 +230,7 @@ const Navbar = () => {
                 </button>
               </Link>
             ) : (
-              <Link href={`/${userRole}-panel`}>
+              <Link href={`/${userRole}-panel/Dashboard`}>
                 <button className="bg-white text-green-700 px-4 py-2 rounded-lg shadow-lg hover:bg-gray-100 transition">
                   {userRole.charAt(0).toUpperCase() + userRole.slice(1)} Panel
                 </button>

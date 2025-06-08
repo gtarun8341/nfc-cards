@@ -1,11 +1,14 @@
-// src/app/components/Footer.js
-"use client"; // Next.js Client Component
+"use client";
 
 const Footer = () => {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="bg-gray-800 text-white p-4">
+    <footer className="bg-gray-800 text-white p-4 border-t border-gray-700">
       <div className="container mx-auto text-center">
-        <p>&copy; 2024 NFC Card Website. All rights reserved.</p>
+        <p>
+          &copy; {currentYear} Designed and Developed by Shiven Enterprises.
+        </p>
       </div>
     </footer>
   );
