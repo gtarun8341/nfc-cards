@@ -12,27 +12,34 @@ const CustomerProfileManagementPage = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
-
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   // Fetch customers when the component loads
+  // useEffect(() => {
+  const fetchCustomers = async () => {
+    try {
+      const token = localStorage.getItem("adminAuthToken"); // Assuming token is stored here
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach the token
+        },
+      };
+      const response = await api.get(
+        `/api/users/users?page=${page}&limit=10`,
+        config
+      ); // Assuming '/api/users' is your route to fetch customers
+      console.log(response.data);
+      setCustomers(response.data.users); // <- response.data.users from backend
+      setTotalPages(response.data.totalPages);
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+    }
+  };
+  //   fetchCustomers();
+  // }, []);
   useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        const token = localStorage.getItem("adminAuthToken"); // Assuming token is stored here
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`, // Attach the token
-          },
-        };
-        const { data } = await api.get("/api/users/users", config); // Assuming '/api/users' is your route to fetch customers
-        console.log(data);
-        setCustomers(data);
-      } catch (error) {
-        console.error("Error fetching customers:", error);
-      }
-    };
     fetchCustomers();
-  }, []);
-
+  }, [page]);
   // Handle edit functionality
   const handleEdit = (customer) => {
     setEditCustomer(customer);
@@ -218,6 +225,27 @@ const CustomerProfileManagementPage = () => {
           ))}
         </tbody>
       </table>
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center mt-4 space-x-4">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="text-lg font-semibold">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
       {showPasswordModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-md w-96">

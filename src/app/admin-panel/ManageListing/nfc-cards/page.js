@@ -9,38 +9,48 @@ const AdminNFCCardsPage = () => {
   const [previewHtml, setPreviewHtml] = useState({}); // Store rendered HTML for the iframe
   const router = useRouter(); // Initialize useRouter
   const [sortOrder, setSortOrder] = useState("desc"); // 'asc' or 'desc'
-
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   // Fetch NFC card templates on component mount
+  // useEffect(() => {
+  const fetchTemplates = async () => {
+    try {
+      const token = localStorage.getItem("adminAuthToken"); // Retrieve the JWT token from localStorage
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
+        },
+      };
+      // Fetch NFC card templates
+      const response = await api.get(
+        `/api/templates/admin/templates?type=nfc&page=${page}&limit=9`,
+        config
+      );
+
+      setTemplates(response.data.templates);
+      setTotalPages(response.data.totalPages);
+      setPage(response.data.currentPage); // Optional: keep in sync
+
+      // Load preview HTML for each
+      await Promise.all(
+        response.data.templates.map((template) => previewTemplate(template._id))
+      );
+      // // Automatically preview each template
+      // for (const template of response.data.templates) {
+      //   await previewTemplate(template._id);
+      // }
+    } catch (error) {
+      console.error("Error fetching templates:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  //   fetchTemplates();
+  // }, []);
   useEffect(() => {
-    const fetchTemplates = async () => {
-      try {
-        const token = localStorage.getItem("adminAuthToken"); // Retrieve the JWT token from localStorage
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
-          },
-        };
-        // Fetch NFC card templates
-        const response = await api.get(
-          "/api/templates/admin/templates?type=nfc",
-          config
-        );
-        setTemplates(response.data);
-        console.log(response.data);
-
-        // Automatically preview each template
-        for (const template of response.data) {
-          await previewTemplate(template._id);
-        }
-      } catch (error) {
-        console.error("Error fetching templates:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTemplates();
-  }, []);
+  }, [page]);
 
   const previewTemplate = async (templateId) => {
     try {
@@ -172,6 +182,27 @@ const AdminNFCCardsPage = () => {
           <p>No templates found.</p>
         )}
       </div>
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6 space-x-4">
+          <button
+            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+            disabled={page === 1}
+            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="text-lg font-semibold">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={page === totalPages}
+            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };

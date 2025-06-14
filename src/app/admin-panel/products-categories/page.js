@@ -12,33 +12,37 @@ const ProductsCategoriesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("all");
   const [selectedDiscount, setSelectedDiscount] = useState("all");
-
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   // Fetch products
+  // useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      const token = localStorage.getItem("adminAuthToken"); // Get the token
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach the token
+        },
+      };
+      const response = await api.get(
+        `/api/user-details/admin/users-products?page=${page}&limit=10`,
+        config
+      );
+      setProducts(response.data.data);
+      setFilteredProducts(response.data.data); // Initialize filteredProducts
+      setTotalPages(response.data.totalPages);
+    } catch (err) {
+      setError("Error fetching products");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  //   fetchProducts();
+  // }, []);
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const token = localStorage.getItem("adminAuthToken"); // Get the token
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`, // Attach the token
-          },
-        };
-        const response = await api.get(
-          "/api/user-details/admin/users-products",
-          config
-        );
-        setProducts(response.data);
-        setFilteredProducts(response.data); // Initialize filteredProducts
-      } catch (err) {
-        setError("Error fetching products");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProducts();
-  }, []);
-
+  }, [page]);
   // Handle search and filters
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -203,6 +207,27 @@ const ProductsCategoriesPage = () => {
         ))
       ) : (
         <p>No products found matching the criteria.</p>
+      )}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center mt-4 space-x-4">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="text-lg font-semibold">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       )}
     </div>
   );

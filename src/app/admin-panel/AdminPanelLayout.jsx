@@ -18,6 +18,12 @@ import {
   GiftIcon,
   ArchiveBoxIcon,
   AcademicCapIcon,
+  ClipboardDocumentListIcon,
+  ShoppingBagIcon,
+  CubeIcon,
+  BanknotesIcon,
+  ChartPieIcon,
+  ChatBubbleLeftEllipsisIcon,
 } from "@heroicons/react/24/outline";
 import Sidebar from "../components/Sidebar"; // Import Sidebar component
 
@@ -76,6 +82,42 @@ const AdminPanelLayout = ({ children }) => {
           onClick: () => setActiveForm("business-essentials"),
         },
         // { name: 'Additional Services', icon: UserIcon, onClick: () => setActiveForm('additional-services') },
+      ],
+    },
+    {
+      name: "Reports",
+      icon: ChartBarIcon, // or any relevant icon
+      submenu: [
+        {
+          name: "Customer Reports", // Join/Leave history
+          path: "/admin-panel/customer-reports",
+          icon: UserGroupIcon,
+        },
+        {
+          name: "Template Usage Reports", // Template usage history
+          path: "/admin-panel/template-reports",
+          icon: ClipboardDocumentListIcon,
+        },
+        {
+          name: "Customer Product Sales", // Customer's own product sales
+          path: "/admin-panel/customer-product-sales",
+          icon: ShoppingBagIcon,
+        },
+        {
+          name: "Admin Product Sales", // Admin-provided products sold
+          path: "/admin-panel/admin-product-sales",
+          icon: CubeIcon,
+        },
+        {
+          name: "Payment Reports", // Full payment transaction logs
+          path: "/admin-panel/payment-reports",
+          icon: BanknotesIcon,
+        },
+        {
+          name: "Enquiry Reports", // Contact Dev, Contact Us, Feedback, etc.
+          path: "/admin-panel/form-reports",
+          icon: ChatBubbleLeftEllipsisIcon,
+        },
       ],
     },
     {
@@ -212,13 +254,17 @@ const AdminPanelLayout = ({ children }) => {
       onClick: () => setActiveForm("contact-us"),
     },
   ];
-
   const handleLogout = () => {
-    document.cookie =
-      "adminAuthToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-    localStorage.clear();
+    ["authToken", "staffAuthToken", "adminAuthToken"].forEach((token) => {
+      // Clear cookie
+      document.cookie = `${token}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
+      // Clear localStorage
+      localStorage.removeItem(token);
+    });
+
     router.push("/admin-auth");
   };
+
   return (
     <div className="flex h-screen">
       <Sidebar

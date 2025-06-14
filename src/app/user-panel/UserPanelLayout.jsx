@@ -18,6 +18,9 @@ import {
   GiftIcon,
   ArchiveBoxIcon,
   AcademicCapIcon,
+  ClipboardDocumentIcon,
+  BanknotesIcon,
+  ChatBubbleLeftRightIcon,
 } from "@heroicons/react/24/outline";
 import Sidebar from "../components/Sidebar"; // Import Sidebar component
 import api from "../apiConfig/axiosConfig"; // Import the axios instance
@@ -116,6 +119,31 @@ const UserPanelLayout = ({ children }) => {
         // { name: 'Additional Services', icon: UserIcon, onClick: () => setActiveForm('additional-services') },
       ],
     },
+    {
+      name: "Reports",
+      icon: ChartBarIcon, // You can use a Lucide or Heroicons icon here
+      submenu: [
+        {
+          name: "Product Reports",
+          path: "/user-panel/product-reports",
+          icon: ClipboardDocumentIcon,
+          onClick: () => setActiveForm("product-report"),
+        },
+        {
+          name: "Payment Reports",
+          path: "/user-panel/payment-reports",
+          icon: BanknotesIcon,
+          onClick: () => setActiveForm("payment-report"),
+        },
+        {
+          name: "Form Reports",
+          path: "/user-panel/form-reports",
+          icon: ChatBubbleLeftRightIcon,
+          onClick: () => setActiveForm("form-reviews"),
+        },
+      ],
+    },
+
     // { name: 'Mini Website', path: 'mini-website', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('mini-website') },
     // { name: 'NFC Cards', path: 'nfc-cards', icon: CreditCardIcon, onClick: () => setActiveForm('nfc-cards') },
     // { name: 'PDF Visiting Card', path: 'pdf-visiting-card', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('pdf-visiting-card') },
@@ -196,9 +224,11 @@ const UserPanelLayout = ({ children }) => {
   ];
 
   const handleLogout = () => {
-    document.cookie =
-      "authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-    localStorage.clear();
+    ["authToken", "staffAuthToken", "adminAuthToken"].forEach((token) => {
+      document.cookie = `${token}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
+      localStorage.removeItem(token);
+    });
+
     router.push("/auth");
   };
 

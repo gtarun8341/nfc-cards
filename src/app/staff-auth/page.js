@@ -13,26 +13,32 @@ export default function StaffAuthPage() {
     e.preventDefault();
 
     try {
-      const response = await api.post("/api/staffAuthRoute/login", { staffId, password });
+      const response = await api.post("/api/staffAuthRoute/login", {
+        staffId,
+        password,
+      });
       console.log("Response:", response.data);
 
       if (response.status === 200) {
         // alert(response.data.message);
+        ["authToken", "staffAuthToken", "adminAuthToken"].forEach((token) => {
+          document.cookie = `${token}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
+          localStorage.removeItem(token);
+        });
 
         // Redirect to staff panel
         document.cookie = `staffAuthToken=${response.data.token}; path=/`; // Set auth token as a cookie
-        localStorage.setItem('staffAuthToken', response.data.token);
-      // If it's the first-time login, redirect to change password page
-      if (response.data.isInitialPassword) {
-        router.push("staff-panel/change-password");
+        localStorage.setItem("staffAuthToken", response.data.token);
+        // If it's the first-time login, redirect to change password page
+        if (response.data.isInitialPassword) {
+          router.push("staff-panel/change-password");
+        } else {
+          // Redirect to staff panel
+          router.push("/staff-panel/Dashboard");
+        }
       } else {
-        // Redirect to staff panel
-        router.push("/staff-panel/Dashboard");
-        
+        alert("Login failed. Please try again.");
       }
-    } else {
-      alert("Login failed. Please try again.");
-    }
     } catch (error) {
       if (error.response) {
         if (error.response.status === 400) {
@@ -61,7 +67,10 @@ export default function StaffAuthPage() {
             <form className="space-y-6 w-full" onSubmit={handleSubmit}>
               {/* Staff ID Input */}
               <div className="space-y-1">
-                <label htmlFor="staffId" className="text-lg font-semibold text-gray-800">
+                <label
+                  htmlFor="staffId"
+                  className="text-lg font-semibold text-gray-800"
+                >
                   Staff ID
                 </label>
                 <input
@@ -76,7 +85,10 @@ export default function StaffAuthPage() {
 
               {/* Password Input */}
               <div className="space-y-1">
-                <label htmlFor="password" className="text-lg font-semibold text-gray-800">
+                <label
+                  htmlFor="password"
+                  className="text-lg font-semibold text-gray-800"
+                >
                   Password
                 </label>
                 <input

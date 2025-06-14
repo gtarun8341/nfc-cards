@@ -12,31 +12,39 @@ const CustomerCompanyManagementPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   // Fetch all company details when the component is mounted
-  useEffect(() => {
-    const fetchCompanies = async () => {
-      try {
-        const token = localStorage.getItem("adminAuthToken");
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        };
-        const response = await api.get("/api/user-details/admin/users", config); // Fetch user details for admin
-        console.log(response.data);
-        setCompanies(response.data);
-        setFilteredCompanies(response.data); // Initialize filteredCompanies with all companies
-      } catch (err) {
-        setError("Error fetching companies");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // useEffect(() => {
+  const fetchCompanies = async () => {
+    try {
+      const token = localStorage.getItem("adminAuthToken");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await api.get(
+        `/api/user-details/admin/users?page=${page}&limit=10`,
+        config
+      ); // Fetch user details for admin
+      console.log(response.data);
+      setCompanies(response.data);
+      setFilteredCompanies(response.data.data); // Initialize filteredCompanies with all companies
+      setTotalPages(response.data.totalPages);
+    } catch (err) {
+      setError("Error fetching companies");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  //   fetchCompanies();
+  // }, []);
+  useEffect(() => {
     fetchCompanies();
-  }, []);
+  }, [page]);
   const handleViewClick = (company) => {
     setSelectedCompany(company);
     setIsModalOpen(true);
@@ -229,6 +237,29 @@ const CustomerCompanyManagementPage = () => {
                 })}
               </tbody>
             </table>
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center mt-4 space-x-4">
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                  className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                <span className="text-lg font-semibold">
+                  Page {page} of {totalPages}
+                </span>
+                <button
+                  disabled={page === totalPages}
+                  onClick={() =>
+                    setPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Display selected company details */}

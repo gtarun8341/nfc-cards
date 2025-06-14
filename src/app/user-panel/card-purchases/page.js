@@ -30,6 +30,7 @@ const CardPurchases = () => {
         const { data } = await api.get("/api/cardPurchase/card-purchase", {
           headers: { Authorization: `Bearer ${token}` },
         });
+        console.log(data);
         setPurchases(data.purchases || []);
       } catch (error) {
         console.error("Error fetching card purchases:", error.message);
@@ -50,7 +51,10 @@ const CardPurchases = () => {
         `${api.defaults.baseURL}/api/cardPurchase/download-invoice/${trackingId}`,
         {
           method: "GET",
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/pdf" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/pdf",
+          },
         }
       );
       if (!response.ok) {
@@ -140,7 +144,9 @@ const CardPurchases = () => {
                       className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700"
                       disabled={downloading === purchase.trackingId}
                     >
-                      {downloading === purchase.trackingId ? "Downloading..." : "Download"}
+                      {downloading === purchase.trackingId
+                        ? "Downloading..."
+                        : "Download"}
                     </button>
                     {error && downloading === purchase.trackingId && (
                       <p className="text-red-500 text-sm mt-1">{error}</p>

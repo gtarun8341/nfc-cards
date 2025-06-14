@@ -1,89 +1,107 @@
-"use client"; 
-import { useState } from 'react'; 
-import { useRouter } from 'next/navigation'; 
-import api from '../apiConfig/axiosConfig'; 
-import AllFooter from '../components/AllFooter';
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import api from "../apiConfig/axiosConfig";
+import AllFooter from "../components/AllFooter";
 
-export default function AuthPage() { 
-  const [isRegister, setIsRegister] = useState(false); 
-  const [email, setEmail] = useState(''); 
-  const [password, setPassword] = useState(''); 
-  const [name, setName] = useState(''); 
-  const [phone, setPhone] = useState('');  // New state for phone number 
+export default function AuthPage() {
+  const [isRegister, setIsRegister] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState(""); // New state for phone number
   const router = useRouter();
 
-  const handleSubmit = async (e) => { 
-    e.preventDefault(); 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    const apiEndpoint = isRegister ? '/api/users/register' : '/api/users/login'; 
-    const requestData = isRegister ? { name, email, password, phone } : { email, password };
+    const apiEndpoint = isRegister ? "/api/users/register" : "/api/users/login";
+    const requestData = isRegister
+      ? { name, email, password, phone }
+      : { email, password };
 
-    try { 
-      const response = await api.post(apiEndpoint, requestData); 
-      console.log('Response:', response.data);
+    try {
+      const response = await api.post(apiEndpoint, requestData);
+      console.log("Response:", response.data);
 
-      if (!isRegister) { 
-        if (response.data.token) { 
-          // User has an active plan 
-          document.cookie = `authToken=${response.data.token}; path=/`; // Set auth token as a cookie 
-          localStorage.setItem('authToken', response.data.token); 
-          router.push('/user-panel/Edit-Account'); 
-        } 
-        // else { 
-        //   // User doesn't have an active plan 
-        //   alert(response.data.message); // Alert the message from the backend 
-        //   localStorage.setItem('_id', response.data._id); 
-        //   localStorage.setItem('userName', response.data.name); 
-        //   localStorage.setItem('userEmail', response.data.email); 
-        //   localStorage.setItem('userPhone', response.data.phone); 
-        //   router.push('/purchase-plan'); 
-        // } 
-        else if (response.data.message?.includes('expired')) {
-          alert(response.data.message);
-          localStorage.setItem('_id', response.data._id);
-          localStorage.setItem('userName', response.data.name);
-          localStorage.setItem('userEmail', response.data.email);
-          localStorage.setItem('userPhone', response.data.phone);
-          router.push('/purchase-plan');
+      if (!isRegister) {
+        if (response.data.token) {
+          // User has an active plan
+          ["authToken", "staffAuthToken", "adminAuthToken"].forEach((token) => {
+            document.cookie = `${token}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
+            localStorage.removeItem(token);
+          });
+
+          document.cookie = `authToken=${response.data.token}; path=/`; // Set auth token as a cookie
+          localStorage.setItem("authToken", response.data.token);
+          router.push("/user-panel/Dashboard");
         }
-      } else { 
-        // Registration successful 
-        alert('Registration successful! Please log in to continue.'); 
-      } 
-    } catch (error) { 
-      if (error.response) { 
-        if (error.response.status === 401) { 
-          alert('Invalid email or password'); 
-        } else { 
-          console.error('Error during API request:', error); 
-          alert('An error occurred. Please try again later.'); 
-        } 
-      } else { 
-        console.error('Error during API request:', error); 
-      } 
-    } 
+        // else {
+        //   // User doesn't have an active plan
+        //   alert(response.data.message); // Alert the message from the backend
+        //   localStorage.setItem('_id', response.data._id);
+        //   localStorage.setItem('userName', response.data.name);
+        //   localStorage.setItem('userEmail', response.data.email);
+        //   localStorage.setItem('userPhone', response.data.phone);
+        //   router.push('/purchase-plan');
+        // }
+        else if (response.data.message?.includes("expired")) {
+          alert(response.data.message);
+          localStorage.setItem("_id", response.data._id);
+          localStorage.setItem("userName", response.data.name);
+          localStorage.setItem("userEmail", response.data.email);
+          localStorage.setItem("userPhone", response.data.phone);
+          router.push("/purchase-plan");
+        }
+      } else {
+        // Registration successful
+        alert("Registration successful! Please log in to continue.");
+      }
+    } catch (error) {
+      if (error.response) {
+        if (error.response.status === 401) {
+          alert("Invalid email or password");
+        } else {
+          console.error("Error during API request:", error);
+          alert("An error occurred. Please try again later.");
+        }
+      } else {
+        console.error("Error during API request:", error);
+      }
+    }
   };
 
-  const toggleForm = () => { 
-    setIsRegister(!isRegister); 
+  const toggleForm = () => {
+    setIsRegister(!isRegister);
   };
 
-  return ( 
-    <> 
+  return (
+    <>
       <section className="min-h-screen flex items-center justify-center bg-gray-200 py-12 px-4">
         <div className="relative w-full max-w-lg h-[650px] rounded-lg shadow-xl bg-white overflow-hidden transform-style-3d">
-          <div className={`absolute top-0 left-0 w-full h-full p-8 transition-transform duration-700 ease-in-out 
-            ${isRegister ? 'rotate-y-180' : ''} transform-style-3d`}>
-            
+          <div
+            className={`absolute top-0 left-0 w-full h-full p-8 transition-transform duration-700 ease-in-out 
+            ${isRegister ? "rotate-y-180" : ""} transform-style-3d`}
+          >
             {/* Login Form */}
-            <div className={`absolute top-0 left-0 w-full h-full p-8 transition-all duration-700 ease-in-out flex flex-col justify-center items-center ${isRegister ? 'hidden' : ''}`}>
+            <div
+              className={`absolute top-0 left-0 w-full h-full p-8 transition-all duration-700 ease-in-out flex flex-col justify-center items-center ${
+                isRegister ? "hidden" : ""
+              }`}
+            >
               <h2 className="text-3xl font-extrabold text-green-600 mb-8 transition-opacity duration-500 opacity-100">
                 Login
               </h2>
 
-              <form className="space-y-6 w-full max-w-sm animate-slideIn" onSubmit={handleSubmit}>
+              <form
+                className="space-y-6 w-full max-w-sm animate-slideIn"
+                onSubmit={handleSubmit}
+              >
                 <div>
-                  <label htmlFor="email" className="block text-lg font-semibold text-gray-700">
+                  <label
+                    htmlFor="email"
+                    className="block text-lg font-semibold text-gray-700"
+                  >
                     Email
                   </label>
                   <input
@@ -97,7 +115,10 @@ export default function AuthPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="block text-lg font-semibold text-gray-700">
+                  <label
+                    htmlFor="password"
+                    className="block text-lg font-semibold text-gray-700"
+                  >
                     Password
                   </label>
                   <input
@@ -120,7 +141,7 @@ export default function AuthPage() {
 
               <div className="mt-6">
                 <p className="text-gray-600 text-sm">
-                Don&apos;t have an account?
+                  Don&apos;t have an account?
                 </p>
                 <button
                   onClick={toggleForm}
@@ -132,14 +153,24 @@ export default function AuthPage() {
             </div>
 
             {/* Register Form */}
-            <div className={`absolute top-0 left-0 w-full h-full p-8 transition-all duration-700 ease-in-out flex flex-col justify-center items-center ${!isRegister ? 'hidden' : ''}`}>
+            <div
+              className={`absolute top-0 left-0 w-full h-full p-8 transition-all duration-700 ease-in-out flex flex-col justify-center items-center ${
+                !isRegister ? "hidden" : ""
+              }`}
+            >
               <h2 className="text-3xl font-extrabold text-green-600 mb-8 transition-opacity duration-500 opacity-100">
                 Register
               </h2>
 
-              <form className="space-y-6 w-full max-w-sm animate-slideIn" onSubmit={handleSubmit}>
+              <form
+                className="space-y-6 w-full max-w-sm animate-slideIn"
+                onSubmit={handleSubmit}
+              >
                 <div>
-                  <label htmlFor="name" className="block text-lg font-semibold text-gray-700">
+                  <label
+                    htmlFor="name"
+                    className="block text-lg font-semibold text-gray-700"
+                  >
                     Name
                   </label>
                   <input
@@ -153,7 +184,10 @@ export default function AuthPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="phone" className="block text-lg font-semibold text-gray-700">
+                  <label
+                    htmlFor="phone"
+                    className="block text-lg font-semibold text-gray-700"
+                  >
                     Phone Number
                   </label>
                   <input
@@ -167,7 +201,10 @@ export default function AuthPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-lg font-semibold text-gray-700">
+                  <label
+                    htmlFor="email"
+                    className="block text-lg font-semibold text-gray-700"
+                  >
                     Email
                   </label>
                   <input
@@ -181,7 +218,10 @@ export default function AuthPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="block text-lg font-semibold text-gray-700">
+                  <label
+                    htmlFor="password"
+                    className="block text-lg font-semibold text-gray-700"
+                  >
                     Password
                   </label>
                   <input

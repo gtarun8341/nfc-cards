@@ -8,21 +8,31 @@ const SoldProducts = () => {
   const [sales, setSales] = useState([]);
   const [token, setToken] = useState(null); // State to store the token
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
-
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   // Fetch sales data
   const fetchSalesData = useCallback(async () => {
+    const token = localStorage.getItem("authToken"); // Get the token
+
     if (!token) return; // Ensure the token is available before making the API call
 
     try {
-      const response = await api.get("/api/order/user-sales-data", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setSales(response.data);
-      console.log(response.data);
+      const response = await api.get(
+        `/api/order/user-sales-data?page=${page}&limit=10`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setSales(response.data.data);
+      console.log(response.data.data);
+      setTotalPages(response.data.totalPages);
     } catch (error) {
       console.error("Error fetching sales data:", error);
     }
   }, [token]);
+  useEffect(() => {
+    fetchSalesData();
+  }, [page]);
   const handleDownload = () => {
     if (sales.length === 0) {
       alert("No sales data to download.");
@@ -238,6 +248,27 @@ const SoldProducts = () => {
           )}
         </tbody>
       </table>
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center mt-4 space-x-4">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="text-lg font-semibold">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -157,10 +157,14 @@ const StaffPanelLayout = ({ children }) => {
   ];
 
   const handleLogout = () => {
-    document.cookie =
-      "authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-    localStorage.clear();
-    router.push("/auth");
+    ["authToken", "staffAuthToken", "adminAuthToken"].forEach((token) => {
+      // Clear cookie
+      document.cookie = `${token}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
+      // Clear localStorage
+      localStorage.removeItem(token);
+    });
+
+    router.push("/staff-auth");
   };
 
   return (
