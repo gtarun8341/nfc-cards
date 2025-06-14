@@ -8,12 +8,12 @@ import ReportPieChart from "../../components/ReportPieChart";
 
 export default function CustomerReports() {
   const [customerStats, setCustomerStats] = useState(null);
-  const token = localStorage.getItem("adminAuthToken"); // Assuming token is stored here
-
-  if (!token) return;
 
   useEffect(() => {
     const fetchUserStats = async () => {
+      const token = localStorage.getItem("adminAuthToken"); // Assuming token is stored here
+
+      if (!token) return;
       try {
         const { data } = await api.get("/api/admin-dashboard/user-stats", {
           headers: { Authorization: `Bearer ${token}` },
