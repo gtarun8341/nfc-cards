@@ -11,9 +11,9 @@ export default function CustomerReports() {
 
   useEffect(() => {
     const fetchUserStats = async () => {
-      const token = localStorage.getItem("adminAuthToken"); // Assuming token is stored here
-
+      const token = localStorage.getItem("adminAuthToken");
       if (!token) return;
+
       try {
         const { data } = await api.get("/api/admin-dashboard/user-stats", {
           headers: { Authorization: `Bearer ${token}` },
@@ -26,7 +26,7 @@ export default function CustomerReports() {
     };
 
     fetchUserStats();
-  }, [token]);
+  }, []); // ✅ No need to include token here
 
   if (!customerStats) return <p className="p-6">Loading customer report...</p>;
 
