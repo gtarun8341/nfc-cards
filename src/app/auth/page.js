@@ -86,7 +86,7 @@ export default function AuthPage() {
             <p className="text-lg leading-relaxed">
               Your one-stop destination for premium NFC cards and smart digital
               services. We empower you to share your identity, links, and
-              content instantly with a simple tap. Whether you're a
+              content instantly with a simple tap. Whether you&apos;re a
               professional, creator, or business owner, our tools help you stand
               out in the digital world.
               <br />

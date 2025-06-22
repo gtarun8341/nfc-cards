@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 
 const EnquiryForm = ({
   imageSrc = "/images/enquiry.png", // Update path if needed
@@ -91,9 +92,11 @@ const EnquiryForm = ({
 
         {/* Right: Image */}
         <div className="w-full md:w-1/2 flex items-end justify-center h-full">
-          <img
+          <Image
             src={imageSrc}
             alt="Enquiry Visual"
+            width={500} // or an appropriate width
+            height={300} // or an appropriate height
             className="h-[80%] object-contain"
           />
         </div>
