@@ -1,6 +1,7 @@
 // src/app/components/AllFooter.js
 "use client";
 import { FaEnvelope, FaInstagram, FaLinkedin, FaYoutube } from "react-icons/fa";
+import Link from "next/link";
 
 const AllFooter = () => {
   return (
@@ -39,44 +40,64 @@ const AllFooter = () => {
             </a>
           </div>
         </div>
-
         {/* Column 2 */}
         <div>
           <h5 className="font-bold mb-2 text-[#FDB98F]">Shop By Category</h5>
           <ul className="space-y-1 text-sm">
-            <li>NFC Cards</li>
-            <li>Digital Visiting Cards</li>
-            <li>Physical Visiting Cards</li>
-            <li>Business Profile</li>
-            <li>Business Essentials</li>
+            <li>
+              <Link href="/nfc-card">NFC Cards</Link>
+            </li>
+            <li>
+              <Link href="/pdf-card">Digital Visiting Cards</Link>
+            </li>
+            <li>
+              <Link href="/physical-card">Physical Visiting Cards</Link>
+            </li>
+            <li>
+              <Link href="/one-page-bussiness-profile">Business Profile</Link>
+            </li>
+            <li>
+              <Link href="/bussiness-essentials">Business Essentials</Link>
+            </li>
           </ul>
         </div>
-
         {/* Column 3 */}
         <div>
           <h5 className="font-bold mb-2 text-[#FDB98F]">Learn</h5>
           <ul className="space-y-1 text-sm">
-            <li>Blogs</li>
-            <li>FAQs</li>
+            <li>
+              <Link href="/blogs">Blogs</Link>
+            </li>
+            <li>
+              <Link href="/faqs">FAQs</Link>
+            </li>
           </ul>
         </div>
-
         {/* Column 4 */}
         <div>
           <h5 className="font-bold mb-2 text-[#FDB98F]">Help</h5>
           <ul className="space-y-1 text-sm">
-            <li>Privacy Policies</li>
-            <li>Returns & Refunds</li>
-            <li>Terms & Conditions</li>
-            <li>Shipping</li>
+            <li>
+              <Link href="/privacy-policy">Privacy Policies</Link>
+            </li>
+            <li>
+              <Link href="/returns-refunds">Returns & Refunds</Link>
+            </li>
+            <li>
+              <Link href="/terms-conditions">Terms & Conditions</Link>
+            </li>
+            <li>
+              <Link href="/shipping">Shipping</Link>
+            </li>
           </ul>
         </div>
-
         {/* Column 5 */}
         <div>
           <h5 className="font-bold mb-2 text-[#FDB98F]">Connect With Us</h5>
           <ul className="space-y-1 text-sm">
-            <li>Contact us</li>
+            <li>
+              <Link href="/contact-us">Contact us</Link>
+            </li>
           </ul>
         </div>
       </div>

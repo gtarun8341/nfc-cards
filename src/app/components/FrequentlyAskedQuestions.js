@@ -1,58 +1,47 @@
-"use client"; // Marking this as a Client Component
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useState } from "react";
+import { FiPlus, FiX } from "react-icons/fi"; // For icons
 
-const FrequentlyAskedQuestions = ({ faqs }) => { // Accept faqs as a prop
-  const [activeIndex, setActiveIndex] = useState(null); // Track the currently active question
-  const [displayedAnswer, setDisplayedAnswer] = useState(''); // Track the displayed answer
+const FAQ = ({ title, description, faqs }) => {
+  const [openIndex, setOpenIndex] = useState(null);
 
-  const toggleAnswer = (index) => {
-    if (activeIndex === index) {
-      // If it's already active, reset
-      setActiveIndex(null);
-      setDisplayedAnswer(''); // Reset displayed answer
-    } else {
-      // Set the active index and start typing
-      setActiveIndex(index);
-      typeAnswer(faqs[index].answer);
-    }
-  };
-
-  const typeAnswer = (answer) => {
-    let i = 0;
-    setDisplayedAnswer(''); // Clear previous answer
-    const typingInterval = setInterval(() => {
-      if (i < answer.length) {
-        setDisplayedAnswer(prev => prev + answer[i]);
-        i++;
-      } else {
-        clearInterval(typingInterval);
-      }
-    }, 50); // Adjust typing speed (ms)
+  const toggleFAQ = (index) => {
+    setOpenIndex((prev) => (prev === index ? null : index));
   };
 
   return (
-    <div className="container mx-auto p-6">
-      {faqs.map((faq, index) => (
-        <div key={index} className="mb-4">
-          <div
-            className="flex items-center justify-between p-4 border rounded cursor-pointer"
-            onClick={() => toggleAnswer(index)}
-          >
-            <span className="font-semibold text-lg">{faq.question}</span>
-            <span className={`transform transition-transform ${activeIndex === index ? 'rotate-180' : ''}`}>
-              ▼ {/* Dropdown icon */}
-            </span>
-          </div>
-          {activeIndex === index && (
-            <div className="p-4 bg-gray-100 rounded mt-2">
-              <p className="text-sm sm:text-base break-words whitespace-pre-wrap">{displayedAnswer}</p> {/* Display the animated answer */}
+    <section className="container mx-auto p-6">
+      <div className="max-w-4xl mx-auto text-center mb-6">
+        <h2 className="text-3xl font-bold text-gray-800">{title}</h2>
+        <p className="text-gray-700 mt-2">{description}</p>
+      </div>
+      <div className="space-y-4">
+        {faqs.map((faq, index) => {
+          const isOpen = openIndex === index;
+          return (
+            <div
+              key={index}
+              className={`border p-4 rounded-2xl shadow-sm cursor-pointer transition-colors duration-300 ${
+                isOpen ? "bg-[#F3E9E9]" : "bg-gray-100"
+              }`}
+              onClick={() => toggleFAQ(index)}
+            >
+              <div className="flex justify-between items-center">
+                <h3 className="font-semibold text-left">{faq.question}</h3>
+                <span className="text-xl">{isOpen ? <FiX /> : <FiPlus />}</span>
+              </div>
+              {isOpen && (
+                <p className="mt-3 text-gray-700 transition-opacity duration-300">
+                  {faq.answer}
+                </p>
+              )}
             </div>
-          )}
-        </div>
-      ))}
-    </div>
+          );
+        })}
+      </div>
+    </section>
   );
 };
 
-export default FrequentlyAskedQuestions;
+export default FAQ;

@@ -3,11 +3,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import api from "../apiConfig/axiosConfig";
 import AllFooter from "../components/AllFooter";
+import { UserCog, User, Briefcase } from "lucide-react";
 
 export default function StaffAuthPage() {
   const [staffId, setStaffId] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const [userRole, setUserRole] = useState("staff"); // default role
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,29 +59,65 @@ export default function StaffAuthPage() {
 
   return (
     <>
-      <section className="min-h-screen flex items-center justify-center bg-gradient-to-r from-green-400 to-green-600">
-        <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
+      <section className="min-h-[80vh]  flex items-center justify-center bg-white">
+        <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg border border-black min-h-[500px]">
           <div className="flex flex-col items-center justify-center">
-            <h2 className="text-4xl font-bold text-green-600 mb-8 animate__animated animate__fadeIn">
+            <h2 className="text-4xl font-bold text-black mb-8 animate__animated animate__fadeIn">
               Staff Login
             </h2>
+            <h3 className="text-gray-600 mb-4">
+              Sign in to access the dashboard
+            </h3>
+
+            <div className="w-full mb-6">
+              <div className="relative flex justify-between border-b border-gray-300">
+                {["admin", "staff"].map((role, index) => (
+                  <button
+                    key={role}
+                    // onClick={() => setUserRole(role)}
+                    onClick={() => {
+                      router.push(`/${role}-auth`);
+                    }}
+                    className={`flex-1 text-center py-2 text-sm font-medium flex items-center justify-center gap-2 transition-all duration-300 ${
+                      userRole === role ? "text-black" : "text-gray-300"
+                    }`}
+                  >
+                    {role === "admin" && <UserCog size={20} />}
+                    {role === "staff" && <Briefcase size={20} />}
+                    <span className="capitalize">{role}</span>
+                  </button>
+                ))}
+
+                {/* Sliding underline */}
+                <div
+                  className="absolute bottom-0 h-1 bg-[#EECCCC] transition-all duration-300"
+                  style={{
+                    width: "50%", // 50% width for two tabs
+                    transform:
+                      userRole === "admin"
+                        ? "translateX(0%)"
+                        : "translateX(100%)",
+                  }}
+                />
+              </div>
+            </div>
 
             <form className="space-y-6 w-full" onSubmit={handleSubmit}>
-              {/* Staff ID Input */}
+              {/* Email Input */}
               <div className="space-y-1">
                 <label
                   htmlFor="staffId"
                   className="text-lg font-semibold text-gray-800"
                 >
-                  Staff ID
+                  Staff Id
                 </label>
                 <input
-                  type="text"
+                  type="staffId"
                   id="staffId"
                   value={staffId}
                   onChange={(e) => setStaffId(e.target.value)}
-                  placeholder="Enter your Staff ID"
-                  className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none transition-all"
+                  placeholder="Enter your Staff Id"
+                  className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none transition-all"
                 />
               </div>
 
@@ -97,14 +135,14 @@ export default function StaffAuthPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none transition-all"
+                  className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none transition-all"
                 />
               </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-all duration-300"
+                className="w-1/2 mx-auto block bg-[#EECCCC] text-white px-6 py-3 rounded-full hover:bg-green-700 transition-all duration-300"
               >
                 Login
               </button>
@@ -112,6 +150,7 @@ export default function StaffAuthPage() {
           </div>
         </div>
       </section>
+
       <AllFooter />
     </>
   );

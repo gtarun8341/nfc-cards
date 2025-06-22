@@ -1,4 +1,5 @@
 import Image from "next/image";
+import api from "../../apiConfig/axiosConfig"; // Ensure you have the right API config
 
 const ViewBlog = ({ blog }) => {
   const renderContent = (content) => {
@@ -7,7 +8,12 @@ const ViewBlog = ({ blog }) => {
         case "image":
           return (
             <div key={index} className="relative w-full h-64 mb-6">
-              <Image src={item.data} alt={`Image for ${blog.title}`} className="rounded-md" />
+              <Image
+                src={`${api.defaults.baseURL}/uploads/${item.data}`}
+                alt={`Image for ${blog.title}`}
+                fill
+                className="rounded-md"
+              />
             </div>
           );
         case "text":
@@ -24,7 +30,10 @@ const ViewBlog = ({ blog }) => {
           );
         case "subheading":
           return (
-            <h4 key={index} className="text-2xl font-semibold text-gray-800 mb-4">
+            <h4
+              key={index}
+              className="text-2xl font-semibold text-gray-800 mb-4"
+            >
               {item.data}
             </h4>
           );
@@ -60,6 +69,14 @@ const ViewBlog = ({ blog }) => {
     <div className="mb-8 p-6 bg-white shadow-md rounded-lg">
       <h2 className="text-2xl font-bold mb-2">{blog.title}</h2>
       <h3 className="text-xl text-gray-600 mb-4">{blog.subtitle}</h3>
+      <div className="relative w-full h-64 mb-6">
+        <Image
+          src={`${api.defaults.baseURL}/uploads/${blog.previewImage}`}
+          alt={`Image for ${blog.title}`}
+          fill
+          className="rounded-md"
+        />
+      </div>
       {blog.content && renderContent(blog.content)}
     </div>
   );

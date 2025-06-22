@@ -1,94 +1,104 @@
-"use client"; // Mark this component as a Client Component
-import Image from 'next/image';
-import React, { useEffect, useState, useCallback } from 'react';
+"use client";
 
-const Samples = ({ images }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const totalImages = images.length;
+import { useState } from "react";
+import Image from "next/image";
 
-  // Function to change the image index
-  const changeImage = useCallback((direction) => {
-    setCurrentIndex((prevIndex) => {
-      if (direction === 'next') {
-        return (prevIndex + 1) % totalImages;
-      } else {
-        return (prevIndex - 1 + totalImages) % totalImages; // Wrap around for previous
-      }
-    });
-  }, [totalImages]);
+const Samples = ({
+  heading,
+  description,
+  sideHeading,
+  sideHeadingDescription,
+  images,
+}) => {
+  const [page, setPage] = useState(0);
+  const imagesPerPage = 3;
+  const totalPages = Math.ceil(images.length / imagesPerPage);
 
-  // Function to automatically scroll images
-  useEffect(() => {
-    const interval = setInterval(() => {
-      changeImage('next');
-    }, 3000); // Change image every 3 seconds
+  const paginatedImages = images.slice(
+    page * imagesPerPage,
+    page * imagesPerPage + imagesPerPage
+  );
 
-    return () => clearInterval(interval); // Clean up the interval on component unmount
-  }, [changeImage]);
-
-  // Get styles for each image based on its position
-  const getImageStyles = (index) => {
-    const adjustedIndex = (index + currentIndex + totalImages) % totalImages;
-    const isMiddle = adjustedIndex === currentIndex; // Determine if it's the middle image
-
-    return {
-      height: isMiddle ? '30vh' : '20vh', // Use vh for responsive height
-      transition: 'height 0.5s ease, transform 0.5s ease, margin 0.5s ease',
-      transform: isMiddle ? 'scale(1.1)' : 'scale(0.9)', // Scale effect for middle image
-      opacity: isMiddle ? 1 : 0.7, // Fade effect for side images
-      margin: '0 5px', // Maintain margin for spacing
-    };
-  };
-
-  // Calculate the indices for the current, left, and right images
-  const leftImageIndex = (currentIndex - 1 + totalImages) % totalImages;
-  const middleImageIndex = currentIndex;
-  const rightImageIndex = (currentIndex + 1) % totalImages;
+  const nextPage = () => setPage((p) => Math.min(p + 1, totalPages - 1));
+  const prevPage = () => setPage((p) => Math.max(p - 1, 0));
 
   return (
-    <div className="overflow-hidden container mx-auto p-6 flex justify-center items-center relative">
-      <button
-        onClick={() => changeImage('prev')}
-        className="absolute left-0 z-10 bg-white p-2 rounded-md"
-      >
-        Prev
-      </button>
-      <div className="flex items-center transition-transform duration-500 ease-in-out">
-        <Image
-          src={images[leftImageIndex]}
-          alt={`Sample ${leftImageIndex + 1}`}
-          width={500} // Set a reasonable default width
-          height={500}
-          layout="intrinsic"
-          className="rounded-lg object-cover h-20 w-auto sm:h-30 md:h-40" // Responsive height
-          style={getImageStyles(-1)}
-        />
-        <Image
-          src={images[middleImageIndex]}
-          alt={`Sample ${middleImageIndex + 1}`}
-          width={500} // Set a reasonable default width
-          height={500}
-          layout="intrinsic"
-          className="rounded-lg object-cover h-20 w-auto sm:h-30 md:h-40" // Responsive height
-          style={getImageStyles(0)}
-        />
-        <Image
-          src={images[rightImageIndex]}
-          alt={`Sample ${rightImageIndex + 1}`}
-          width={500} // Set a reasonable default width
-          height={500}
-          layout="intrinsic"
-          className="rounded-lg object-cover h-20 w-auto sm:h-30 md:h-40" // Responsive height
-          style={getImageStyles(1)}
-        />
+    <section className="w-full px-4 py-10">
+      {/* Heading + Description */}
+      <div className="max-w-6xl mx-auto text-center mb-10">
+        <h2 className="text-3xl font-bold text-gray-800">{heading}</h2>
+        <p className="text-gray-600 mt-2">{description}</p>
       </div>
-      <button
-        onClick={() => changeImage('next')}
-        className="absolute right-0 z-10 bg-white p-2 rounded-md"
-      >
-        Next
-      </button>
-    </div>
+
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        {/* Left Side Text */}
+        <div className="text-center md:text-left">
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">
+            {sideHeading}
+          </h3>
+          <p className="text-gray-600">{sideHeadingDescription}</p>
+        </div>
+
+        {/* Right Side Images */}
+        <div className="relative flex items-center justify-center h-[400px]">
+          {paginatedImages.length >= 1 && (
+            <div className="absolute z-10 h-full w-auto">
+              <Image
+                src={paginatedImages[0]}
+                alt="Main Image"
+                width={300}
+                height={400}
+                className="h-full w-auto object-cover rounded-lg shadow-md"
+              />
+            </div>
+          )}
+
+          {paginatedImages.length >= 2 && (
+            <div className="absolute left-0 top-0 h-[80%]">
+              <Image
+                src={paginatedImages[1]}
+                alt="Left Image"
+                width={200}
+                height={300}
+                className="h-full w-auto object-cover rounded-lg shadow"
+              />
+            </div>
+          )}
+
+          {paginatedImages.length >= 3 && (
+            <div className="absolute right-0 bottom-0 h-[80%]">
+              <Image
+                src={paginatedImages[2]}
+                alt="Right Image"
+                width={200}
+                height={300}
+                className="h-full w-auto object-cover rounded-lg shadow"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Arrow Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-8 gap-4">
+          <button
+            onClick={prevPage}
+            disabled={page === 0}
+            className="bg-black hover:bg-gray-400 text-white w-8 h-8 flex items-center justify-center rounded-full disabled:opacity-50"
+          >
+            &larr;
+          </button>
+          <button
+            onClick={nextPage}
+            disabled={page === totalPages - 1}
+            className="bg-black hover:bg-gray-400 text-white w-8 h-8 flex items-center justify-center rounded-full disabled:opacity-50"
+          >
+            &rarr;
+          </button>
+        </div>
+      )}
+    </section>
   );
 };
 

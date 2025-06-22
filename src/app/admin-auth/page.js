@@ -59,16 +59,18 @@ export default function AuthPage() {
 
             <div className="w-full mb-6">
               <div className="relative flex justify-between border-b border-gray-300">
-                {["admin", "customer", "staff"].map((role, index) => (
+                {["admin", "staff"].map((role, index) => (
                   <button
                     key={role}
-                    onClick={() => setUserRole(role)}
+                    // onClick={() => setUserRole(role)}
+                    onClick={() => {
+                      router.push(`/${role}-auth`);
+                    }}
                     className={`flex-1 text-center py-2 text-sm font-medium flex items-center justify-center gap-2 transition-all duration-300 ${
                       userRole === role ? "text-black" : "text-gray-300"
                     }`}
                   >
                     {role === "admin" && <UserCog size={20} />}
-                    {role === "customer" && <User size={20} />}
                     {role === "staff" && <Briefcase size={20} />}
                     <span className="capitalize">{role}</span>
                   </button>
@@ -78,13 +80,11 @@ export default function AuthPage() {
                 <div
                   className="absolute bottom-0 h-1 bg-[#EECCCC] transition-all duration-300"
                   style={{
-                    width: "33.3333%",
+                    width: "50%", // 50% width for two tabs
                     transform:
                       userRole === "admin"
                         ? "translateX(0%)"
-                        : userRole === "customer"
-                        ? "translateX(100%)"
-                        : "translateX(200%)",
+                        : "translateX(100%)",
                   }}
                 />
               </div>

@@ -76,11 +76,35 @@ const CustomerProfileManagementPage = () => {
         },
       };
       await api.delete(`/api/users/users/${id}`, config); // Assuming delete route is '/api/users/:id'
-      setCustomers(customers.filter((customer) => customer._id !== id));
+      setCustomers((prev) =>
+        prev.map((customer) =>
+          customer._id === id
+            ? { ...customer, isDeleted: true, deletedAt: new Date() }
+            : customer
+        )
+      );
+      alert(res.data.message);
     } catch (error) {
       console.error("Error deleting customer:", error);
     }
   };
+  const handleReactivate = async (userId) => {
+    try {
+      const token = localStorage.getItem("adminAuthToken"); // Assuming token is stored here
+      const config = {
+        headers: {
+          authorization: `Bearer ${token}`, // Attach the token
+        },
+      };
+      const res = await api.put(`/api/users/reactivate/${userId}`, config);
+      alert(res.data.message);
+      fetchCustomers(); // refresh your user list
+    } catch (error) {
+      console.error("Error reactivating user:", error);
+      alert("Failed to reactivate user.");
+    }
+  };
+
   const handleResetPassword = (id) => {
     setSelectedCustomerId(id);
     setNewPassword("");
@@ -168,6 +192,8 @@ const CustomerProfileManagementPage = () => {
             <th className="py-2 px-4 bg-gray-100 text-left border-b">
               Profession
             </th>
+            <th className="py-2 px-4 bg-gray-100 text-left border-b">Status</th>
+
             <th className="py-2 px-4 bg-gray-100 text-left border-b">
               Actions
             </th>
@@ -193,6 +219,13 @@ const CustomerProfileManagementPage = () => {
               <td className="py-2 px-4">{customer.companyName || "-"}</td>
               <td className="py-2 px-4">{customer.profession || "-"}</td>
               <td className="py-2 px-4">
+                {customer.isDeleted ? (
+                  <span className="text-red-600 font-semibold">Deleted</span>
+                ) : (
+                  <span className="text-green-600 font-semibold">Active</span>
+                )}
+              </td>
+              <td className="py-2 px-4">
                 {editCustomer?._id === customer._id ? (
                   <button
                     onClick={() => handleUpdate(customer._id)}
@@ -214,12 +247,21 @@ const CustomerProfileManagementPage = () => {
                 >
                   Reset Password
                 </button>
-                <button
-                  onClick={() => handleDelete(customer._id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                >
-                  Delete
-                </button>
+                {customer.isDeleted ? (
+                  <button
+                    onClick={() => handleReactivate(customer._id)}
+                    className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                  >
+                    Reactivate
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleDelete(customer._id)}
+                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                  >
+                    Delete
+                  </button>
+                )}
               </td>
             </tr>
           ))}

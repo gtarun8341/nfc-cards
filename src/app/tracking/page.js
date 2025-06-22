@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import api from "../apiConfig/axiosConfig";
+import HeroBanner from "../components/HeroBanner";
+import OurMoreProducts from "../components/OurMoreProducts";
 
 export default function TrackOrderPage() {
   const [trackingNumber, setTrackingNumber] = useState("");
   const [orderDetails, setOrderDetails] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [trackType, setTrackType] = useState("order"); // Default selection
 
   const handleTrackingInput = (e) => {
     setTrackingNumber(e.target.value);
@@ -59,33 +62,90 @@ export default function TrackOrderPage() {
       setLoading(false);
     }
   };
+  const ourmoreproductsdata = [
+    {
+      id: 1,
+      icon: "https://via.placeholder.com/150",
+      title: "Product 1",
+      description: "Fast, secure, and scalable hosting.",
+      price: "$10.00",
+    },
+    {
+      id: 2,
+      icon: "https://via.placeholder.com/150",
+      title: "Product 2",
+      description: "Fast, secure, and scalable hosting.",
+      price: "$15.00",
+    },
+    {
+      id: 3,
+      icon: "https://via.placeholder.com/150",
+      title: "Product 3",
+      description: "Fast, secure, and scalable hosting.",
+      price: "$20.00",
+    },
+    // Add more products as needed
+  ];
 
   return (
-    <div className=" flex flex-col justify-center items-center bg-white p-4">
-      <div
-        className="w-full max-w-2xl h-[150px]  bg-cover bg-center bg-no-repeat rounded-md overflow-hidden"
-        style={{ backgroundImage: "url('/images/trackyoourorder.jpg')" }}
-      >
-        <div className="h-full flex flex-col justify-center items-center px-4 bg-black/30">
-          <h1
-            className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg text-center"
-            style={{
-              fontFamily: `'Copperplate Gothic Bold', Copperplate, serif`,
-            }}
-          >
-            Track Your Order
-          </h1>
-        </div>
+    <div className="min-h-full flex flex-col justify-center items-center bg-white p-4">
+      <div className="flex justify-center w-full ">
+        <HeroBanner text="Track Your Order" />
       </div>
 
-      <div className="w-full max-w-lg bg-white p-6 rounded-lg shadow-lg">
+      <div className="w-full max-w-lg bg-white p-6 ">
+        <div className="flex justify-between items-center mb-4">
+          <label className="flex items-center space-x-2">
+            <input
+              type="radio"
+              name="trackType"
+              value="order"
+              checked={trackType === "order"}
+              onChange={(e) => setTrackType(e.target.value)}
+              className="accent-green-500"
+            />
+            <span className="text-gray-700">Order Number</span>
+          </label>
+          <label className="flex items-center space-x-2">
+            <input
+              type="radio"
+              name="trackType"
+              value="invoice"
+              checked={trackType === "invoice"}
+              onChange={(e) => setTrackType(e.target.value)}
+              className="accent-green-500"
+            />
+            <span className="text-gray-700">Invoice Number</span>
+          </label>
+          <label className="flex items-center space-x-2">
+            <input
+              type="radio"
+              name="trackType"
+              value="tracking"
+              checked={trackType === "tracking"}
+              onChange={(e) => setTrackType(e.target.value)}
+              className="accent-green-500"
+            />
+            <span className="text-gray-700">Tracking ID</span>
+          </label>
+        </div>
+
+        {/* Input */}
         <input
           type="text"
-          placeholder="Enter Tracking Number"
+          placeholder={`Enter ${
+            trackType === "order"
+              ? "Order Number"
+              : trackType === "invoice"
+              ? "Invoice Number"
+              : "Tracking ID"
+          }`}
           value={trackingNumber}
           onChange={handleTrackingInput}
           className="w-full p-3 border border-gray-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-green-500"
         />
+
+        {/* Button */}
         <button
           onClick={handleTrackOrder}
           className="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring focus:ring-green-200 transition-colors"
@@ -147,6 +207,11 @@ export default function TrackOrderPage() {
           <p className="mt-4 text-xl text-red-500 font-semibold">{error}</p>
         )}
       </div>
+      <OurMoreProducts
+        headingTitle="Our More Products"
+        headingDescription="Select the perfect package for your networking needs, from individual cards to enterprise solutions."
+        ourmoreproductsdata={ourmoreproductsdata}
+      />
     </div>
   );
 }

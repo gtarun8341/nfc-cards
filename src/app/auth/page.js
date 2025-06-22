@@ -19,7 +19,9 @@ export default function AuthPage() {
     const requestData = isRegister
       ? { name, email, password, phone }
       : { email, password };
-
+    if (isRegister && (!name || !email || !password || !phone)) {
+      return alert("All fields are required for registration.");
+    }
     try {
       const response = await api.post(apiEndpoint, requestData);
       console.log("Response:", response.data);
@@ -35,17 +37,7 @@ export default function AuthPage() {
           document.cookie = `authToken=${response.data.token}; path=/`; // Set auth token as a cookie
           localStorage.setItem("authToken", response.data.token);
           router.push("/user-panel/Dashboard");
-        }
-        // else {
-        //   // User doesn't have an active plan
-        //   alert(response.data.message); // Alert the message from the backend
-        //   localStorage.setItem('_id', response.data._id);
-        //   localStorage.setItem('userName', response.data.name);
-        //   localStorage.setItem('userEmail', response.data.email);
-        //   localStorage.setItem('userPhone', response.data.phone);
-        //   router.push('/purchase-plan');
-        // }
-        else if (response.data.message?.includes("expired")) {
+        } else if (response.data.message?.includes("expired")) {
           alert(response.data.message);
           localStorage.setItem("_id", response.data._id);
           localStorage.setItem("userName", response.data.name);
@@ -61,6 +53,10 @@ export default function AuthPage() {
       if (error.response) {
         if (error.response.status === 401) {
           alert("Invalid email or password");
+        } else if (error.response.status === 403) {
+          alert(error.response.data.message); // Account deactivated
+        } else if (error.response.status === 400) {
+          alert(error.response.data.message); // Registration: email already in use
         } else {
           console.error("Error during API request:", error);
           alert("An error occurred. Please try again later.");
@@ -77,188 +73,135 @@ export default function AuthPage() {
 
   return (
     <>
-      <section className="min-h-screen flex items-center justify-center bg-gray-200 py-12 px-4">
-        <div className="relative w-full max-w-lg h-[650px] rounded-lg shadow-xl bg-white overflow-hidden transform-style-3d">
+      <section className="min-h-screen flex items-center justify-center bg-[#EECCCC80]">
+        <div className="flex w-full max-w-6xl h-[700px] rounded-lg shadow-2xl overflow-hidden bg-white">
+          {/* Left side */}
           <div
-            className={`absolute top-0 left-0 w-full h-full p-8 transition-transform duration-700 ease-in-out 
-            ${isRegister ? "rotate-y-180" : ""} transform-style-3d`}
+            className="w-1/2 bg-cover bg-center p-10 text-black flex flex-col justify-center"
+            style={{ backgroundImage: "url('/images/userLogin.jpg')" }} // Replace with your image path
           >
-            {/* Login Form */}
-            <div
-              className={`absolute top-0 left-0 w-full h-full p-8 transition-all duration-700 ease-in-out flex flex-col justify-center items-center ${
-                isRegister ? "hidden" : ""
-              }`}
+            <h1 className="text-4xl font-bold mb-6">
+              Welcome To Shiven NFC Cards
+            </h1>
+            <p className="text-lg leading-relaxed">
+              Your one-stop destination for premium NFC cards and smart digital
+              services. We empower you to share your identity, links, and
+              content instantly with a simple tap. Whether you're a
+              professional, creator, or business owner, our tools help you stand
+              out in the digital world.
+              <br />
+              <br />
+              Log in to explore, customize, and manage your smart solutions with
+              ease. Let’s make your first impression unforgettable.
+            </p>
+          </div>
+
+          {/* Right side */}
+          <div className="w-1/2 p-10 flex flex-col justify-center">
+            <h2 className="text-3xl font-bold text-black mb-6 text-center">
+              {isRegister ? "Register" : "User Login"}
+            </h2>
+
+            <form
+              className="space-y-6 w-full max-w-md mx-auto"
+              onSubmit={handleSubmit}
             >
-              <h2 className="text-3xl font-extrabold text-green-600 mb-8 transition-opacity duration-500 opacity-100">
-                Login
-              </h2>
+              {isRegister && (
+                <>
+                  <div>
+                    <label
+                      htmlFor="name"
+                      className="block text-lg font-semibold text-gray-700"
+                    >
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Your Name"
+                      className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
 
-              <form
-                className="space-y-6 w-full max-w-sm animate-slideIn"
-                onSubmit={handleSubmit}
-              >
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-lg font-semibold text-gray-700"
-                  >
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Your Email"
-                    className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
+                  <div>
+                    <label
+                      htmlFor="phone"
+                      className="block text-lg font-semibold text-gray-700"
+                    >
+                      Phone Number
+                    </label>
+                    <input
+                      type="text"
+                      id="phone"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="Your Phone Number"
+                      className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
+                </>
+              )}
 
-                <div>
-                  <label
-                    htmlFor="password"
-                    className="block text-lg font-semibold text-gray-700"
-                  >
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Your Password"
-                    className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-all duration-300"
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-lg font-semibold text-gray-700"
                 >
-                  Login
-                </button>
-              </form>
-
-              <div className="mt-6">
-                <p className="text-gray-600 text-sm">
-                  Don&apos;t have an account?
-                </p>
-                <button
-                  onClick={toggleForm}
-                  className="text-green-600 font-medium hover:underline mt-2 transition-all duration-300"
-                >
-                  Register here
-                </button>
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Your Email"
+                  className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                />
               </div>
-            </div>
 
-            {/* Register Form */}
-            <div
-              className={`absolute top-0 left-0 w-full h-full p-8 transition-all duration-700 ease-in-out flex flex-col justify-center items-center ${
-                !isRegister ? "hidden" : ""
-              }`}
-            >
-              <h2 className="text-3xl font-extrabold text-green-600 mb-8 transition-opacity duration-500 opacity-100">
-                Register
-              </h2>
-
-              <form
-                className="space-y-6 w-full max-w-sm animate-slideIn"
-                onSubmit={handleSubmit}
-              >
-                <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-lg font-semibold text-gray-700"
-                  >
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Your Name"
-                    className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="phone"
-                    className="block text-lg font-semibold text-gray-700"
-                  >
-                    Phone Number
-                  </label>
-                  <input
-                    type="text"
-                    id="phone"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Your Phone Number"
-                    className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-lg font-semibold text-gray-700"
-                  >
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Your Email"
-                    className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="password"
-                    className="block text-lg font-semibold text-gray-700"
-                  >
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Your Password"
-                    className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-all duration-300"
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-lg font-semibold text-gray-700"
                 >
-                  Register
-                </button>
-              </form>
-
-              <div className="mt-6">
-                <p className="text-gray-600 text-sm">
-                  Already have an account?
-                </p>
-                <button
-                  onClick={toggleForm}
-                  className="text-green-600 font-medium hover:underline mt-2 transition-all duration-300"
-                >
-                  Login here
-                </button>
+                  Password
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Your Password"
+                  className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                />
               </div>
+
+              <button
+                type="submit"
+                className="w-full bg-[#EECCCC] text-black px-6 py-3 rounded-lg hover:bg-green-600 transition-all duration-300"
+              >
+                {isRegister ? "Register" : "Login"}
+              </button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <p className="text-gray-600 text-sm">
+                {isRegister
+                  ? "Already have an account?"
+                  : "Don't have an account?"}
+              </p>
+              <button
+                onClick={toggleForm}
+                className="text-[#EECCCC] font-medium hover:underline mt-2 transition-all duration-300"
+              >
+                {isRegister ? "Login here" : "Register here"}
+              </button>
             </div>
           </div>
         </div>
       </section>
-
-      <AllFooter />
     </>
   );
 }

@@ -15,6 +15,7 @@ const AdminPanel = () => {
   const fetchBlogs = async () => {
     try {
       const response = await api.get("/api/blogRoutes/");
+      console.log(response.data);
       setBlogs(response.data);
     } catch (error) {
       console.error("Error fetching blogs:", error);
@@ -24,7 +25,6 @@ const AdminPanel = () => {
   useEffect(() => {
     fetchBlogs();
   }, []);
-
 
   const handleDelete = async (id) => {
     const token = localStorage.getItem("adminAuthToken");
@@ -50,7 +50,7 @@ const AdminPanel = () => {
 
   const refreshBlogs = () => {
     fetchBlogs();
-    setIsAddingOrEditing(false);  // Close the add/edit blog modal
+    setIsAddingOrEditing(false); // Close the add/edit blog modal
   };
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
@@ -63,10 +63,10 @@ const AdminPanel = () => {
       </button>
 
       {isAddingOrEditing ? (
-        <AddEditBlog 
-          setIsAddingOrEditing={setIsAddingOrEditing} 
-          blog={selectedBlog} 
-          onBlogSave={refreshBlogs}  // Pass the callback to AddEditBlog
+        <AddEditBlog
+          setIsAddingOrEditing={setIsAddingOrEditing}
+          blog={selectedBlog}
+          onBlogSave={refreshBlogs} // Pass the callback to AddEditBlog
         />
       ) : (
         <div>
