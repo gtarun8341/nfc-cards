@@ -92,7 +92,7 @@ export default function AuthPage() {
               <br />
               <br />
               Log in to explore, customize, and manage your smart solutions with
-              ease. Let’s make your first impression unforgettable.
+              ease. Let&apos;s make your first impression unforgettable.
             </p>
           </div>
 

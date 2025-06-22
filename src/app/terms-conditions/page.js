@@ -14,11 +14,11 @@ export default function TermsAndConditionsPage() {
           <strong>Last Updated:</strong> [Insert Date]
         </p>
         <p>
-          Welcome to <strong>[Your Company Name]</strong> ("we", "our", or
-          "us"). This Privacy Policy explains how we collect, use, disclose, and
-          protect your information when you visit our website{" "}
-          <strong>[yourdomain.com]</strong> and purchase our products, including
-          NFC business cards and digital services.
+          Welcome to <strong>[Your Company Name]</strong> (&quot;we&quot;,
+          &quot;our&quot;, or &quot;us&quot;). This Privacy Policy explains how
+          we collect, use, disclose, and protect your information when you visit
+          our website <strong>[yourdomain.com]</strong> and purchase our
+          products, including NFC business cards and digital services.
         </p>
         <p>
           We collect personal information such as your name, phone number, email
