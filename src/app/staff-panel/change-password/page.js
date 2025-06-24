@@ -20,7 +20,7 @@ export default function ChangePasswordPage() {
     }
 
     try {
-      const token = localStorage.getItem('staffAuthToken');
+      const token = localStorage.getItem("staffAuthToken");
       const response = await api.post(
         "/api/staffAuthRoute/change-password",
         { oldPassword, newPassword },
@@ -29,7 +29,7 @@ export default function ChangePasswordPage() {
 
       if (response.status === 200) {
         alert("Password updated successfully");
-        router.push("/staff-panel"); // Navigate to the staff panel on success
+        router.push("/staff-panel/Dashboard"); // Navigate to the staff panel on success
       } else {
         setErrorMessage("Error updating password. Please try again.");
       }
@@ -41,15 +41,24 @@ export default function ChangePasswordPage() {
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
-        <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">Change Password</h2>
-        
+        <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">
+          Change Password
+        </h2>
+
         {errorMessage && (
-          <p className="text-red-500 text-sm mb-4 text-center">{errorMessage}</p>
+          <p className="text-red-500 text-sm mb-4 text-center">
+            {errorMessage}
+          </p>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="oldPassword" className="block text-sm font-medium text-gray-700">Old Password</label>
+            <label
+              htmlFor="oldPassword"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Old Password
+            </label>
             <input
               id="oldPassword"
               type="password"
@@ -62,7 +71,12 @@ export default function ChangePasswordPage() {
           </div>
 
           <div>
-            <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">New Password</label>
+            <label
+              htmlFor="newPassword"
+              className="block text-sm font-medium text-gray-700"
+            >
+              New Password
+            </label>
             <input
               id="newPassword"
               type="password"
@@ -75,7 +89,12 @@ export default function ChangePasswordPage() {
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm New Password</label>
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Confirm New Password
+            </label>
             <input
               id="confirmPassword"
               type="password"

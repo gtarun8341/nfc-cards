@@ -1,117 +1,137 @@
-// components/ContactUs.js
-"use client"; // Next.js Client Component
+"use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from "react";
+import api from "../../apiConfig/axiosConfig"; // Adjust path if needed
 
-const ContactUs = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
-  });
+const AdminContactUsPage = () => {
+  const [contacts, setContacts] = useState([]);
+  const [filteredContacts, setFilteredContacts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const limit = 10;
 
-  const [errors, setErrors] = useState({});
-  const [success, setSuccess] = useState(false);
+  const fetchContacts = async (page = 1) => {
+    try {
+      const token = localStorage.getItem("staffAuthToken");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.name) newErrors.name = 'Name is required';
-    if (!formData.email) newErrors.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
-    if (!formData.message) newErrors.message = 'Message is required';
-    return newErrors;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const validationErrors = validateForm();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
+      const response = await api.get(
+        `/api/contactUs-form/staff/contactUs?page=${page}&limit=${limit}`,
+        config
+      );
+      const { data, total: totalCount } = response.data;
+      setContacts(data);
+      setFilteredContacts(data);
+      setTotal(totalCount);
+    } catch (error) {
+      console.error("Error fetching contact entries:", error);
     }
-
-    // Simulating form submission
-    setSuccess(true);
-    setErrors({});
-    setFormData({ name: '', email: '', message: '' });
-    // You can replace this with an actual API call to submit the form
   };
+
+  const handleSearch = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearchTerm(value);
+
+    const filtered = contacts.filter(
+      (c) =>
+        c.name?.toLowerCase().includes(value) ||
+        c.email?.toLowerCase().includes(value) ||
+        c.mobile?.includes(value) ||
+        c.service?.toLowerCase().includes(value)
+    );
+    setFilteredContacts(filtered);
+  };
+
+  const totalPages = Math.ceil(total / limit);
+
+  useEffect(() => {
+    fetchContacts(page);
+  }, [page]);
 
   return (
-    <div className="max-w-md mx-auto p-8 border rounded-lg shadow-lg bg-white">
-      <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Contact Us</h2>
-      {success && <p className="text-green-600 mb-4 text-center">Message sent successfully!</p>}
-      <form onSubmit={handleSubmit}>
-        <div className="mb-5">
-          <label className="block text-sm font-medium mb-1 text-gray-700" htmlFor="name">
-            Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className={`border rounded-lg p-3 w-full bg-gray-100 transition duration-200 ease-in-out focus:ring-2 focus:ring-blue-400 ${
-              errors.name ? 'border-red-500' : 'border-gray-300'
-            }`}
-            placeholder="Your Name"
-          />
-          {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-        </div>
+    <div className="max-w-6xl mx-auto p-5 bg-white rounded shadow">
+      <h2 className="text-2xl font-semibold text-center mb-6">
+        Admin Contact Us
+      </h2>
 
-        <div className="mb-5">
-          <label className="block text-sm font-medium mb-1 text-gray-700" htmlFor="email">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className={`border rounded-lg p-3 w-full bg-gray-100 transition duration-200 ease-in-out focus:ring-2 focus:ring-blue-400 ${
-              errors.email ? 'border-red-500' : 'border-gray-300'
-            }`}
-            placeholder="Your Email"
-          />
-          {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
-        </div>
+      <div className="mb-4">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={handleSearch}
+          placeholder="Search by name, email, service..."
+          className="w-full p-2 border border-gray-300 rounded"
+        />
+      </div>
 
-        <div className="mb-5">
-          <label className="block text-sm font-medium mb-1 text-gray-700" htmlFor="message">
-            Message
-          </label>
-          <textarea
-            id="message"
-            name="message"
-            value={formData.message}
-            onChange={handleChange}
-            className={`border rounded-lg p-3 w-full bg-gray-100 h-32 transition duration-200 ease-in-out focus:ring-2 focus:ring-blue-400 ${
-              errors.message ? 'border-red-500' : 'border-gray-300'
-            }`}
-            placeholder="Your Message"
-          />
-          {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
-        </div>
+      <table className="w-full table-auto">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="px-4 py-2 text-left">Name</th>
+            <th className="px-4 py-2 text-left">Email</th>
+            <th className="px-4 py-2 text-left">Mobile</th>
+            <th className="px-4 py-2 text-left">Service</th>
+            <th className="px-4 py-2 text-left">Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredContacts.length > 0 ? (
+            filteredContacts.map((contact) => (
+              <tr key={contact._id} className="border-b">
+                <td className="px-4 py-2">{contact.name}</td>
+                <td className="px-4 py-2">{contact.email}</td>
+                <td className="px-4 py-2">{contact.mobile}</td>
+                <td className="px-4 py-2">{contact.service}</td>
+                <td className="px-4 py-2">{contact.message}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="6" className="text-center py-4 text-gray-500">
+                No contact entries found
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 transition duration-200 ease-in-out focus:ring-2 focus:ring-blue-400"
-        >
-          Send Message
-        </button>
-      </form>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6 space-x-2">
+          <button
+            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+            disabled={page === 1}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
+            Prev
+          </button>
+          {Array.from({ length: totalPages }).map((_, i) => (
+            <button
+              key={i + 1}
+              onClick={() => setPage(i + 1)}
+              className={`px-3 py-1 border rounded ${
+                page === i + 1 ? "bg-gray-200" : ""
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={page === totalPages}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
-export default ContactUs;
+export default AdminContactUsPage;

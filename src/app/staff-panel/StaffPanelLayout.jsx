@@ -29,9 +29,15 @@ const StaffPanelLayout = ({ children }) => {
   const menuItems = [
     {
       name: "Dashboard",
-      path: "/staff-panel/dashboard",
+      path: "/staff-panel/Dashboard",
       icon: UserIcon,
-      onClick: () => setActiveForm("dashboard"),
+      onClick: () => setActiveForm("Dashboard"),
+    },
+    {
+      name: "Template Management",
+      path: "/staff-panel/TemplateManagement",
+      icon: InboxIcon,
+      onClick: () => setActiveForm("template-management"),
     },
     {
       name: "Manage Listing",
@@ -39,38 +45,38 @@ const StaffPanelLayout = ({ children }) => {
       submenu: [
         {
           name: "Mini Website",
-          path: "/staff-panel/ManageListing/All-Card-Purchases",
-          icon: UserIcon,
+          path: "/staff-panel/ManageListing/mini-website",
+          icon: DocumentArrowUpIcon,
           onClick: () => setActiveForm("mini-website"),
         },
         {
           name: "NFC Cards",
-          path: "/staff-panel/ManageListing/All-Card-Purchases",
-          icon: UserIcon,
+          path: "/staff-panel/ManageListing/nfc-cards",
+          icon: CreditCardIcon,
           onClick: () => setActiveForm("nfc-cards"),
         },
         {
           name: "PDF Visiting Card",
-          path: "/staff-panel/ManageListing/All-Card-Purchases",
-          icon: UserIcon,
+          path: "/staff-panel/ManageListing/pdf-visiting-card",
+          icon: DocumentArrowUpIcon,
           onClick: () => setActiveForm("pdf-visiting-card"),
         },
         {
           name: "One Page Business Profile",
-          path: "/staff-panel/ManageListing/All-Card-Purchases",
-          icon: UserIcon,
+          path: "/staff-panel/ManageListing/one-page-business-profile",
+          icon: PencilSquareIcon,
           onClick: () => setActiveForm("one-page-business-profile"),
         },
         {
           name: "Physical Visiting Card",
-          path: "/staff-panel/ManageListing/All-Card-Purchases",
-          icon: UserIcon,
+          path: "/staff-panel/ManageListing/physical-visiting-card",
+          icon: CreditCardIcon,
           onClick: () => setActiveForm("physical-visiting-card"),
         },
         {
           name: "Business Essentials",
-          path: "/staff-panel/ManageListing/All-Card-Purchases",
-          icon: UserIcon,
+          path: "/staff-panel/ManageListing/business-essentials",
+          icon: BriefcaseIcon,
           onClick: () => setActiveForm("business-essentials"),
         },
         // { name: 'Additional Services', icon: UserIcon, onClick: () => setActiveForm('additional-services') },

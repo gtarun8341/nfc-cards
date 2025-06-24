@@ -1,17 +1,46 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
+import api from "../apiConfig/axiosConfig";
 
 const EnquiryForm = ({
   imageSrc = "/images/enquiry.png", // Update path if needed
 }) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    mobile: "",
+    service: "",
+    message: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post("/api/contactUs-form/contactUs", formData);
+      alert("Enquiry submitted!");
+      setFormData({
+        name: "",
+        email: "",
+        mobile: "",
+        service: "",
+        message: "",
+      });
+    } catch (err) {
+      console.error("Error submitting enquiry:", err);
+    }
+  };
   return (
     <div className="mt-16 bg-[#EECCCC33] py-12 px-4">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12">
         {/* Left: Form */}
         <div className="w-full md:w-1/2">
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
             {/* Full Name */}
             <div>
               <label className="block mb-1 text-gray-700 font-medium">
@@ -19,6 +48,9 @@ const EnquiryForm = ({
               </label>
               <input
                 type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
                 placeholder="Enter your name"
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
               />
@@ -31,6 +63,9 @@ const EnquiryForm = ({
               </label>
               <input
                 type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
                 placeholder="Enter your email"
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
               />
@@ -43,6 +78,9 @@ const EnquiryForm = ({
               </label>
               <input
                 type="tel"
+                name="mobile"
+                value={formData.mobile}
+                onChange={handleChange}
                 placeholder="Enter your mobile number"
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
               />
@@ -54,8 +92,10 @@ const EnquiryForm = ({
                 Service Required
               </label>
               <select
+                name="service"
+                value={formData.service}
+                onChange={handleChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                defaultValue=""
               >
                 <option value="" disabled>
                   Select a service
@@ -73,10 +113,13 @@ const EnquiryForm = ({
                 Message
               </label>
               <textarea
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
                 rows="4"
                 placeholder="Write your message"
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-              ></textarea>
+              />
             </div>
 
             <div className="flex justify-center">

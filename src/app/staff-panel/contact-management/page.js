@@ -80,12 +80,17 @@ const AdminContactManagementPage = () => {
     XLSX.utils.book_append_sheet(wb, ws, "Contacts");
 
     // Generate and download the Excel file
-    XLSX.writeFile(wb, `${user.email}_${user.phone}_${user.name}_contacts.xlsx`);
+    XLSX.writeFile(
+      wb,
+      `${user.email}_${user.phone}_${user.name}_contacts.xlsx`
+    );
   };
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white shadow-md rounded-lg overflow-hidden">
-      <h1 className="text-2xl font-semibold text-center mb-4">Contact Management</h1>
+      <h1 className="text-2xl font-semibold text-center mb-4">
+        Contact Management
+      </h1>
 
       {!selectedUser ? (
         <div>
@@ -145,7 +150,9 @@ const AdminContactManagementPage = () => {
           >
             Back to Users
           </button>
-          <h2 className="text-xl font-semibold mb-4">Contacts for Selected User</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            Contacts for Selected User
+          </h2>
 
           {/* Search Bar for Inner Table */}
           <input
@@ -156,7 +163,7 @@ const AdminContactManagementPage = () => {
             onChange={(e) => setInnerSearchTerm(e.target.value)}
           />
           <div className="overflow-x-auto">
-          <table className="min-w-full table-auto border-collapse bg-white shadow-md rounded-md">
+            <table className="min-w-full table-auto border-collapse bg-white shadow-md rounded-md">
               <thead>
                 <tr className="border-b bg-gray-100">
                   <th className="px-4 py-2 text-left">Name</th>
@@ -177,7 +184,8 @@ const AdminContactManagementPage = () => {
               </thead>
               <tbody>
                 {filterInnerContacts(
-                  contacts.find((user) => user.userId === selectedUser).contacts,
+                  contacts.find((user) => user.userId === selectedUser)
+                    .contacts,
                   innerSearchTerm
                 ).map((contact, index) => (
                   <tr key={index} className="border-b">

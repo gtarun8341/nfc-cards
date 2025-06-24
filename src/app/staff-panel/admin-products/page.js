@@ -1,7 +1,7 @@
 "use client"; // Next.js Client Component
-import Image from 'next/image';
-import { useState, useEffect ,useCallback} from 'react';
-import axios from 'axios';
+import Image from "next/image";
+import { useState, useEffect, useCallback } from "react";
+import axios from "axios";
 import api from "../../apiConfig/axiosConfig"; // Ensure you have the right API config
 
 const ProductCataloguePage = () => {
@@ -10,13 +10,14 @@ const ProductCataloguePage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("");
   const [currentProduct, setCurrentProduct] = useState({
-    name: '',
-    type: '',
-    price: '',
+    name: "",
+    type: "",
+    price: "",
     image: null,
-    hsnCode: '',
-    gst: '',
-    discount: '',
+    hsnCode: "",
+    gst: "",
+    units: "",
+    discount: "",
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -33,7 +34,7 @@ const ProductCataloguePage = () => {
   // Handle form input changes
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === 'image') {
+    if (name === "image") {
       setCurrentProduct({ ...currentProduct, image: files[0] });
     } else {
       setCurrentProduct({ ...currentProduct, [name]: value });
@@ -42,23 +43,24 @@ const ProductCataloguePage = () => {
 
   // Add or update product function
   const addOrUpdateProduct = async () => {
-    const token = localStorage.getItem('staffAuthToken');
+    const token = localStorage.getItem("staffAuthToken");
     const formData = new FormData();
 
-    formData.append('name', currentProduct.name);
-    formData.append('type', currentProduct.type);
-    formData.append('price', currentProduct.price);
-    formData.append('hsnCode', currentProduct.hsnCode);
-    formData.append('gst', currentProduct.gst);
-    formData.append('discount', currentProduct.discount);
+    formData.append("name", currentProduct.name);
+    formData.append("type", currentProduct.type);
+    formData.append("price", currentProduct.price);
+    formData.append("hsnCode", currentProduct.hsnCode);
+    formData.append("gst", currentProduct.gst);
+    formData.append("units", currentProduct.units);
+    formData.append("discount", currentProduct.discount);
 
     if (currentProduct.image) {
-      formData.append('productImages[]', currentProduct.image); // Append image file if available
+      formData.append("productImages[]", currentProduct.image); // Append image file if available
     }
 
     const config = {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${token}`,
       },
     };
@@ -66,29 +68,37 @@ const ProductCataloguePage = () => {
     try {
       let response;
       if (isEditing && editProductId) {
-        console.log(editProductId)
-        response = await api.put(`/api/addAdminProduct/staff/update-product/${editProductId}`, formData, config);
+        console.log(editProductId);
+        response = await api.put(
+          `/api/addAdminProduct/staff/update-product/${editProductId}`,
+          formData,
+          config
+        );
       } else {
-        response = await api.post('/api/addAdminProduct/add-product', formData, config);
+        response = await api.post(
+          "/api/addAdminProduct/staff/add-product",
+          formData,
+          config
+        );
       }
 
       resetForm();
       fetchProducts(); // Refresh product list after adding/updating
     } catch (error) {
-      console.error('Error adding/updating product:', error);
+      console.error("Error adding/updating product:", error);
     }
   };
 
   // Fetch products
   const fetchProducts = async () => {
-    const token = localStorage.getItem('staffAuthToken');
+    const token = localStorage.getItem("staffAuthToken");
     try {
-      const { data } = await api.get('/api/addAdminProduct/all-products', {
+      const { data } = await api.get("/api/addAdminProduct/all-products", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCatalogue(data.products);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error("Error fetching products:", error);
     }
   };
 
@@ -99,7 +109,9 @@ const ProductCataloguePage = () => {
     if (searchQuery) {
       updatedCatalogue = updatedCatalogue.filter(
         (product) =>
-          product.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          product.productName
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
           product.productPrice.toString().includes(searchQuery) ||
           product.discount.toString().includes(searchQuery) ||
           product.productType.toLowerCase().includes(searchQuery.toLowerCase())
@@ -107,7 +119,9 @@ const ProductCataloguePage = () => {
     }
 
     if (filterType) {
-      updatedCatalogue = updatedCatalogue.filter((product) => product.productType === filterType);
+      updatedCatalogue = updatedCatalogue.filter(
+        (product) => product.productType === filterType
+      );
     }
 
     setFilteredCatalogue(updatedCatalogue);
@@ -116,7 +130,6 @@ const ProductCataloguePage = () => {
   useEffect(() => {
     handleSearchAndFilter();
   }, [handleSearchAndFilter]);
-
 
   // Edit product
   const editProduct = (product) => {
@@ -127,6 +140,7 @@ const ProductCataloguePage = () => {
       image: null,
       hsnCode: product.hsnCode,
       gst: product.gst,
+      units: product.units,
       discount: product.discount,
       currentImage: product.productImages?.[0] || null,
     });
@@ -134,29 +148,27 @@ const ProductCataloguePage = () => {
     setEditProductId(product._id); // Store product ID for updating
   };
 
-  // Delete product
-  // const deleteProduct = async (productId) => {
-  //   const token = localStorage.getItem('staffAuthToken');
-  //   try {
-  //     await api.delete(`/api/addAdminProduct/delete-product/${productId}`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     });
-  //     fetchProducts(); // Refresh product list after deletion
-  //   } catch (error) {
-  //     console.error('Error deleting product:', error);
-  //   }
-  // };
-
   // Reset form after submission
   const resetForm = () => {
-    setCurrentProduct({ name: '', type: '', price: '', image: null, hsnCode: '', gst: '', discount: '' });
+    setCurrentProduct({
+      name: "",
+      type: "",
+      price: "",
+      image: null,
+      hsnCode: "",
+      gst: "",
+      discount: "",
+      units: "",
+    });
     setIsEditing(false);
     setEditProductId(null);
   };
 
   return (
     <div className="container mx-auto p-6 bg-gray-50 rounded-lg shadow-lg">
-      <h1 className="text-4xl font-bold text-center text-gray-800 mb-6">Product Catalogue</h1>
+      <h1 className="text-4xl font-bold text-center text-gray-800 mb-6">
+        Product Catalogue
+      </h1>
 
       {/* Search and Filter */}
       <div className="flex items-center justify-between mb-4">
@@ -196,9 +208,25 @@ const ProductCataloguePage = () => {
             className="border border-gray-300 p-3 rounded-md"
             required
           >
-            <option value="" disabled>Select Type</option>
+            <option value="" disabled>
+              Select Type
+            </option>
             <option value="product">Product</option>
             <option value="service">Service</option>
+          </select>
+          <select
+            name="units"
+            value={currentProduct.units}
+            onChange={handleChange}
+            className="border border-gray-300 p-3 rounded-md"
+            required
+          >
+            <option value="">Select Units</option>
+            <option value="kg">Kilograms (kg)</option>
+            <option value="g">Grams (g)</option>
+            <option value="litre">Litres (L)</option>
+            <option value="ml">Millilitres (ml)</option>
+            <option value="piece">Piece</option>
           </select>
           <input
             type="text"
@@ -248,7 +276,7 @@ const ProductCataloguePage = () => {
           onClick={addOrUpdateProduct}
           className="mt-4 w-full bg-blue-600 text-white p-3 rounded-md hover:bg-blue-700 transition"
         >
-          {isEditing ? 'Update Product' : 'Add Product'}
+          {isEditing ? "Update Product" : "Add Product"}
         </button>
       </form>
 
@@ -261,7 +289,8 @@ const ProductCataloguePage = () => {
               <th className="py-3 px-4 border-b">Price</th>
               <th className="py-3 px-4 border-b">Discount</th>
               <th className="py-3 px-4 border-b">HSN Code</th>
-<th className="py-3 px-4 border-b">GST</th>
+              <th className="py-3 px-4 border-b">GST</th>
+              <th className="py-3 px-4 border-b">UNITS</th>
               <th className="py-3 px-4 border-b">Image</th>
               <th className="py-3 px-4 border-b">Actions</th>
             </tr>
@@ -274,24 +303,26 @@ const ProductCataloguePage = () => {
                 <td className="py-3 px-4 border-b">{product.productPrice}</td>
                 <td className="py-3 px-4 border-b">{product.discount}</td>
                 <td className="py-3 px-4 border-b">{product.hsnCode}</td>
-<td className="py-3 px-4 border-b">{product.gst}</td>
+                <td className="py-3 px-4 border-b">{product.gst}</td>
+                <td className="py-3 px-4 border-b">{product.units}</td>
                 <td className="py-3 px-4 border-b">
-                {product.productImages && product.productImages[0] && (() => {
-  const imageUrl = `${api.defaults.baseURL}/uploads/adminproducts/${product.productImages[0]}`;
-  console.log('Image URL:', imageUrl); // Log the URL
-  return (
-    <Image
-      src={imageUrl} // Use base URL for images
-      alt={product.productName}
-      width={500} // Set a reasonable default width
-      height={500}
-      layout="intrinsic"
-      className="h-16 w-16 object-cover"
-    />
-  );
-})()}
-
-</td>
+                  {product.productImages &&
+                    product.productImages[0] &&
+                    (() => {
+                      const imageUrl = `${api.defaults.baseURL}/uploads/adminproducts/${product.productImages[0]}`;
+                      console.log("Image URL:", imageUrl); // Log the URL
+                      return (
+                        <Image
+                          src={imageUrl} // Use base URL for images
+                          alt={product.productName}
+                          width={500} // Set a reasonable default width
+                          height={500}
+                          layout="intrinsic"
+                          className="h-16 w-16 object-cover"
+                        />
+                      );
+                    })()}
+                </td>
 
                 <td className="py-3 px-4 border-b flex space-x-2">
                   <button
@@ -300,12 +331,6 @@ const ProductCataloguePage = () => {
                   >
                     Edit
                   </button>
-                  {/* <button
-                    onClick={() => deleteProduct(product._id)}
-                    className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600 transition duration-200"
-                  >
-                    Delete
-                  </button> */}
                 </td>
               </tr>
             ))}

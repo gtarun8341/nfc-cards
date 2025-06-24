@@ -9,6 +9,8 @@ const AllCardPurchases = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [filteredPurchases, setFilteredPurchases] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchAllPurchases = async () => {
     try {
@@ -18,7 +20,10 @@ const AllCardPurchases = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const { data } = await api.get("/api/cardPurchase/staff/all-purchases", config);
+      const { data } = await api.get(
+        `/api/cardPurchase/staff/all-purchases?page=${page}&limit=10`,
+        config
+      );
 
       // Sort purchases by newest first
       const sortedPurchases = data.purchases
@@ -26,7 +31,10 @@ const AllCardPurchases = () => {
             (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
           )
         : [];
+      // const sortedPurchases = data.purchases || [];
+
       setPurchases(sortedPurchases);
+      setTotalPages(data.totalPages || 1);
     } catch (error) {
       console.error("Error fetching all card purchases:", error.message);
       setPurchases([]);
@@ -37,7 +45,7 @@ const AllCardPurchases = () => {
 
   useEffect(() => {
     fetchAllPurchases();
-  }, []);
+  }, [page]);
 
   const updateStatus = async (id, newStatus) => {
     try {
@@ -88,9 +96,7 @@ const AllCardPurchases = () => {
             purchase.user.name
               .toLowerCase()
               .includes(searchTerm.toLowerCase()) ||
-            purchase.user.email
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase())
+            purchase.user.email.toLowerCase().includes(searchTerm.toLowerCase())
         );
       }
 
@@ -109,7 +115,9 @@ const AllCardPurchases = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
-      <h1 className="text-2xl font-bold text-center mb-6">All Card Purchases</h1>
+      <h1 className="text-2xl font-bold text-center mb-6">
+        All Card Purchases
+      </h1>
 
       <div className="mb-4 flex justify-between">
         {/* Search Bar */}
@@ -192,6 +200,27 @@ const AllCardPurchases = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center mt-4 space-x-4">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="text-lg font-semibold">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
         </div>
       )}
     </div>
