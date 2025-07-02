@@ -1,7 +1,7 @@
 // src/app/nfc-card/page.js
 "use client"; // Next.js Client Component
 
-import Hero from "../components/Hero"; // Adjust the import path as necessary
+import Hero from "../components/Heropvc"; // Adjust the import path as necessary
 import AllCards from "../components/AllCards"; // Import the AllCards component
 import Pricing from "../components/Pricing"; // Import the Pricing component
 import DemoVideos from "../components/DemoVideos"; // Import the DemoVideos component
@@ -526,23 +526,23 @@ export default function PhysicalCardPage() {
     <div className="bg-white">
       <Hero />
       <DifferentTypeCards
-        heading="Different Types Of Cards"
+        heading="Different Types Of Physical Visiting Cards"
         description="More than just a business card – a complete digital identity solution with features that keep you connected."
         differenttypecardsimages={differenttypecardsimages}
       />
       <FeaturesCard
-        headingTitle="Features of NFC Card"
+        headingTitle="Features of Physical Visiting Cards"
         headingDescription="More than just a business card – a complete digital identity solution with features that keep you connected."
         cardsData={cardsData}
       />
       <SeeHowItWorks
-        title="See How NFC Cards Work"
+        title="See How Physical Visiting Cards Work"
         description="See how our Tap-and-Share NFC Business Cards in Mumbai work with a simple tap. No apps, no hassle — just contactless networking at your fingertips."
         videos={demoVideos}
         cardsData={HowItWorkscardsData}
       />
       <Benefits
-        title="Advantages Of Using NFC Cards"
+        title="Advantages Of Using Physical Visiting Cards"
         description="More than just a business card – a complete digital identity solution with features that keep you connected."
         benefitsData={benefitsData}
       />
@@ -565,7 +565,7 @@ export default function PhysicalCardPage() {
         testimonials={testimonialData}
       />
       <Samples
-        heading="Sample Mini Websites"
+        heading="Sample Physical Visiting Cards"
         description="Each NFC card links to a customizable digital profile. Here are some examples of what yours could look like."
         sideHeading="Service Catalog with Direct Links"
         sideHeadingDescription="Use NFC smart cards with customizable templates to showcase offerings by emphasizing services, prices, and clickable links."

@@ -7,6 +7,7 @@ import HomeSection from "../components/HomeSection";
 import HeroBanner from "../components/HeroBanner";
 import EnquiryForm from "../components/EnquiryForm";
 import BlogsSection from "../components/BlogsSection";
+import GalarySection from "../components/GalarySection";
 import FrequentlyAskedQuestions from "../components/FrequentlyAskedQuestions";
 
 export default function AdditionalServices() {
@@ -166,6 +167,11 @@ export default function AdditionalServices() {
         </p>
         <EnquiryForm />
       </div>
+      <GalarySection
+        headingTitle="Sliders"
+        headingDescription="More than just a business card – a complete digital identity solution with features that keep you connected."
+        blogData={blogData}
+      />
       <BlogsSection
         headingTitle="Blogs Section"
         headingDescription="Keep abreast with the most recent developments, patterns, and advice on NFC business cards with online profiles in Mumbai and elsewhere. Our site offers something for everyone, regardless of whether you're a corporate professional, freelancer, or small business owner."
