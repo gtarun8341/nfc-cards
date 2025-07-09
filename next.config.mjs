@@ -2,8 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["via.placeholder.com"], // Add your image domains here
-
+    domains: [
+      "photos.app.goo.gl", // Add this line
+      "lh3.googleusercontent.com", // Also common for Google Drive thumbnails
+      "via.placeholder.com",
+    ],
     remotePatterns: [
       {
         protocol: "https",

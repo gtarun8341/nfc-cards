@@ -179,6 +179,7 @@ const ProductsCategoriesPage = () => {
                   <th className="px-4 py-2 text-left border">Price</th>
                   <th className="px-4 py-2 text-left border">Type</th>
                   <th className="px-4 py-2 text-left border">UNITS</th>
+                  <th className="px-4 py-2 text-left border">Category</th>
                   <th className="px-4 py-2 text-left border">Sold Count</th>
                   <th className="px-4 py-2 text-left border">Discount</th>
                 </tr>
@@ -192,6 +193,7 @@ const ProductsCategoriesPage = () => {
                     </td>
                     <td className="px-4 py-2 border">{product.productType}</td>
                     <td className="px-4 py-2 border">{product.units}</td>
+                    <td className="px-4 py-2 border">{product.category}</td>
                     <td className="px-4 py-2 border">{product.soldCount}</td>
 
                     <td className="px-4 py-2 border">

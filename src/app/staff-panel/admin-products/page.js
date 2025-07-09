@@ -9,6 +9,8 @@ const ProductCataloguePage = () => {
   const [filteredCatalogue, setFilteredCatalogue] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+
   const [currentProduct, setCurrentProduct] = useState({
     name: "",
     type: "",
@@ -18,6 +20,7 @@ const ProductCataloguePage = () => {
     gst: "",
     units: "",
     discount: "",
+    category: "", // <-- Add this
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -53,6 +56,7 @@ const ProductCataloguePage = () => {
     formData.append("gst", currentProduct.gst);
     formData.append("units", currentProduct.units);
     formData.append("discount", currentProduct.discount);
+    formData.append("category", currentProduct.category);
 
     if (currentProduct.image) {
       formData.append("productImages[]", currentProduct.image); // Append image file if available
@@ -123,9 +127,13 @@ const ProductCataloguePage = () => {
         (product) => product.productType === filterType
       );
     }
-
+    if (filterCategory) {
+      updatedCatalogue = updatedCatalogue.filter(
+        (product) => product.category === filterCategory
+      );
+    }
     setFilteredCatalogue(updatedCatalogue);
-  }, [searchQuery, filterType, catalogue]);
+  }, [searchQuery, filterType, filterCategory, catalogue]);
 
   useEffect(() => {
     handleSearchAndFilter();
@@ -142,6 +150,7 @@ const ProductCataloguePage = () => {
       gst: product.gst,
       units: product.units,
       discount: product.discount,
+      category: product.category,
       currentImage: product.productImages?.[0] || null,
     });
     setIsEditing(true);
@@ -159,6 +168,7 @@ const ProductCataloguePage = () => {
       gst: "",
       discount: "",
       units: "",
+      category: "",
     });
     setIsEditing(false);
     setEditProductId(null);
@@ -187,6 +197,19 @@ const ProductCataloguePage = () => {
           <option value="">All Types</option>
           <option value="product">Product</option>
           <option value="service">Service</option>
+        </select>
+        <select
+          value={filterCategory}
+          onChange={(e) => setFilterCategory(e.target.value)}
+          className="border border-gray-300 p-3 rounded-md"
+        >
+          <option value="">All Category</option>
+          <option value="grocery">Grocery</option>
+          <option value="electronics">Electronics</option>
+          <option value="clothing">Clothing</option>
+          <option value="furniture">Furniture</option>
+          <option value="services">Services</option>
+          <option value="other">Other</option>
         </select>
       </div>
 
@@ -227,6 +250,20 @@ const ProductCataloguePage = () => {
             <option value="litre">Litres (L)</option>
             <option value="ml">Millilitres (ml)</option>
             <option value="piece">Piece</option>
+          </select>
+          <select
+            name="category"
+            value={currentProduct.category}
+            onChange={handleChange}
+            className="border border-gray-300 p-3 rounded-md"
+          >
+            <option value="">Select Category</option>
+            <option value="grocery">Grocery</option>
+            <option value="electronics">Electronics</option>
+            <option value="clothing">Clothing</option>
+            <option value="furniture">Furniture</option>
+            <option value="services">Services</option>
+            <option value="other">Other</option>
           </select>
           <input
             type="text"
@@ -291,6 +328,7 @@ const ProductCataloguePage = () => {
               <th className="py-3 px-4 border-b">HSN Code</th>
               <th className="py-3 px-4 border-b">GST</th>
               <th className="py-3 px-4 border-b">UNITS</th>
+              <th className="py-3 px-4 border-b">Category</th>
               <th className="py-3 px-4 border-b">Image</th>
               <th className="py-3 px-4 border-b">Actions</th>
             </tr>
@@ -305,6 +343,7 @@ const ProductCataloguePage = () => {
                 <td className="py-3 px-4 border-b">{product.hsnCode}</td>
                 <td className="py-3 px-4 border-b">{product.gst}</td>
                 <td className="py-3 px-4 border-b">{product.units}</td>
+                <td className="py-3 px-4 border-b">{product.category}</td>
                 <td className="py-3 px-4 border-b">
                   {product.productImages &&
                     product.productImages[0] &&

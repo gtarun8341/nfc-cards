@@ -11,15 +11,18 @@ export default function AuthPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState(""); // New state for phone number
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // start loading
 
     const apiEndpoint = isRegister ? "/api/users/register" : "/api/users/login";
     const requestData = isRegister
       ? { name, email, password, phone }
       : { email, password };
     if (isRegister && (!name || !email || !password || !phone)) {
+      setLoading(false); // stop loading
       return alert("All fields are required for registration.");
     }
     try {
@@ -64,6 +67,8 @@ export default function AuthPage() {
       } else {
         console.error("Error during API request:", error);
       }
+    } finally {
+      setLoading(false); // stop loading in all cases
     }
   };
 
@@ -180,9 +185,10 @@ export default function AuthPage() {
 
               <button
                 type="submit"
-                className="w-full bg-[#EECCCC] text-black px-6 py-3 rounded-lg hover:bg-green-600 transition-all duration-300"
+                className="w-full bg-[#EECCCC] text-black px-6 py-3 rounded-lg hover:bg-green-600 transition-all duration-300 disabled:opacity-50"
+                disabled={loading}
               >
-                {isRegister ? "Register" : "Login"}
+                {loading ? "Loading..." : isRegister ? "Register" : "Login"}
               </button>
             </form>
 

@@ -10,9 +10,11 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const router = useRouter();
   const [userRole, setUserRole] = useState("admin"); // default role
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // start loading
 
     try {
       const response = await api.post("/api/admin/login", { email, password });
@@ -42,6 +44,8 @@ export default function AuthPage() {
       } else {
         console.error("Error during API request:", error);
       }
+    } finally {
+      setLoading(false); // stop loading no matter what
     }
   };
 
@@ -131,8 +135,9 @@ export default function AuthPage() {
               <button
                 type="submit"
                 className="w-1/2 mx-auto block bg-[#EECCCC] text-white px-6 py-3 rounded-full hover:bg-green-700 transition-all duration-300"
+                disabled={loading}
               >
-                Login
+                {loading ? "Loading..." : "Login"}
               </button>
             </form>
           </div>

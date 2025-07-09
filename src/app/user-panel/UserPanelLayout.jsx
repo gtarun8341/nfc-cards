@@ -30,6 +30,8 @@ const UserPanelLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // State for sidebar toggle
   const router = useRouter();
   const [userDetailsExist, setUserDetailsExist] = useState(false); // State to check user details
+  const [limitations, setLimitations] = useState({});
+
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
@@ -46,7 +48,8 @@ const UserPanelLayout = ({ children }) => {
           !!response.data?.userDetailsExist,
           "Converted boolean value"
         );
-        setUserDetailsExist(!!response.data?.userDetailsExist); // Make sure this is a boolean
+        setUserDetailsExist(!!response.data?.userDetailsExist);
+        setLimitations(response.data?.limitations || {});
       } catch (error) {
         console.error("Error fetching user details:", error);
         setUserDetailsExist(false);
@@ -76,49 +79,49 @@ const UserPanelLayout = ({ children }) => {
       onClick: () => setActiveForm("company-profile"),
     },
     // { name: 'templates-manage', path: 'templates-manage', icon: WrenchIcon, onClick: () => setActiveForm('templates-manage') },
-    {
-      name: "Manage Listing",
-      icon: CogIcon,
-      submenu: [
-        {
-          name: "Mini Website",
-          path: "/user-panel/mini-website",
-          icon: DocumentArrowUpIcon,
-          onClick: () => setActiveForm("mini-website"),
-        },
-        {
-          name: "NFC Cards",
-          path: "/user-panel/nfc-cards",
-          icon: CreditCardIcon,
-          onClick: () => setActiveForm("nfc-cards"),
-        },
-        {
-          name: "PDF Visiting Card",
-          path: "/user-panel/pdf-visiting-card",
-          icon: DocumentArrowUpIcon,
-          onClick: () => setActiveForm("pdf-visiting-card"),
-        },
-        {
-          name: "One Page Business Profile",
-          path: "/user-panel/one-page-business-profile",
-          icon: PencilSquareIcon,
-          onClick: () => setActiveForm("one-page-business-profile"),
-        },
-        {
-          name: "Physical Visiting Card",
-          path: "/user-panel/physical-visiting-card",
-          icon: CreditCardIcon,
-          onClick: () => setActiveForm("physical-visiting-card"),
-        },
-        {
-          name: "Business Essentials",
-          path: "/user-panel/business-essentials",
-          icon: BriefcaseIcon,
-          onClick: () => setActiveForm("business-essentials"),
-        },
-        // { name: 'Additional Services', icon: UserIcon, onClick: () => setActiveForm('additional-services') },
-      ],
-    },
+    // {
+    //   name: "Manage Listing",
+    //   icon: CogIcon,
+    //   submenu: [
+    //     {
+    //       name: "Mini Website",
+    //       path: "/user-panel/mini-website",
+    //       icon: DocumentArrowUpIcon,
+    //       onClick: () => setActiveForm("mini-website"),
+    //     },
+    //     {
+    //       name: "NFC Cards",
+    //       path: "/user-panel/nfc-cards",
+    //       icon: CreditCardIcon,
+    //       onClick: () => setActiveForm("nfc-cards"),
+    //     },
+    //     {
+    //       name: "PDF Visiting Card",
+    //       path: "/user-panel/pdf-visiting-card",
+    //       icon: DocumentArrowUpIcon,
+    //       onClick: () => setActiveForm("pdf-visiting-card"),
+    //     },
+    //     {
+    //       name: "One Page Business Profile",
+    //       path: "/user-panel/one-page-business-profile",
+    //       icon: PencilSquareIcon,
+    //       onClick: () => setActiveForm("one-page-business-profile"),
+    //     },
+    //     {
+    //       name: "Physical Visiting Card",
+    //       path: "/user-panel/physical-visiting-card",
+    //       icon: CreditCardIcon,
+    //       onClick: () => setActiveForm("physical-visiting-card"),
+    //     },
+    //     {
+    //       name: "Business Essentials",
+    //       path: "/user-panel/business-essentials",
+    //       icon: BriefcaseIcon,
+    //       onClick: () => setActiveForm("business-essentials"),
+    //     },
+    //     // { name: 'Additional Services', icon: UserIcon, onClick: () => setActiveForm('additional-services') },
+    //   ],
+    // },
     {
       name: "Reports",
       icon: ChartBarIcon, // You can use a Lucide or Heroicons icon here
@@ -222,6 +225,65 @@ const UserPanelLayout = ({ children }) => {
       onClick: () => setActiveForm("offer-discounts-events"),
     },
   ];
+  if (userDetailsExist) {
+    const listingSubmenu = [];
+
+    if (limitations?.miniWebsite !== "0") {
+      listingSubmenu.push({
+        name: "Mini Website",
+        path: "/user-panel/mini-website",
+        icon: DocumentArrowUpIcon,
+        onClick: () => setActiveForm("mini-website"),
+      });
+    }
+
+    if (limitations?.pdfVisitingCard !== "0") {
+      listingSubmenu.push({
+        name: "PDF Visiting Card",
+        path: "/user-panel/pdf-visiting-card",
+        icon: DocumentArrowUpIcon,
+        onClick: () => setActiveForm("pdf-visiting-card"),
+      });
+    }
+
+    if (limitations?.businessProfile !== "0") {
+      listingSubmenu.push({
+        name: "One Page Business Profile",
+        path: "/user-panel/one-page-business-profile",
+        icon: PencilSquareIcon,
+        onClick: () => setActiveForm("one-page-business-profile"),
+      });
+    }
+
+    if (limitations?.physicalVisitingCard !== "0") {
+      listingSubmenu.push({
+        name: "Physical Visiting Card",
+        path: "/user-panel/physical-visiting-card",
+        icon: CreditCardIcon,
+        onClick: () => setActiveForm("physical-visiting-card"),
+      });
+    }
+
+    if (limitations?.businessEssentials !== "0") {
+      listingSubmenu.push({
+        name: "Business Essentials",
+        path: "/user-panel/business-essentials",
+        icon: BriefcaseIcon,
+        onClick: () => setActiveForm("business-essentials"),
+      });
+    }
+
+    if (listingSubmenu.length > 0) {
+      const manageListingMenu = {
+        name: "Manage Listing",
+        icon: CogIcon,
+        submenu: listingSubmenu,
+      };
+
+      // 🧠 Insert at position 3 (4th item — index starts from 0)
+      menuItems.splice(3, 0, manageListingMenu);
+    }
+  }
 
   const handleLogout = () => {
     ["authToken", "staffAuthToken", "adminAuthToken"].forEach((token) => {

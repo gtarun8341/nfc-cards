@@ -2,17 +2,28 @@
 
 import { useState, useEffect } from "react";
 import api from "../../apiConfig/axiosConfig";
-
+const defaultLimitations = {
+  miniWebsite: "",
+  pdfVisitingCard: "",
+  businessProfile: "",
+  businessEssentials: "",
+  physicalVisitingCard: "",
+  templateChanges: "",
+  productUploads: "",
+  storageSpace: "",
+};
 const AdminPlansPage = () => {
   const [plans, setPlans] = useState([]);
   const [filteredPlans, setFilteredPlans] = useState([]);
   const [search, setSearch] = useState("");
+
   const [newPlan, setNewPlan] = useState({
     title: "",
     price: "",
     currency: "INR",
     features: "",
     expiryMonths: "",
+    limitations: { ...defaultLimitations },
   });
   const [editPlan, setEditPlan] = useState(null);
   const [error, setError] = useState("");
@@ -23,7 +34,7 @@ const AdminPlansPage = () => {
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        const response = await api.get("/api/subscription/all");
+        const response = await api.get("/api/subscription/allplans");
         setPlans(response.data);
         setFilteredPlans(response.data);
         setLoading(false);
@@ -38,7 +49,7 @@ const AdminPlansPage = () => {
   const handleAddPlan = async () => {
     const formattedPlan = {
       ...newPlan,
-      features: newPlan.features.split(","),
+      features: newPlan.features.split(",").map((f) => f.trim()),
     };
     try {
       const token = localStorage.getItem("adminAuthToken");
@@ -47,7 +58,11 @@ const AdminPlansPage = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await api.post("/api/subscription/add", formattedPlan, config);
+      const response = await api.post(
+        "/api/subscription/add",
+        formattedPlan,
+        config
+      );
       setPlans([...plans, response.data.plan]);
       setFilteredPlans([...plans, response.data.plan]);
       closeModal();
@@ -61,7 +76,7 @@ const AdminPlansPage = () => {
       ...editPlan,
       features: Array.isArray(editPlan.features)
         ? editPlan.features
-        : editPlan.features.split(","),
+        : editPlan.features.split(",").map((f) => f.trim()),
     };
     try {
       const token = localStorage.getItem("adminAuthToken");
@@ -86,20 +101,25 @@ const AdminPlansPage = () => {
     }
   };
 
-  const handleDeletePlan = async (id) => {
+  const toggleDeletePlan = async (id, shouldDelete) => {
     try {
       const token = localStorage.getItem("adminAuthToken");
       const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       };
-      await api.delete(`/api/subscription/delete?id=${id}`, config);
-      const updatedPlans = plans.filter((plan) => plan._id !== id);
+      const response = await api.patch(
+        `/api/subscription/delete?id=${id}`,
+        { isDeleted: shouldDelete },
+        config
+      );
+
+      const updatedPlans = plans.map((plan) =>
+        plan._id === id ? { ...plan, isDeleted: shouldDelete } : plan
+      );
       setPlans(updatedPlans);
       setFilteredPlans(updatedPlans);
     } catch (error) {
-      setError("Failed to delete subscription plan");
+      setError("Failed to update delete status");
     }
   };
 
@@ -119,13 +139,18 @@ const AdminPlansPage = () => {
       currency: "INR",
       features: "",
       expiryMonths: "",
+      limitations: { ...defaultLimitations },
     });
     setEditing(false);
     setModalOpen(true);
   };
 
   const openEditModal = (plan) => {
-    setEditPlan({ ...plan, features: plan.features.join(", ") });
+    setEditPlan({
+      ...plan,
+      features: Array.isArray(plan.features) ? plan.features.join(", ") : "",
+      limitations: plan.limitations || { ...defaultLimitations },
+    });
     setEditing(true);
     setModalOpen(true);
   };
@@ -137,23 +162,23 @@ const AdminPlansPage = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <h1 className="text-3xl font-semibold text-center mb-6">
+    <div className="max-w-7xl mx-auto p-4 sm:p-6">
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-6">
         Manage Subscription Plans
       </h1>
       {error && <p className="text-red-500 text-center">{error}</p>}
 
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
         <input
           type="text"
           value={search}
           onChange={handleSearch}
           placeholder="Search plans by title..."
-          className="p-3 border border-gray-300 rounded-md w-1/2"
+          className="p-3 border border-gray-300 rounded-md w-full sm:w-1/2"
         />
         <button
           onClick={openAddModal}
-          className="p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 w-full sm:w-auto"
         >
           Add New Plan
         </button>
@@ -162,49 +187,86 @@ const AdminPlansPage = () => {
       {loading ? (
         <div className="text-center text-gray-500">Loading plans...</div>
       ) : (
-        <table className="min-w-full bg-white border border-gray-200">
-          <thead>
-            <tr>
-              <th className="px-6 py-3 border-b">Title</th>
-              <th className="px-6 py-3 border-b">Price</th>
-              <th className="px-6 py-3 border-b">Currency</th>
-              <th className="px-6 py-3 border-b">Features</th>
-              <th className="px-6 py-3 border-b">Duration</th>
-              <th className="px-6 py-3 border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredPlans.map((plan) => (
-              <tr key={plan._id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 border-b">{plan.title}</td>
-                <td className="px-6 py-4 border-b">{plan.price}</td>
-                <td className="px-6 py-4 border-b">{plan.currency}</td>
-                <td className="px-6 py-4 border-b">{plan.features.join(", ")}</td>
-                <td className="px-6 py-4 border-b">{plan.expiryMonths} months</td>
-                <td className="px-6 py-4 border-b flex gap-2">
-                  <button
-                    onClick={() => openEditModal(plan)}
-                    className="p-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-200 text-sm sm:text-base">
+            <thead>
+              <tr>
+                <th className="px-4 sm:px-6 py-3 border-b">Title</th>
+                <th className="px-4 sm:px-6 py-3 border-b">Price</th>
+                <th className="px-4 sm:px-6 py-3 border-b">Currency</th>
+                <th className="px-4 sm:px-6 py-3 border-b">Features</th>
+                <th className="px-4 sm:px-6 py-3 border-b">Duration</th>
+                {Object.keys(defaultLimitations).map((key) => (
+                  <th
+                    key={key}
+                    className="px-4 sm:px-6 py-3 border-b capitalize"
                   >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeletePlan(plan._id)}
-                    className="p-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                </td>
+                    {key.replace(/([A-Z])/g, " $1")}
+                  </th>
+                ))}
+                <th className="px-4 sm:px-6 py-3 border-b">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredPlans.map((plan) => (
+                <tr key={plan._id} className="hover:bg-gray-50">
+                  <td className="px-4 sm:px-6 py-4 border-b">{plan.title}</td>
+                  <td className="px-4 sm:px-6 py-4 border-b">{plan.price}</td>
+                  <td className="px-4 sm:px-6 py-4 border-b">
+                    {plan.currency}
+                  </td>
+                  <td className="px-4 sm:px-6 py-4 border-b">
+                    {Array.isArray(plan.features)
+                      ? plan.features.join(", ")
+                      : plan.features}
+                  </td>
+                  <td className="px-4 sm:px-6 py-4 border-b">
+                    {plan.expiryMonths} months
+                  </td>
+                  {Object.keys(defaultLimitations).map((key) => (
+                    <td
+                      key={key}
+                      className="px-4 sm:px-6 py-4 border-b text-center"
+                    >
+                      {plan.limitations?.[key] || "-"}
+                    </td>
+                  ))}
+                  <td className="px-4 sm:px-6 py-4 border-b flex flex-wrap gap-2">
+                    {plan.isDeleted ? (
+                      <button
+                        onClick={() => toggleDeletePlan(plan._id, false)}
+                        className="p-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                      >
+                        Restore
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => openEditModal(plan)}
+                          className="p-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => toggleDeletePlan(plan._id, true)}
+                          className="p-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {modalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-md shadow-lg w-96">
-            <h2 className="text-2xl font-semibold mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4">
+          <div className="bg-white w-full max-w-screen-sm sm:max-w-xl p-6 rounded-xl shadow-2xl overflow-y-auto max-h-[90vh]">
+            <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-center">
               {editing ? "Edit Plan" : "Add a New Plan"}
             </h2>
             <div className="space-y-4">
@@ -230,12 +292,23 @@ const AdminPlansPage = () => {
                 placeholder="Price"
                 className="w-full p-3 border border-gray-300 rounded-md"
               />
+              <select
+                value={editing ? editPlan.currency : newPlan.currency}
+                onChange={(e) =>
+                  editing
+                    ? setEditPlan({ ...editPlan, currency: e.target.value })
+                    : setNewPlan({ ...newPlan, currency: e.target.value })
+                }
+                className="w-full p-3 border border-gray-300 rounded-md"
+              >
+                <option value="INR">INR</option>
+              </select>
               <input
                 type="text"
                 value={editing ? editPlan.expiryMonths : newPlan.expiryMonths}
                 onChange={(e) =>
                   editing
-                    ? setEditPlan({ ...editPlan, expiryMonths:                 e.target.value })
+                    ? setEditPlan({ ...editPlan, expiryMonths: e.target.value })
                     : setNewPlan({ ...newPlan, expiryMonths: e.target.value })
                 }
                 placeholder="Duration (in months)"
@@ -251,18 +324,36 @@ const AdminPlansPage = () => {
                 placeholder="Features (comma-separated)"
                 className="w-full p-3 border border-gray-300 rounded-md"
               ></textarea>
-              <select
-                value={editing ? editPlan.currency : newPlan.currency}
-                onChange={(e) =>
-                  editing
-                    ? setEditPlan({ ...editPlan, currency: e.target.value })
-                    : setNewPlan({ ...newPlan, currency: e.target.value })
-                }
-                className="w-full p-3 border border-gray-300 rounded-md"
-              >
-                <option value="INR">INR</option>
-              </select>
+              {Object.entries(
+                (editing ? editPlan?.limitations : newPlan?.limitations) || {}
+              ).map(([key, value]) => (
+                <input
+                  key={key}
+                  type="text"
+                  value={value}
+                  placeholder={key}
+                  className="w-full p-3 border border-gray-300 rounded-md"
+                  onChange={(e) =>
+                    editing
+                      ? setEditPlan({
+                          ...editPlan,
+                          limitations: {
+                            ...editPlan.limitations,
+                            [key]: e.target.value,
+                          },
+                        })
+                      : setNewPlan({
+                          ...newPlan,
+                          limitations: {
+                            ...newPlan.limitations,
+                            [key]: e.target.value,
+                          },
+                        })
+                  }
+                />
+              ))}
             </div>
+
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={closeModal}
@@ -285,4 +376,3 @@ const AdminPlansPage = () => {
 };
 
 export default AdminPlansPage;
-

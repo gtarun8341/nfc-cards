@@ -127,6 +127,12 @@ const AdminPanelLayout = ({ children }) => {
       onClick: () => setActiveForm("All-Card-Purchases"),
     },
     {
+      name: "Landing Media ",
+      path: "/admin-panel/LandingMediaAdmin",
+      icon: InboxIcon,
+      onClick: () => setActiveForm("LandingMediaAdmin"),
+    },
+    {
       name: "Generate QR Code",
       path: "/admin-panel/generate-qr-code",
       icon: AdjustmentsHorizontalIcon,

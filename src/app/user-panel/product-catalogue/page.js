@@ -1,26 +1,29 @@
 "use client"; // Next.js Client Component
-import Image from 'next/image';
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import Image from "next/image";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import api from "../../apiConfig/axiosConfig"; // Ensure you have the right API config
 
 const ProductCataloguePage = () => {
   const [catalogue, setCatalogue] = useState([]);
   const [currentProduct, setCurrentProduct] = useState({
-    name: '',
-    type: '',
-    price: '',
+    name: "",
+    type: "",
+    price: "",
     image: null,
-    hsnCode: '',
-    gst: '',
+    hsnCode: "",
+    gst: "",
     units: "",
+    category: "", // <-- Add this
   });
-  
+  const [uploadedCount, setUploadedCount] = useState(0);
+  const [uploadLimit, setUploadLimit] = useState(0);
+
   const [isEditing, setIsEditing] = useState(false);
   const [editProductId, setEditProductId] = useState(null);
   const [userId, setUserId] = useState(null); // Add a state to store the ID
-  const [searchQuery, setSearchQuery] = useState(''); // State to store search query
-  const [error, setError] = useState(''); // State to store validation error
+  const [searchQuery, setSearchQuery] = useState(""); // State to store search query
+  const [error, setError] = useState(""); // State to store validation error
 
   useEffect(() => {
     fetchProducts(); // Fetch products when the component mounts
@@ -29,7 +32,7 @@ const ProductCataloguePage = () => {
   // Handle form input changes
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === 'image') {
+    if (name === "image") {
       setCurrentProduct({ ...currentProduct, image: files[0] });
     } else {
       setCurrentProduct({ ...currentProduct, [name]: value });
@@ -38,42 +41,51 @@ const ProductCataloguePage = () => {
 
   // Add or update product function with validation
   const addOrUpdateProduct = async () => {
-    const token = localStorage.getItem('authToken');
-    
+    const token = localStorage.getItem("authToken");
+
     // Validate form fields
-    if (!currentProduct.name || !currentProduct.type || !currentProduct.price || !currentProduct.hsnCode || !currentProduct.gst || !currentProduct.units) {
-      setError('All fields are required.');
+    if (
+      !currentProduct.name ||
+      !currentProduct.type ||
+      !currentProduct.price ||
+      !currentProduct.hsnCode ||
+      !currentProduct.gst ||
+      !currentProduct.units ||
+      !currentProduct.category
+    ) {
+      setError("All fields are required.");
       return;
     }
 
     if (isNaN(currentProduct.price)) {
-      setError('Price must be a valid number.');
+      setError("Price must be a valid number.");
       return;
     }
 
     // If adding a product, ensure image is provided
     if (!isEditing && !currentProduct.image) {
-      setError('Image is required when adding a product.');
+      setError("Image is required when adding a product.");
       return;
     }
 
-    setError(''); // Reset error if validation passes
+    setError(""); // Reset error if validation passes
 
     const formData = new FormData();
-    formData.append('name', currentProduct.name);
-    formData.append('type', currentProduct.type);
-    formData.append('price', currentProduct.price);
-    formData.append('hsnCode', currentProduct.hsnCode);
-    formData.append('gst', currentProduct.gst);
-    formData.append('units', currentProduct.units);
-    
+    formData.append("name", currentProduct.name);
+    formData.append("type", currentProduct.type);
+    formData.append("price", currentProduct.price);
+    formData.append("hsnCode", currentProduct.hsnCode);
+    formData.append("gst", currentProduct.gst);
+    formData.append("units", currentProduct.units);
+    formData.append("category", currentProduct.category);
+
     if (currentProduct.image) {
-      formData.append('productImages[]', currentProduct.image); // Append image file if available
+      formData.append("productImages[]", currentProduct.image); // Append image file if available
     }
 
     const config = {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${token}`,
       },
     };
@@ -85,34 +97,44 @@ const ProductCataloguePage = () => {
         console.log(isEditing, editProductId, formData, "edit");
 
         // Update product if editing
-        response = await api.put(`/api/products/${editProductId}`, formData, config);
+        response = await api.put(
+          `/api/products/${editProductId}`,
+          formData,
+          config
+        );
         console.log(response);
       } else {
         // Add new product if not editing
         console.log(formData);
-        response = await api.post('/api/products/', formData, config);
+        response = await api.post("/api/products/", formData, config);
       }
 
       resetForm();
       fetchProducts(); // Refresh product list after adding/updating
     } catch (error) {
-      console.error('Error adding/updating product:', error);
+      console.error("Error adding/updating product:", error);
+      setError(
+        error.response?.data?.message ||
+          "An unexpected error occurred while saving the product."
+      );
     }
   };
 
   // Fetch products
   const fetchProducts = async () => {
     console.log(api.defaults.baseURL);
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem("authToken");
     try {
-      const { data } = await api.get('/api/products/', {
+      const { data } = await api.get("/api/products/", {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log(data);
       setCatalogue(data.products);
       setUserId(data.id); // Store the ID in state
+      setUploadedCount(data.uploadedCount);
+      setUploadLimit(data.uploadLimit);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error("Error fetching products:", error);
     }
   };
 
@@ -126,9 +148,10 @@ const ProductCataloguePage = () => {
       hsnCode: product.hsnCode,
       gst: product.gst,
       units: product.units,
+      category: product.category,
       currentImage: product.productImages?.[0] || null,
     });
-    
+
     setIsEditing(true);
     setEditProductId(product._id); // Store product ID for updating
   };
@@ -136,34 +159,75 @@ const ProductCataloguePage = () => {
   // Delete product
   const deleteProduct = async (productId) => {
     console.log(productId, "id");
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem("authToken");
     try {
       await api.delete(`/api/products/${productId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchProducts(); // Refresh product list after deletion
     } catch (error) {
-      console.error('Error deleting product:', error);
+      console.error("Error deleting product:", error);
+      setError(
+        error.response?.data?.message ||
+          "An unexpected error occurred while deleting the product."
+      );
     }
   };
 
   // Reset form after submission
   const resetForm = () => {
-    setCurrentProduct({ name: '', type: '', price: '', image: null, hsnCode: '', gst: '', units: '' });
+    setCurrentProduct({
+      name: "",
+      type: "",
+      price: "",
+      image: null,
+      hsnCode: "",
+      gst: "",
+      units: "",
+      category: "",
+    });
     setIsEditing(false);
     setEditProductId(null);
   };
 
   // Filter catalogue based on search query
-  const filteredCatalogue = catalogue.filter((product) =>
-    product.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.hsnCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.gst.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredCatalogue = catalogue.filter(
+    (product) =>
+      product.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.hsnCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.gst.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <div className="container mx-auto p-6 bg-gray-50 rounded-lg shadow-lg">
-      <h1 className="text-4xl font-bold text-center text-gray-800 mb-6">Product Catalogue</h1>
+      <h1 className="text-4xl font-bold text-center text-gray-800 mb-6">
+        Product Catalogue
+      </h1>
+      {/* Upload Stats */}
+      <div className="mb-6 flex justify-center">
+        <div className="bg-white shadow-md rounded-lg px-6 py-4 w-full max-w-xl flex justify-between items-center">
+          <div className="text-center">
+            <p className="text-gray-500 text-sm">Uploaded</p>
+            <p className="text-xl font-semibold text-blue-600">
+              {uploadedCount}
+            </p>
+          </div>
+          <div className="text-center">
+            <p className="text-gray-500 text-sm">Limit</p>
+            <p className="text-xl font-semibold text-green-600">
+              {uploadLimit === "unlimited" ? "Unlimited" : uploadLimit}
+            </p>
+          </div>
+          {uploadLimit !== "unlimited" && (
+            <div className="text-center">
+              <p className="text-gray-500 text-sm">Remaining</p>
+              <p className="text-xl font-semibold text-orange-500">
+                {uploadLimit - uploadedCount}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Search Bar */}
       <div className="mb-6">
@@ -197,7 +261,9 @@ const ProductCataloguePage = () => {
             className="border border-gray-300 p-3 rounded-md"
             required
           >
-            <option value="" disabled>Select Type</option>
+            <option value="" disabled>
+              Select Type
+            </option>
             <option value="product">Product</option>
             <option value="service">Service</option>
           </select>
@@ -228,19 +294,33 @@ const ProductCataloguePage = () => {
             className="border border-gray-300 p-3 rounded-md"
             required
           />
-                <select
-                  name="units"
-                  value={currentProduct.units}
-                  onChange={handleChange}
-                  className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-                >
-                  <option value="">Select Units</option>
-                  <option value="kg">Kilograms (kg)</option>
-                  <option value="g">Grams (g)</option>
-                  <option value="litre">Litres (L)</option>
-                  <option value="ml">Millilitres (ml)</option>
-                  <option value="piece">Piece</option>
-                </select>
+          <select
+            name="units"
+            value={currentProduct.units}
+            onChange={handleChange}
+            className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+          >
+            <option value="">Select Units</option>
+            <option value="kg">Kilograms (kg)</option>
+            <option value="g">Grams (g)</option>
+            <option value="litre">Litres (L)</option>
+            <option value="ml">Millilitres (ml)</option>
+            <option value="piece">Piece</option>
+          </select>
+          <select
+            name="category"
+            value={currentProduct.category}
+            onChange={handleChange}
+            className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+          >
+            <option value="">Select Category</option>
+            <option value="grocery">Grocery</option>
+            <option value="electronics">Electronics</option>
+            <option value="clothing">Clothing</option>
+            <option value="furniture">Furniture</option>
+            <option value="services">Services</option>
+            <option value="other">Other</option>
+          </select>
           <input
             type="file"
             name="image"
@@ -253,7 +333,7 @@ const ProductCataloguePage = () => {
           onClick={addOrUpdateProduct}
           className="mt-4 w-full bg-blue-600 text-white p-3 rounded-md hover:bg-blue-700 transition"
         >
-          {isEditing ? 'Update Product' : 'Add Product'}
+          {isEditing ? "Update Product" : "Add Product"}
         </button>
       </form>
 
@@ -267,6 +347,7 @@ const ProductCataloguePage = () => {
               <th className="py-3 px-4 border-b">HSN Code</th>
               <th className="py-3 px-4 border-b">GST</th>
               <th className="py-3 px-4 border-b">UNITS</th>
+              <th className="py-3 px-4 border-b">CATEGORY</th>
               <th className="py-3 px-4 border-b">Image</th>
               <th className="py-3 px-4 border-b">Actions</th>
             </tr>
@@ -280,21 +361,24 @@ const ProductCataloguePage = () => {
                 <td className="py-3 px-4 border-b">{product.hsnCode}</td>
                 <td className="py-3 px-4 border-b">{product.gst}</td>
                 <td className="py-3 px-4 border-b">{product.units}</td>
+                <td className="py-3 px-4 border-b">{product.category}</td>
                 <td className="py-3 px-4 border-b">
-                  {product.productImages && product.productImages[0] && (() => {
-                    const imageUrl = `${api.defaults.baseURL}/uploads/userDetails/${userId}/${product.productImages[0]}`;
-                    console.log('Image URL:', imageUrl); // Log the URL
-                    return (
-                      <Image
-                        src={imageUrl} // Use base URL for images
-                        alt={product.productName}
-                        width={500} // Set a reasonable default width
-                        height={500}
-                        layout="intrinsic"
-                        className="h-16 w-16 object-cover"
-                      />
-                    );
-                  })()}
+                  {product.productImages &&
+                    product.productImages[0] &&
+                    (() => {
+                      const imageUrl = `${api.defaults.baseURL}/uploads/userDetails/${userId}/${product.productImages[0]}`;
+                      console.log("Image URL:", imageUrl); // Log the URL
+                      return (
+                        <Image
+                          src={imageUrl} // Use base URL for images
+                          alt={product.productName}
+                          width={500} // Set a reasonable default width
+                          height={500}
+                          layout="intrinsic"
+                          className="h-16 w-16 object-cover"
+                        />
+                      );
+                    })()}
                 </td>
 
                 <td className="py-3 px-4 border-b flex space-x-2">

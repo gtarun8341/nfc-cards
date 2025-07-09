@@ -1,5 +1,6 @@
 // src/app/nfc-card/page.js
 "use client"; // Next.js Client Component
+import { useEffect, useState } from "react";
 
 import Hero from "../components/Heronfc"; // Adjust the import path as necessary
 import AllCards from "../components/AllCards"; // Import the AllCards component
@@ -23,6 +24,7 @@ import BlogsSection from "../components/BlogsSection";
 import AdditionalServices from "../components/AdditionalServices";
 import OurMoreProducts from "../components/OurMoreProducts";
 import DifferentTypeCards from "../components/DifferentTypeCards";
+import api from "../apiConfig/axiosConfig";
 
 const differenttypecardsimages = [
   "https://via.placeholder.com/300x200",
@@ -522,6 +524,56 @@ const ourmoreproductsdata = [
 // <OtherServices services={servicesData} />;
 
 export default function NFCPage() {
+  const [differenttypecardsimages, setDifferentTypeCardsImages] = useState([]);
+  const [HowItWorkscardsData, setHowCardsWorkImages] = useState([]);
+  const [benficalFor, setBeneficialForImages] = useState([]);
+  const [sampleImages, setSampleCardsImages] = useState([]);
+  const [bestSellerImages, setOurBestsellersImages] = useState([]);
+  const [stories, setSuccessStoriesImages] = useState([]);
+
+  const fetchMedia = async () => {
+    try {
+      const { data } = await api.get("/api/landing", {
+        params: { page: "NfcCardTemplate" },
+      });
+
+      data.forEach((item) => {
+        const images = item.media
+          ?.filter((m) => m.mediaType === "image")
+          ?.map((m) => m.driveLink);
+
+        switch (item.section) {
+          case "Different Type Of Cards":
+            setDifferentTypeCardsImages(images);
+            break;
+          case "How Cards Work":
+            setHowCardsWorkImages(images);
+            break;
+          case "Beneficial For":
+            setBeneficialForImages(images);
+            break;
+          case "Sample Cards":
+            setSampleCardsImages(images);
+            break;
+          case "Our Bestsellers":
+            setOurBestsellersImages(images);
+            break;
+          case "Success Stories":
+            setSuccessStoriesImages(images);
+            break;
+          default:
+            break;
+        }
+      });
+    } catch (err) {
+      console.error("Failed to fetch media", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchMedia();
+  }, []);
+
   return (
     <div className="bg-white">
       <Hero />

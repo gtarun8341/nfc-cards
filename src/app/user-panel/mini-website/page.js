@@ -18,6 +18,25 @@ const MiniWebsitePage = () => {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [stats, setStats] = useState([]);
+  const fetchStats = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const config = {
+        headers: { Authorization: `Bearer ${token}` },
+      };
+
+      const res = await api.get(
+        `/api/selectedtemplates/template-stats?type=mini-website`,
+        config
+      );
+
+      const data = res.data.stats ? res.data.stats[0] : res.data;
+      setStats(data);
+    } catch (err) {
+      console.error("Error fetching template change stats", err);
+    }
+  };
 
   //   useEffect(() => {
   const fetchTemplates = async (page = 1) => {
@@ -63,7 +82,9 @@ const MiniWebsitePage = () => {
   useEffect(() => {
     fetchTemplates(page);
   }, [page]);
-
+  useEffect(() => {
+    fetchStats();
+  }, []);
   const previewTemplate = async (templateId) => {
     try {
       const token = localStorage.getItem("authToken");
@@ -122,6 +143,7 @@ const MiniWebsitePage = () => {
         templateId,
         generatedLink: response.data.link,
       });
+      await fetchStats(); // <-- refresh limits
     } catch (error) {
       console.error("Error selecting template:", error);
     }
@@ -142,6 +164,7 @@ const MiniWebsitePage = () => {
         config
       );
       setSelectedTemplateData(null);
+      await fetchStats(); // <-- refresh limits
     } catch (error) {
       console.error("Error deleting selected template:", error);
     }
@@ -160,6 +183,33 @@ const MiniWebsitePage = () => {
       <h1 className="text-3xl font-bold text-center mb-6 text-blue-600">
         Available Mini Website Templates
       </h1>
+      <div className="mb-6 flex justify-center">
+        <div className="bg-white shadow-md rounded-lg px-6 py-4 w-full max-w-xl flex justify-between items-center">
+          <div className="text-center">
+            <p className="text-gray-500 text-sm">Used</p>
+            <p className="text-xl font-semibold text-blue-600">
+              {stats.selectedCount}
+            </p>
+          </div>
+          <div className="text-center">
+            <p className="text-gray-500 text-sm">Limit</p>
+            <p className="text-xl font-semibold text-green-600">
+              {stats.changeLimit === "unlimited"
+                ? "Unlimited"
+                : stats.changeLimit}
+            </p>
+          </div>
+          {stats.changeLimit !== "unlimited" && (
+            <div className="text-center">
+              <p className="text-gray-500 text-sm">Remaining</p>
+              <p className="text-xl font-semibold text-orange-500">
+                {stats.remaining}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {templates.length > 0 ? (
           templates.map((template) => (
@@ -202,7 +252,17 @@ const MiniWebsitePage = () => {
                     </button>
                     <button
                       onClick={handleDeleteSelectedTemplate}
-                      className="ml-2 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition duration-200"
+                      disabled={stats.remaining === 0}
+                      className={`ml-2 py-2 px-4 rounded-lg transition duration-200 ${
+                        stats.remaining === 0
+                          ? "bg-gray-400 text-white cursor-not-allowed"
+                          : "bg-red-600 text-white hover:bg-red-700"
+                      }`}
+                      title={
+                        stats.remaining === 0
+                          ? "Limit reached. You cannot delete this template now."
+                          : "Delete selected template"
+                      }
                     >
                       <FaTrashAlt className="text-xl" />
                     </button>

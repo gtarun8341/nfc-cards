@@ -1,6 +1,8 @@
-"use client"; // Next.js Client Component
+"use client";
 
 import { useEffect, useState } from "react";
+import api from "../apiConfig/axiosConfig";
+const MAX_IMAGE_SIZE_MB = 1;
 
 const ProductDetailsForm = ({ onDataChange, initialData }) => {
   const [products, setProducts] = useState([
@@ -12,12 +14,43 @@ const ProductDetailsForm = ({ onDataChange, initialData }) => {
       hsnCode: "",
       gst: "",
       units: "",
+      category: "",
     },
   ]);
 
-  // Use effect to set initial products from initialData
+  const [uploadStats, setUploadStats] = useState({
+    uploadedCount: 0,
+    uploadLimit: 0,
+    remainingUploads: 0,
+  });
+
+  const [error, setError] = useState("");
+
+  // Fetch product upload stats from backend
   useEffect(() => {
-    if (initialData && initialData.products) {
+    const fetchStats = async () => {
+      const token = localStorage.getItem("authToken");
+
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      try {
+        const res = await api.get("/api/products/product-upload-stats", config); // use actual API route
+        setUploadStats(res.data);
+      } catch (err) {
+        console.error("Failed to fetch product stats", err);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  // Load initial products from initialData
+  useEffect(() => {
+    if (initialData?.products?.length) {
       setProducts(
         initialData.products.map((product) => ({
           productName: product.productName || "",
@@ -27,7 +60,7 @@ const ProductDetailsForm = ({ onDataChange, initialData }) => {
           hsnCode: product.hsnCode || "",
           gst: product.gst || "",
           units: product.units || "",
-
+          category: product.category || "",
         }))
       );
     }
@@ -35,16 +68,37 @@ const ProductDetailsForm = ({ onDataChange, initialData }) => {
 
   const handleChange = (index, e) => {
     const { name, value, files } = e.target;
-    const newValue = files ? files[0] : value;
+    let newValue = files ? files[0] : value;
+
+    // Validate image size
+    if (name === "productImage" && newValue) {
+      const sizeMB = newValue.size / (1024 * 1024);
+      if (sizeMB > MAX_IMAGE_SIZE_MB) {
+        setError("Image must be less than or equal to 1MB.");
+        return;
+      }
+    }
 
     const updatedProducts = [...products];
     updatedProducts[index] = { ...updatedProducts[index], [name]: newValue };
 
     setProducts(updatedProducts);
-    onDataChange({ products: updatedProducts }); // Send the updated array back to the parent
+    onDataChange({ products: updatedProducts });
+    setError("");
   };
 
   const addProduct = () => {
+    const remaining = uploadStats.remainingUploads;
+    const maxReached =
+      remaining !== "unlimited" && products.length >= remaining;
+
+    if (maxReached) {
+      setError(
+        "You have reached your product upload limit.Upgrade your subscription plan to add more products"
+      );
+      return;
+    }
+
     setProducts([
       ...products,
       {
@@ -55,144 +109,182 @@ const ProductDetailsForm = ({ onDataChange, initialData }) => {
         hsnCode: "",
         gst: "",
         units: "",
-
+        category: "",
       },
     ]);
+    setError("");
   };
 
   const deleteProduct = (index) => {
     const updatedProducts = products.filter((_, i) => i !== index);
     setProducts(updatedProducts);
-    onDataChange(updatedProducts);
+    onDataChange({ products: updatedProducts });
   };
 
-    return (
-      <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-xl border border-gray-200">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Product Details</h2>
-        <div className="grid grid-cols-1 gap-6">
-          {products.map((product, index) => (
-            <div
-              key={index}
-              className="border p-6 rounded-xl shadow-sm hover:shadow-lg transition-transform duration-200"
-            >
-              <h3 className="text-lg font-semibold text-gray-700 mb-4">Product Set {index + 1}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Product Name</label>
-                  <input
-                    type="text"
-                    name="productName"
-                    placeholder="Product Name"
-                    value={product.productName}
-                    onChange={(e) => handleChange(index, e)}
-                    required
-                    className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Product Price</label>
-                  <input
-                    type="number"
-                    name="productPrice"
-                    placeholder="Product Price"
-                    value={product.productPrice}
-                    onChange={(e) => handleChange(index, e)}
-                    onInput={(e) => {
-                      const newValue = e.target.value;
-                      if (!/^\d*\.?\d*$/.test(newValue)) {
-                        e.preventDefault();
-                      }
-                    }}
-                    required
-                    className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">HSN Code</label>
-                  <input
-                    type="text"
-                    name="hsnCode"
-                    placeholder="HSN Code"
-                    value={product.hsnCode}
-                    onChange={(e) => handleChange(index, e)}
-                    required
-                    className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">GST (%)</label>
-                  <input
-                    type="number"
-                    name="gst"
-                    placeholder="GST Percentage"
-                    value={product.gst}
-                    onChange={(e) => handleChange(index, e)}
-                    required
-                    className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">Product Image</label>
-                  <input
-                    type="file"
-                    name="productImage"
-                    accept="image/*"
-                    onChange={(e) => handleChange(index, e)}
-                    className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Product Type</label>
-                  <select
-                    name="productType"
-                    value={product.productType}
-                    onChange={(e) => handleChange(index, e)}
-                    className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-                  >
-                    <option value="">Select Product Type</option>
-                    <option value="product">Product</option>
-                    <option value="service">Service</option>
-                  </select>
-                </div>
-                <div>
-                <label className="block text-sm font-medium text-gray-700">Units</label>
-                <select
-                  name="units"
-                  value={product.units}
+  return (
+    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-xl border border-gray-200">
+      <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
+        Product Details
+      </h2>
+
+      <p className="text-center text-sm text-gray-600 mb-6">
+        {uploadStats.uploadedCount} uploaded /{" "}
+        {uploadStats.uploadLimit === "unlimited"
+          ? "Unlimited"
+          : uploadStats.uploadLimit}{" "}
+        allowed
+      </p>
+
+      {error && (
+        <p className="text-red-500 text-sm text-center mb-4">{error}</p>
+      )}
+
+      <div className="grid grid-cols-1 gap-6">
+        {products.map((product, index) => (
+          <div
+            key={index}
+            className="border p-6 rounded-xl shadow-sm hover:shadow-lg transition-transform duration-200"
+          >
+            <h3 className="text-lg font-semibold text-gray-700 mb-4">
+              Product Set {index + 1}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Form Inputs Same as Before */}
+              <InputField
+                label="Product Name"
+                name="productName"
+                type="text"
+                value={product.productName}
+                onChange={(e) => handleChange(index, e)}
+              />
+              <InputField
+                label="Product Price"
+                name="productPrice"
+                type="number"
+                value={product.productPrice}
+                onChange={(e) => handleChange(index, e)}
+              />
+              <InputField
+                label="HSN Code"
+                name="hsnCode"
+                type="text"
+                value={product.hsnCode}
+                onChange={(e) => handleChange(index, e)}
+              />
+              <InputField
+                label="GST (%)"
+                name="gst"
+                type="number"
+                value={product.gst}
+                onChange={(e) => handleChange(index, e)}
+              />
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Product Image
+                </label>
+                <input
+                  type="file"
+                  name="productImage"
+                  accept="image/*"
                   onChange={(e) => handleChange(index, e)}
                   className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
-                >
-                  <option value="">Select Units</option>
-                  <option value="kg">Kilograms (kg)</option>
-                  <option value="g">Grams (g)</option>
-                  <option value="litre">Litres (L)</option>
-                  <option value="ml">Millilitres (ml)</option>
-                  <option value="piece">Piece</option>
-                </select>
+                />
               </div>
-              </div>
-              {/* {products.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => deleteProduct(index)}
-                  className="mt-6 w-full p-3 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
-                >
-                  Delete Product Set
-                </button>
-              )} */}
+              {/* Dropdowns */}
+              {renderDropdown(
+                "Product Type",
+                "productType",
+                product.productType,
+                index,
+                [
+                  ["", "Select Product Type"],
+                  ["product", "Product"],
+                  ["service", "Service"],
+                ],
+                handleChange
+              )}
+
+              {renderDropdown(
+                "Category",
+                "category",
+                product.category,
+                index,
+                [
+                  ["", "Select Category"],
+                  ["grocery", "Grocery"],
+                  ["electronics", "Electronics"],
+                  ["clothing", "Clothing"],
+                  ["furniture", "Furniture"],
+                  ["services", "Services"],
+                  ["other", "Other"],
+                ],
+                handleChange
+              )}
+
+              {renderDropdown(
+                "Units",
+                "units",
+                product.units,
+                index,
+                [
+                  ["", "Select Units"],
+                  ["kg", "Kilograms (kg)"],
+                  ["g", "Grams (g)"],
+                  ["litre", "Litres (L)"],
+                  ["ml", "Millilitres (ml)"],
+                  ["piece", "Piece"],
+                ],
+                handleChange
+              )}
             </div>
-          ))}
-          <button
-            type="button"
-            onClick={addProduct}
-            className="mt-6 w-full p-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition"
-          >
-            Add New Product Set
-          </button>
-        </div>
+            {/* Optional delete per product */}
+            {/* <button onClick={() => deleteProduct(index)} className="mt-4 text-red-500">Delete</button> */}
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={addProduct}
+          className="mt-6 w-full p-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition"
+        >
+          Add New Product Set
+        </button>
       </div>
-    );
-  };
-  
-  export default ProductDetailsForm;
-  
+    </div>
+  );
+};
+
+// Utility: input field
+const InputField = ({ label, name, type, value, onChange }) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-700">{label}</label>
+    <input
+      type={type}
+      name={name}
+      value={value}
+      placeholder={label}
+      onChange={onChange}
+      className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+    />
+  </div>
+);
+
+// Utility: dropdown select
+const renderDropdown = (label, name, value, index, options, handleChange) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-700">{label}</label>
+    <select
+      name={name}
+      value={value}
+      onChange={(e) => handleChange(index, e)}
+      className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
+    >
+      {options.map(([val, text]) => (
+        <option key={val} value={val}>
+          {text}
+        </option>
+      ))}
+    </select>
+  </div>
+);
+
+export default ProductDetailsForm;
