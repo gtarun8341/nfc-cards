@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import api from "../../apiConfig/axiosConfig";
 import * as XLSX from "xlsx";
+import toast from "react-hot-toast";
 
 const CustomerCompanyManagementPage = () => {
   const [companies, setCompanies] = useState([]);
@@ -25,15 +26,16 @@ const CustomerCompanyManagementPage = () => {
         },
       };
       const response = await api.get(
-        `/api/user-details/admin/users?page=${page}&limit=10`,
+        `/api/user-details/admin/users?page=${page}&limit=10&search=${encodeURIComponent(
+          searchQuery
+        )}`,
         config
-      ); // Fetch user details for admin
-      console.log(response.data);
+      );
       setCompanies(response.data);
-      setFilteredCompanies(response.data.data); // Initialize filteredCompanies with all companies
+      setFilteredCompanies(response.data.data);
       setTotalPages(response.data.totalPages);
     } catch (err) {
-      setError("Error fetching companies");
+      toast.error("Failed to fetch companies");
       console.error(err);
     } finally {
       setLoading(false);
@@ -44,131 +46,135 @@ const CustomerCompanyManagementPage = () => {
   // }, []);
   useEffect(() => {
     fetchCompanies();
-  }, [page]);
+  }, [page, searchQuery]);
   const handleViewClick = (company) => {
     setSelectedCompany(company);
     setIsModalOpen(true);
   };
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      fetchCompanies();
+    }, 500);
+
+    return () => clearTimeout(delay);
+  }, [page, searchQuery]);
 
   const handleSearch = (event) => {
-    setSearchQuery(event.target.value);
-    const filtered = companies.filter((company) => {
-      const user = company.user || {};
-      return (
-        user.name.toLowerCase().includes(event.target.value.toLowerCase()) ||
-        user.phone.includes(event.target.value) ||
-        user.email.toLowerCase().includes(event.target.value.toLowerCase())
-      );
-    });
-    setFilteredCompanies(filtered);
-    setSelectedCompany(null); // Reset selected company when a search is performed
+    const value = event.target.value;
+    setSearchQuery(value);
+    setPage(1); // reset to first page on search
   };
 
   const handleDownloadExcel = (selectedCompany) => {
     const user = selectedCompany.user || {};
+    try {
+      // Prepare data for the Excel sheet
+      const companyDetails = [
+        ["User Information"],
+        ["Name", user.name || "N/A"],
+        ["Phone", user.phone || "N/A"],
+        ["Email", user.email || "N/A"],
+        [],
+        ["Company Details"],
+        ["Name", selectedCompany.name || "N/A"],
+        ["Designation", selectedCompany.designation || "N/A"],
+        ["Company Name", selectedCompany.companyName || "N/A"],
+        ["Contact 1", selectedCompany.contact1 || "N/A"],
+        ["Contact 2", selectedCompany.contact2 || "N/A"],
+        ["WhatsApp 1", selectedCompany.whatsapp1 || "N/A"],
+        ["WhatsApp 2", selectedCompany.whatsapp2 || "N/A"],
+        ["Email", selectedCompany.email || "N/A"],
+        ["Website", selectedCompany.website || "N/A"],
+        ["Google Map Link", selectedCompany.googleMap || "N/A"],
+        ["Address", selectedCompany.address || "N/A"],
+        [],
+        ["About Company"],
+        [
+          "Established Year",
+          selectedCompany.aboutCompany?.establishedYear || "N/A",
+        ],
+        [
+          "Nature of Business",
+          selectedCompany.aboutCompany?.natureOfBusiness || "N/A",
+        ],
+        ["GST Number", selectedCompany.aboutCompany?.gstNumber || "N/A"],
+        ["Description", selectedCompany.aboutCompany?.description || "N/A"],
+        [],
+        ["Bank Details"],
+        ["Bank Name", selectedCompany.bankDetails?.bankName || "N/A"],
+        ["Account Number", selectedCompany.bankDetails?.accountNumber || "N/A"],
+        ["IFSC Code", selectedCompany.bankDetails?.ifscCode || "N/A"],
+        ["Branch Name", selectedCompany.bankDetails?.branchName || "N/A"],
+        [
+          "Account Holder Name",
+          selectedCompany.bankDetails?.accountHolderName || "N/A",
+        ],
+        ["GPay Number", selectedCompany.bankDetails?.gPayNumber || "N/A"],
+        ["Paytm Number", selectedCompany.bankDetails?.paytmNumber || "N/A"],
+        ["PhonePe Number", selectedCompany.bankDetails?.phonePeNumber || "N/A"],
+        ["UPI ID", selectedCompany.bankDetails?.upiId || "N/A"],
+        ["Account Type", selectedCompany.bankDetails?.accountType || "N/A"],
+        [],
+        ["Products"],
+      ];
 
-    // Prepare data for the Excel sheet
-    const companyDetails = [
-      ["User Information"],
-      ["Name", user.name || "N/A"],
-      ["Phone", user.phone || "N/A"],
-      ["Email", user.email || "N/A"],
-      [],
-      ["Company Details"],
-      ["Name", selectedCompany.name || "N/A"],
-      ["Designation", selectedCompany.designation || "N/A"],
-      ["Company Name", selectedCompany.companyName || "N/A"],
-      ["Contact 1", selectedCompany.contact1 || "N/A"],
-      ["Contact 2", selectedCompany.contact2 || "N/A"],
-      ["WhatsApp 1", selectedCompany.whatsapp1 || "N/A"],
-      ["WhatsApp 2", selectedCompany.whatsapp2 || "N/A"],
-      ["Email", selectedCompany.email || "N/A"],
-      ["Website", selectedCompany.website || "N/A"],
-      ["Google Map Link", selectedCompany.googleMap || "N/A"],
-      ["Address", selectedCompany.address || "N/A"],
-      [],
-      ["About Company"],
-      [
-        "Established Year",
-        selectedCompany.aboutCompany?.establishedYear || "N/A",
-      ],
-      [
-        "Nature of Business",
-        selectedCompany.aboutCompany?.natureOfBusiness || "N/A",
-      ],
-      ["GST Number", selectedCompany.aboutCompany?.gstNumber || "N/A"],
-      ["Description", selectedCompany.aboutCompany?.description || "N/A"],
-      [],
-      ["Bank Details"],
-      ["Bank Name", selectedCompany.bankDetails?.bankName || "N/A"],
-      ["Account Number", selectedCompany.bankDetails?.accountNumber || "N/A"],
-      ["IFSC Code", selectedCompany.bankDetails?.ifscCode || "N/A"],
-      ["Branch Name", selectedCompany.bankDetails?.branchName || "N/A"],
-      [
-        "Account Holder Name",
-        selectedCompany.bankDetails?.accountHolderName || "N/A",
-      ],
-      ["GPay Number", selectedCompany.bankDetails?.gPayNumber || "N/A"],
-      ["Paytm Number", selectedCompany.bankDetails?.paytmNumber || "N/A"],
-      ["PhonePe Number", selectedCompany.bankDetails?.phonePeNumber || "N/A"],
-      ["UPI ID", selectedCompany.bankDetails?.upiId || "N/A"],
-      ["Account Type", selectedCompany.bankDetails?.accountType || "N/A"],
-      [],
-      ["Products"],
-    ];
+      companyDetails.push([], ["Products"]);
 
-    companyDetails.push([], ["Products"]);
-
-    if (selectedCompany.products && selectedCompany.products.length > 0) {
-      // Add product heading row
-      companyDetails.push([
-        "No",
-        "Product Name",
-        "Price",
-        "Type",
-        "HSN Code",
-        "GST",
-        "Discount",
-        "Units",
-      ]);
-
-      // Add product data
-      selectedCompany.products.forEach((product, index) => {
+      if (selectedCompany.products && selectedCompany.products.length > 0) {
+        // Add product heading row
         companyDetails.push([
-          index + 1,
-          product.productName || "N/A",
-          product.productPrice || "N/A",
-          product.productType || "N/A",
-          product.hsnCode || "N/A",
-          product.gst || "N/A",
-          product.discount || "N/A",
-          product.units || "N/A",
+          "No",
+          "Product Name",
+          "Price",
+          "Type",
+          "HSN Code",
+          "GST",
+          "Discount",
+          "Units",
         ]);
-      });
-    } else {
-      companyDetails.push(["No products available"]);
+
+        // Add product data
+        selectedCompany.products.forEach((product, index) => {
+          companyDetails.push([
+            index + 1,
+            product.productName || "N/A",
+            product.productPrice || "N/A",
+            product.productType || "N/A",
+            product.hsnCode || "N/A",
+            product.gst || "N/A",
+            product.discount || "N/A",
+            product.units || "N/A",
+          ]);
+        });
+      } else {
+        companyDetails.push(["No products available"]);
+      }
+
+      companyDetails.push([], ["Gallery"]);
+      if (
+        selectedCompany.galleryImages &&
+        selectedCompany.galleryImages.length > 0
+      ) {
+        companyDetails.push(["Gallery Images Available"]);
+      } else {
+        companyDetails.push(["No gallery images available"]);
+      }
+
+      // Create a worksheet
+      const worksheet = XLSX.utils.aoa_to_sheet(companyDetails);
+
+      // Create a workbook
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Company Details");
+
+      // Export the Excel file
+      const companyName = selectedCompany.companyName || "company";
+      XLSX.writeFile(workbook, `${companyName}_details.xlsx`);
+      toast.success("Excel downloaded successfully");
+    } catch (error) {
+      console.error("Excel download failed", error);
+      toast.error("Failed to download Excel");
     }
-
-    companyDetails.push([], ["Gallery"]);
-    if (
-      selectedCompany.galleryImages &&
-      selectedCompany.galleryImages.length > 0
-    ) {
-      companyDetails.push(["Gallery Images Available"]);
-    } else {
-      companyDetails.push(["No gallery images available"]);
-    }
-
-    // Create a worksheet
-    const worksheet = XLSX.utils.aoa_to_sheet(companyDetails);
-
-    // Create a workbook
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Company Details");
-
-    // Export the Excel file
-    const companyName = selectedCompany.companyName || "company";
-    XLSX.writeFile(workbook, `${companyName}_details.xlsx`);
   };
 
   const handleCloseClick = () => {

@@ -1,17 +1,18 @@
 "use client"; // Next.js Client Component
 
-import React, { useState, useEffect } from 'react';
-import api from '../../apiConfig/axiosConfig';
+import React, { useState, useEffect } from "react";
+import api from "../../apiConfig/axiosConfig";
+import { toast } from "react-hot-toast"; // ✅ Import toast
 
 const FeedbackPage = () => {
   const [feedbacks, setFeedbacks] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [feedback, setFeedback] = useState('');
-  const [about, setAbout] = useState(''); // New state for about
+  const [feedback, setFeedback] = useState("");
+  const [about, setAbout] = useState(""); // New state for about
 
   const handleFeedbackSubmit = async () => {
     try {
-      const token = localStorage.getItem('authToken'); // Assuming token is stored here
+      const token = localStorage.getItem("authToken"); // Assuming token is stored here
       const config = {
         headers: {
           Authorization: `Bearer ${token}`, // Attach the token
@@ -19,37 +20,41 @@ const FeedbackPage = () => {
       };
 
       // Send feedback and about data to the server
-      const response = await api.post('/api/feedback', { feedback, about }, config);
-      console.log('Feedback submitted:', response.data);
-      alert('Thank you for your feedback!');
-      setFeedback(''); // Clear the textarea after submission
-      setAbout(''); // Clear the about field after submission
+      const response = await api.post(
+        "/api/feedback",
+        { feedback, about },
+        config
+      );
+      console.log("Feedback submitted:", response.data);
+      toast.success("Thank you for your feedback!");
+      setFeedback(""); // Clear the textarea after submission
+      setAbout(""); // Clear the about field after submission
       setShowModal(false);
       setFeedbacks([...feedbacks, response.data.feedback]);
     } catch (error) {
-      console.error('Error submitting feedback:', error);
-      alert('There was an error submitting your feedback. Please try again.');
+      console.error("Error submitting feedback:", error);
+      toast.error("Failed to submit feedback. Please try again.");
     }
   };
   useEffect(() => {
     const fetchComplaints = async () => {
       try {
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem("authToken");
         const config = {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         };
-        const response = await api.get('/api/feedback/all', config);
+        const response = await api.get("/api/feedback/all", config);
         setFeedbacks(response.data);
       } catch (error) {
-        console.error('Error fetching complaints:', error);
+        console.error("Error fetching complaints:", error);
+        toast.error("Failed to load feedbacks.");
       }
     };
 
     fetchComplaints();
   }, []);
-
 
   return (
     <div className="p-4">

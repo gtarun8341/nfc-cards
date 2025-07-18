@@ -1,27 +1,32 @@
 "use client"; // Next.js Client Component
 
-import React, { useEffect, useState } from 'react';
-import api from '../../apiConfig/axiosConfig'; // Import the Axios instance
+import React, { useEffect, useState } from "react";
+import api from "../../apiConfig/axiosConfig"; // Import the Axios instance
+import { toast } from "react-hot-toast"; // ✅ Import toast
 
 const OfferDiscountsEventsPage = () => {
   const [products, setProducts] = useState([]);
-  const [currentDiscount, setCurrentDiscount] = useState({ productId: null, amount: '' });
+  const [currentDiscount, setCurrentDiscount] = useState({
+    productId: null,
+    amount: "",
+  });
   const [isEditing, setIsEditing] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(''); // State for error message
+  const [errorMessage, setErrorMessage] = useState(""); // State for error message
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const token = localStorage.getItem('authToken'); // Retrieve the JWT token from localStorage
+        const token = localStorage.getItem("authToken"); // Retrieve the JWT token from localStorage
         const config = {
-            headers: {
-                Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
-            },
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
+          },
         };
-        const response = await api.get('/api/products', config); // Adjust the URL based on your API setup
+        const response = await api.get("/api/products", config); // Adjust the URL based on your API setup
         setProducts(response.data.products);
       } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error("Error fetching products:", error);
+        toast.error("Failed to load products");
       }
     };
 
@@ -35,26 +40,32 @@ const OfferDiscountsEventsPage = () => {
 
   const addOrUpdateDiscount = async () => {
     // Validate that discount amount is a number
-    if (isNaN(currentDiscount.amount) || currentDiscount.amount === '') {
-      setErrorMessage('Discount amount must be a valid number.');
+    if (isNaN(currentDiscount.amount) || currentDiscount.amount === "") {
+      setErrorMessage("Discount amount must be a valid number.");
+      toast.error("Discount must be a valid number.");
+
       return; // Exit the function if the validation fails
     }
 
-    setErrorMessage(''); // Clear any previous error message
+    setErrorMessage(""); // Clear any previous error message
 
     try {
-      const token = localStorage.getItem('authToken'); // Retrieve the JWT token from localStorage
+      const token = localStorage.getItem("authToken"); // Retrieve the JWT token from localStorage
       const config = {
-          headers: {
-              Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
-          },
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
+        },
       };
 
       if (isEditing) {
         // Update existing discount
-        await api.put(`/api/discount/${currentDiscount.productId}`, {
-          discount: currentDiscount.amount,
-        }, config);
+        await api.put(
+          `/api/discount/${currentDiscount.productId}`,
+          {
+            discount: currentDiscount.amount,
+          },
+          config
+        );
         setProducts((prevProducts) =>
           prevProducts.map((product) =>
             product._id === currentDiscount.productId
@@ -65,9 +76,13 @@ const OfferDiscountsEventsPage = () => {
         setIsEditing(false);
       } else {
         // Add new discount
-        await api.put(`/api/discount/${currentDiscount.productId}`, {
-          discount: currentDiscount.amount,
-        }, config);
+        await api.put(
+          `/api/discount/${currentDiscount.productId}`,
+          {
+            discount: currentDiscount.amount,
+          },
+          config
+        );
         setProducts((prevProducts) =>
           prevProducts.map((product) =>
             product._id === currentDiscount.productId
@@ -76,25 +91,35 @@ const OfferDiscountsEventsPage = () => {
           )
         );
       }
+      toast.success(
+        isEditing
+          ? "Discount updated successfully!"
+          : "Discount added successfully!"
+      );
+
       resetForm();
     } catch (error) {
-      console.error('Error updating discount:', error);
+      console.error("Error updating discount:", error);
+      toast.error("Failed to update discount.");
     }
   };
 
   const editDiscount = (product) => {
-    setCurrentDiscount({ productId: product._id, amount: product.discount || '' });
+    setCurrentDiscount({
+      productId: product._id,
+      amount: product.discount || "",
+    });
     setIsEditing(true);
-    setErrorMessage(''); // Clear error when editing
+    setErrorMessage(""); // Clear error when editing
   };
 
   const removeDiscount = async (productId) => {
     try {
-      const token = localStorage.getItem('authToken'); // Retrieve the JWT token from localStorage
+      const token = localStorage.getItem("authToken"); // Retrieve the JWT token from localStorage
       const config = {
-          headers: {
-              Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
-          },
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
+        },
       };
       await api.put(`/api/discount/${productId}`, { discount: null }, config);
       setProducts((prevProducts) =>
@@ -102,33 +127,46 @@ const OfferDiscountsEventsPage = () => {
           product._id === productId ? { ...product, discount: null } : product
         )
       );
+      toast.success("Discount removed successfully!");
     } catch (error) {
-      console.error('Error removing discount:', error);
+      console.error("Error removing discount:", error);
+      toast.error("Failed to remove discount.");
     }
   };
 
   const resetForm = () => {
-    setCurrentDiscount({ productId: null, amount: '' });
+    setCurrentDiscount({ productId: null, amount: "" });
   };
 
   return (
     <div className="container mx-auto p-6 bg-gray-50 rounded-lg shadow-lg">
-      <h1 className="text-4xl font-bold text-center text-gray-800 mb-6">Products & Discounts</h1>
+      <h1 className="text-4xl font-bold text-center text-gray-800 mb-6">
+        Products & Discounts
+      </h1>
 
       <form className="bg-white p-4 rounded-lg shadow-md mb-6">
         <select
           name="productId"
-          value={currentDiscount.productId || ''}
-          onChange={(e) => setCurrentDiscount({ ...currentDiscount, productId: e.target.value })}
+          value={currentDiscount.productId || ""}
+          onChange={(e) =>
+            setCurrentDiscount({
+              ...currentDiscount,
+              productId: e.target.value,
+            })
+          }
           className="border border-gray-300 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
           required
         >
-          <option value="" disabled>Select a product</option>
+          <option value="" disabled>
+            Select a product
+          </option>
           {products.map((product) => (
-            <option key={product._id} value={product._id}>{product.productName}</option>
+            <option key={product._id} value={product._id}>
+              {product.productName}
+            </option>
           ))}
         </select>
-        
+
         <input
           type="text"
           name="amount"
@@ -138,7 +176,7 @@ const OfferDiscountsEventsPage = () => {
           className="border border-gray-300 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 ml-2"
           required
         />
-        
+
         {errorMessage && (
           <div className="text-red-500 text-sm mt-2">{errorMessage}</div>
         )}
@@ -148,7 +186,7 @@ const OfferDiscountsEventsPage = () => {
           onClick={addOrUpdateDiscount}
           className="mt-4 w-full bg-blue-600 text-white p-3 rounded-md hover:bg-blue-700 transition duration-200"
         >
-          {isEditing ? 'Update Discount' : 'Add Discount'}
+          {isEditing ? "Update Discount" : "Add Discount"}
         </button>
       </form>
 
@@ -165,7 +203,9 @@ const OfferDiscountsEventsPage = () => {
             {products.map((product) => (
               <tr key={product._id} className="hover:bg-gray-100">
                 <td className="py-3 px-4 border-b">{product.productName}</td>
-                <td className="py-3 px-4 border-b">{product.discount ? `${product.discount}` : 'No Discount'}</td>
+                <td className="py-3 px-4 border-b">
+                  {product.discount ? `${product.discount}` : "No Discount"}
+                </td>
                 <td className="py-3 px-4 border-b flex space-x-2">
                   {product.discount ? (
                     <>

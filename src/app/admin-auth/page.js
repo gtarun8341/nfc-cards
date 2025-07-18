@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import api from "../apiConfig/axiosConfig";
 import AllFooter from "../components/AllFooter";
 import { UserCog, User, Briefcase } from "lucide-react";
+import toast from "react-hot-toast"; // ✅ Import this
 
 export default function AuthPage() {
   const [email, setEmail] = useState("");
@@ -29,20 +30,23 @@ export default function AuthPage() {
 
         document.cookie = `adminAuthToken=${response.data.token}; path=/`; // Set auth token as a cookie
         localStorage.setItem("adminAuthToken", response.data.token);
+        toast.success("Login successful");
+
         router.push("/admin-panel/Dashboard");
       } else {
-        alert("Login failed. Please try again.");
+        toast.error("Login failed. Please try again.");
       }
     } catch (error) {
       if (error.response) {
         if (error.response.status === 401) {
-          alert("Invalid email or password");
+          toast.error("Invalid email or password");
         } else {
           console.error("Error during API request:", error);
-          alert("An error occurred. Please try again later.");
+          toast.error("An error occurred. Please try again later.");
         }
       } else {
         console.error("Error during API request:", error);
+        toast.error("Unable to connect to server.");
       }
     } finally {
       setLoading(false); // stop loading no matter what

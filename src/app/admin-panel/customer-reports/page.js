@@ -5,7 +5,7 @@ import api from "../../apiConfig/axiosConfig";
 import ReportSummaryCard from "../../components/ReportSummaryCard";
 import ReportBarChart from "../../components/ReportBarChart";
 import ReportPieChart from "../../components/ReportPieChart";
-
+import toast from "react-hot-toast";
 export default function CustomerReports() {
   const [customerStats, setCustomerStats] = useState(null);
 
@@ -22,6 +22,7 @@ export default function CustomerReports() {
         setCustomerStats(data.data);
       } catch (err) {
         console.error("Failed to fetch user stats:", err.message);
+        toast.error("Failed to fetch user stats");
       }
     };
 

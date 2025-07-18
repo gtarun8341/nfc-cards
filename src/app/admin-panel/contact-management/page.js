@@ -3,89 +3,95 @@
 import React, { useState, useEffect } from "react";
 import api from "../../apiConfig/axiosConfig"; // Adjust the path as needed
 import * as XLSX from "xlsx";
+import toast from "react-hot-toast";
 
 const AdminContactManagementPage = () => {
   const [contacts, setContacts] = useState([]); // Grouped contacts by user
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState(""); // Search term for outer table
   const [innerSearchTerm, setInnerSearchTerm] = useState(""); // Search term for inner table
-
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   useEffect(() => {
     fetchUsers();
   }, []);
 
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem("adminAuthToken"); // Assuming token is stored here
+      const token = localStorage.getItem("adminAuthToken");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await api.get("/api/contacts/contacts", config); // Fetch grouped user contacts
-      setContacts(response.data);
+
+      // Then yes, you must encode it:
+      const response = await api.get(
+        `/api/contacts/contacts?search=${encodeURIComponent(
+          searchTerm
+        )}&page=${page}&limit=10`,
+        config
+      );
+
+      setContacts(response.data.data);
+      setTotalPages(response.data.totalPages);
     } catch (error) {
       console.error("Error fetching contacts:", error);
+      toast.error("Failed to load contacts.");
     }
   };
 
   const handleUserClick = (userId) => {
     setSelectedUser(userId);
   };
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      fetchUsers();
+    }, 400); // debounce
 
-  const filterContacts = (contacts, searchTerm) => {
-    return contacts.filter(
-      (user) =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.phone.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  };
-
-  const filterInnerContacts = (contacts, searchTerm) => {
-    return contacts.filter(
-      (contact) =>
-        contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contact.mobileNumber.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  };
+    return () => clearTimeout(delay);
+  }, [searchTerm, page]);
 
   const downloadContacts = (user) => {
-    const userContacts = user.contacts.map((contact) => ({
-      Name: contact.name,
-      Reference: contact.reference,
-      Profession: contact.profession,
-      Industry: contact.industry,
-      Category: contact.category,
-      Designation: contact.designation,
-      Company: contact.companyName,
-      Mobile: contact.mobileNumber,
-      Email: contact.email,
-      Website: contact.website,
-      Address: contact.address,
-      City: contact.city,
-      State: contact.state,
-      "Pin Code": contact.pinCode,
-    }));
+    try {
+      const userContacts = user.contacts.map((contact) => ({
+        Name: contact.name,
+        Reference: contact.reference,
+        Profession: contact.profession,
+        Industry: contact.industry,
+        Category: contact.category,
+        Designation: contact.designation,
+        Company: contact.companyName,
+        Mobile: contact.mobileNumber,
+        Email: contact.email,
+        Website: contact.website,
+        Address: contact.address,
+        City: contact.city,
+        State: contact.state,
+        "Pin Code": contact.pinCode,
+      }));
 
-    // Merge user details and contacts
-    const dataToExport = [...userContacts];
+      const dataToExport = [...userContacts];
+      const ws = XLSX.utils.json_to_sheet(dataToExport);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Contacts");
+      XLSX.writeFile(
+        wb,
+        `${user.email}_${user.phone}_${user.name}_contacts.xlsx`
+      );
 
-    // Create a new worksheet
-    const ws = XLSX.utils.json_to_sheet(dataToExport);
-
-    // Create a new workbook
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Contacts");
-
-    // Generate and download the Excel file
-    XLSX.writeFile(wb, `${user.email}_${user.phone}_${user.name}_contacts.xlsx`);
+      toast.success("Contacts downloaded successfully!");
+    } catch (error) {
+      console.error("Error downloading contacts:", error);
+      toast.error("Failed to download contacts.");
+    }
   };
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white shadow-md rounded-lg overflow-hidden">
-      <h1 className="text-2xl font-semibold text-center mb-4">Contact Management</h1>
+      <h1 className="text-2xl font-semibold text-center mb-4">
+        Contact Management
+      </h1>
 
       {!selectedUser ? (
         <div>
@@ -111,7 +117,7 @@ const AdminContactManagementPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filterContacts(contacts, searchTerm).map((user, index) => (
+                  {contacts.map((user, index) => (
                     <tr key={index} className="border-b">
                       <td className="px-4 py-2">{user.name}</td>
                       <td className="px-4 py-2">{user.email}</td>
@@ -145,7 +151,9 @@ const AdminContactManagementPage = () => {
           >
             Back to Users
           </button>
-          <h2 className="text-xl font-semibold mb-4">Contacts for Selected User</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            Contacts for Selected User
+          </h2>
 
           {/* Search Bar for Inner Table */}
           <input
@@ -156,7 +164,7 @@ const AdminContactManagementPage = () => {
             onChange={(e) => setInnerSearchTerm(e.target.value)}
           />
           <div className="overflow-x-auto">
-          <table className="min-w-full table-auto border-collapse bg-white shadow-md rounded-md">
+            <table className="min-w-full table-auto border-collapse bg-white shadow-md rounded-md">
               <thead>
                 <tr className="border-b bg-gray-100">
                   <th className="px-4 py-2 text-left">Name</th>
@@ -176,32 +184,58 @@ const AdminContactManagementPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {filterInnerContacts(
-                  contacts.find((user) => user.userId === selectedUser).contacts,
-                  innerSearchTerm
-                ).map((contact, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="px-4 py-2">{contact.name}</td>
-                    <td className="px-4 py-2">{contact.reference}</td>
-                    <td className="px-4 py-2">{contact.profession}</td>
-                    <td className="px-4 py-2">{contact.industry}</td>
-                    <td className="px-4 py-2">{contact.category}</td>
-                    <td className="px-4 py-2">{contact.designation}</td>
-                    <td className="px-4 py-2">{contact.companyName}</td>
-                    <td className="px-4 py-2">{contact.mobileNumber}</td>
-                    <td className="px-4 py-2">{contact.email}</td>
-                    <td className="px-4 py-2">{contact.website}</td>
-                    <td className="px-4 py-2">{contact.address}</td>
-                    <td className="px-4 py-2">{contact.city}</td>
-                    <td className="px-4 py-2">{contact.state}</td>
-                    <td className="px-4 py-2">{contact.pinCode}</td>
-                  </tr>
-                ))}
+                {contacts
+                  .find((user) => user.userId === selectedUser)
+                  ?.contacts?.filter((contact) => {
+                    const q = innerSearchTerm.toLowerCase();
+                    return (
+                      contact.name?.toLowerCase().includes(q) ||
+                      contact.email?.toLowerCase().includes(q) ||
+                      contact.mobileNumber?.toLowerCase().includes(q)
+                    );
+                  })
+                  .map((contact, index) => (
+                    <tr key={index} className="border-b">
+                      <td className="px-4 py-2">{contact.name}</td>
+                      <td className="px-4 py-2">{contact.reference}</td>
+                      <td className="px-4 py-2">{contact.profession}</td>
+                      <td className="px-4 py-2">{contact.industry}</td>
+                      <td className="px-4 py-2">{contact.category}</td>
+                      <td className="px-4 py-2">{contact.designation}</td>
+                      <td className="px-4 py-2">{contact.companyName}</td>
+                      <td className="px-4 py-2">{contact.mobileNumber}</td>
+                      <td className="px-4 py-2">{contact.email}</td>
+                      <td className="px-4 py-2">{contact.website}</td>
+                      <td className="px-4 py-2">{contact.address}</td>
+                      <td className="px-4 py-2">{contact.city}</td>
+                      <td className="px-4 py-2">{contact.state}</td>
+                      <td className="px-4 py-2">{contact.pinCode}</td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>
         </div>
       )}
+      <div className="flex justify-center mt-4 gap-2">
+        <button
+          disabled={page === 1}
+          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+          className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+        >
+          Prev
+        </button>
+        <span className="px-2 py-1">
+          {page} / {totalPages}
+        </span>
+        <button
+          disabled={page === totalPages}
+          onClick={() => setPage((prev) => prev + 1)}
+          className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };

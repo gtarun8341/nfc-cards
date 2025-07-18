@@ -10,6 +10,7 @@ import {
   FaExternalLinkAlt,
   FaCheckCircle,
 } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 const PhysicalVisitingCardPage = () => {
   const [templates, setTemplates] = useState([]);
@@ -47,6 +48,8 @@ const PhysicalVisitingCardPage = () => {
       const data = res.data.stats ? res.data.stats[0] : res.data;
       setStats(data);
     } catch (err) {
+      toast.error("Failed to fetch usage stats");
+
       console.error("Error fetching template change stats", err);
     }
   };
@@ -87,6 +90,8 @@ const PhysicalVisitingCardPage = () => {
         await previewTemplate(template._id);
       }
     } catch (error) {
+      toast.error("Error fetching templates");
+
       console.error("Error fetching templates:", error);
     } finally {
       setLoading(false);
@@ -116,6 +121,8 @@ const PhysicalVisitingCardPage = () => {
       );
       setPreviewHtml((prev) => ({ ...prev, [templateId]: response.data }));
     } catch (error) {
+      toast.error("Failed to load preview");
+
       console.error("Error fetching template preview:", error);
     }
   };
@@ -137,6 +144,8 @@ const PhysicalVisitingCardPage = () => {
       newWindow.document.write(response.data);
       newWindow.document.close();
     } catch (error) {
+      toast.error("Failed to open preview");
+
       console.error("Error fetching template:", error);
     }
   };
@@ -160,7 +169,9 @@ const PhysicalVisitingCardPage = () => {
         generatedLink: response.data.link,
       });
       await fetchStats();
+      toast.success("Template selected successfully");
     } catch (error) {
+      toast.error("Failed to select template");
       console.error("Error selecting template:", error);
     }
   };
@@ -181,11 +192,12 @@ const PhysicalVisitingCardPage = () => {
       );
       setSelectedTemplateData(null);
       await fetchStats();
+      toast.success("Template deselected");
     } catch (error) {
+      toast.error("Failed to delete selected template");
       console.error("Error deleting selected template:", error);
     }
   };
-
   const handlePurchaseClick = () => {
     setIsModalOpen(true); // Open the modal when the user clicks the "Purchase" button
   };
@@ -215,7 +227,7 @@ const PhysicalVisitingCardPage = () => {
       const selectedCardPrice = prices[cardType]; // Get the price based on the selected card type
 
       if (!selectedCardPrice) {
-        alert("Please select a valid card type.");
+        toast.error("Please select a valid card type.");
         return;
       }
 
@@ -227,6 +239,7 @@ const PhysicalVisitingCardPage = () => {
         amount: selectedCardPrice, // Send the price of the selected card
         currency: "INR", // Assuming INR for now, adjust as necessary
       };
+      toast.loading("Creating payment order...");
 
       // Send purchase data to the server to create a Razorpay order
       const purchaseResponse = await api.post(
@@ -234,6 +247,8 @@ const PhysicalVisitingCardPage = () => {
         purchaseData,
         config
       );
+      toast.dismiss(); // Clear the loading toast
+
       const orderData = purchaseResponse.data;
 
       if (orderData && orderData.orderId) {
@@ -246,23 +261,32 @@ const PhysicalVisitingCardPage = () => {
           description: "Payment for card template purchase",
           order_id: orderData.orderId, // Razorpay order ID
           handler: async function (response) {
-            // Handle successful payment verification
-            const verifyResponse = await api.post(
-              "/api/cardPurchase/verify",
-              {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                purchaseData, // Pass the original purchase data
-              },
-              config
-            );
+            toast.loading("Verifying payment...");
 
-            const result = verifyResponse.data;
-            alert(result.message);
+            try {
+              const verifyResponse = await api.post(
+                "/api/cardPurchase/verify",
+                {
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  purchaseData, // Pass the original purchase data
+                },
+                config
+              );
+              toast.dismiss();
 
-            if (result.status === "success") {
-              setIsModalOpen(false); // Close the modal on success
+              const result = verifyResponse.data;
+              if (result.status === "success") {
+                toast.success("Payment successful!");
+                setIsModalOpen(false);
+              } else {
+                toast.error("Payment verification failed.");
+              }
+            } catch (err) {
+              toast.dismiss();
+              console.error("Verification error:", err);
+              toast.error("Verification failed. Please contact support.");
             }
           },
           prefill: {
@@ -277,11 +301,12 @@ const PhysicalVisitingCardPage = () => {
         razorpay.open();
       } else {
         console.error("Failed to create Razorpay order.");
-        alert("Failed to initiate payment. Please try again.");
+        toast.error("Failed to initiate payment. Please try again.");
       }
     } catch (error) {
-      console.error("Error submitting purchase or initiating payment:", error);
-      alert("Error occurred during the purchase process. Please try again.");
+      toast.dismiss();
+      console.error("Error initiating purchase:", error);
+      toast.error("Something went wrong. Please try again.");
     }
   };
   if (loading) {

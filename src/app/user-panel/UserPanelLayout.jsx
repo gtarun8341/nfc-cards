@@ -70,7 +70,7 @@ const UserPanelLayout = ({ children }) => {
     {
       name: "Customer Profile",
       path: "/user-panel/Edit-Account",
-      icon: UserIcon,
+      icon: UserGroupIcon,
     },
     {
       name: "Company Profile",
@@ -156,7 +156,7 @@ const UserPanelLayout = ({ children }) => {
     {
       name: "Card Purchases",
       path: "/user-panel/card-purchases",
-      icon: DocumentArrowUpIcon,
+      icon: CreditCardIcon,
       onClick: () => setActiveForm("card-purchases"),
     },
     {
@@ -176,7 +176,7 @@ const UserPanelLayout = ({ children }) => {
     {
       name: "Sold Products",
       path: "/user-panel/sold-products",
-      icon: CreditCardIcon,
+      icon: ArchiveBoxIcon,
       onClick: () => setActiveForm("sold-products"),
     },
     {
@@ -188,11 +188,11 @@ const UserPanelLayout = ({ children }) => {
     {
       name: "Feedback",
       path: "/user-panel/feedback",
-      icon: InboxIcon,
+      icon: ChatBubbleLeftRightIcon,
       onClick: () => setActiveForm("feedback"),
     },
     {
-      name: "Contact Management",
+      name: "Manage Contacts",
       path: "/user-panel/contact-management",
       icon: UserGroupIcon,
       onClick: () => setActiveForm("contact-management"),
@@ -202,7 +202,7 @@ const UserPanelLayout = ({ children }) => {
     {
       name: "CRM",
       path: "/user-panel/crm",
-      icon: AcademicCapIcon,
+      icon: AdjustmentsHorizontalIcon,
       onClick: () => setActiveForm("crm"),
     },
     // { name: 'Paper Business Cards Scan', path: 'paper-business-cards-scan', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('paper-business-cards-scan') },
@@ -215,7 +215,7 @@ const UserPanelLayout = ({ children }) => {
     {
       name: "Reviews",
       path: "/user-panel/Review",
-      icon: InboxIcon,
+      icon: ClipboardDocumentIcon,
       onClick: () => setActiveForm("Review"),
     },
     {

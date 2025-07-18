@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import api from "../../apiConfig/axiosConfig";
+import toast from "react-hot-toast"; // ✅ Import at top
 
 const PaymentManagementPage = () => {
   const [sales, setSales] = useState([]);
@@ -10,62 +11,84 @@ const PaymentManagementPage = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  // useEffect(() => {
-  const fetchSalesData = async () => {
-    try {
-      const token = localStorage.getItem("adminAuthToken"); // Get the token
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`, // Attach the token
-        },
-      };
-      const response = await api.get(
-        `/api/order/sales-data?page=${page}&limit=10`,
-        config
-      );
-      setSales(response.data.data);
-      console.log(response.data.data);
-      setFilteredSales(response.data.data); // Initialize filtered sales
-      setTotalPages(response.data.totalPages);
-    } catch (error) {
-      console.error("Error fetching sales data:", error);
-    }
-  };
-  //   fetchSalesData();
-  // }, []);
   useEffect(() => {
+    const fetchSalesData = async () => {
+      try {
+        const token = localStorage.getItem("adminAuthToken"); // Get the token
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach the token
+          },
+        };
+        const response = await api.get(
+          `/api/order/sales-data?page=${page}&limit=10`,
+          config
+        );
+        setSales(response.data.data);
+        console.log(response.data.data);
+        setFilteredSales(response.data.data); // Initialize filtered sales
+        setTotalPages(response.data.totalPages);
+      } catch (error) {
+        console.error("Error fetching sales data:", error);
+        toast.error(`Failed to fetch sales data`);
+      }
+    };
     fetchSalesData();
-  }, [page]);
+  }, []);
   useEffect(() => {
     const filterSales = () => {
       let filtered = sales.filter((sale) => {
-        const searchMatch = sale.products.some(
-          (product) =>
-            product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            product.price.toString().includes(searchTerm) ||
-            sale.productTemplateId?.name
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase()) ||
-            sale.productTemplateId?.email
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase()) ||
-            sale.productTemplateId?.phone.includes(searchTerm) ||
-            sale.invoiceNumber.includes(searchTerm) ||
-            sale.trackingNumber.includes(searchTerm) ||
-            sale.userDetails?.name
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase()) ||
-            sale.userDetails?.email
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase()) ||
-            sale.userDetails?.phone.includes(searchTerm) ||
-            sale.userDetails?.address
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase())
-        );
+        const searchMatch =
+          Array.isArray(sale.products) &&
+          sale.products.some(
+            (product) =>
+              product?.title
+                ?.toLowerCase()
+                .includes(searchTerm.toLowerCase()) ||
+              product?.price?.toString().includes(searchTerm)
+          );
+
+        const templateMatch =
+          sale.productTemplateId?.name
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          sale.productTemplateId?.email
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          sale.productTemplateId?.phone?.includes(searchTerm);
+
+        const invoiceMatch = sale.invoiceNumber
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase());
+
+        const trackingMatch = sale.trackingNumber
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase());
+
+        const userMatch =
+          sale.userDetails?.name
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          sale.userDetails?.email
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          sale.userDetails?.phone?.includes(searchTerm) ||
+          sale.userDetails?.address
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase());
+
         const statusMatch = statusFilter ? sale.status === statusFilter : true;
-        return searchMatch && statusMatch;
+
+        return (
+          (searchMatch ||
+            templateMatch ||
+            invoiceMatch ||
+            trackingMatch ||
+            userMatch) &&
+          statusMatch
+        );
       });
+
       setFilteredSales(filtered);
     };
 
@@ -97,8 +120,10 @@ const PaymentManagementPage = () => {
             : sale
         )
       );
+      toast.success(`${field} updated successfully`);
     } catch (error) {
       console.error(`Error updating ${field}:`, error);
+      toast.error(`Failed to update ${field}`);
     }
   };
 
@@ -157,20 +182,35 @@ const PaymentManagementPage = () => {
             {filteredSales.map((sale) => (
               <tr key={sale._id}>
                 <td className="border p-2">
-                  {sale.products.map((product) => (
-                    <div key={product.title}>{product.title}</div>
-                  ))}
+                  {Array.isArray(sale.products) && sale.products.length > 0 ? (
+                    sale.products.map((product) => (
+                      <div key={product.title}>{product.title}</div>
+                    ))
+                  ) : (
+                    <span className="text-gray-400 italic">No products</span>
+                  )}
                 </td>
+
                 <td className="border p-2">
-                  {sale.products.map((product) => (
-                    <div key={product.title}>{product.quantity}</div>
-                  ))}
+                  {Array.isArray(sale.products) && sale.products.length > 0 ? (
+                    sale.products.map((product) => (
+                      <div key={product.title}>{product.quantity}</div>
+                    ))
+                  ) : (
+                    <span className="text-gray-400 italic">No products</span>
+                  )}
                 </td>
+
                 <td className="border p-2">
-                  {sale.products.map((product) => (
-                    <div key={product.title}>{product.price.toFixed(2)}</div>
-                  ))}
+                  {Array.isArray(sale.products) && sale.products.length > 0 ? (
+                    sale.products.map((product) => (
+                      <div key={product.title}>{product.price.toFixed(2)}</div>
+                    ))
+                  ) : (
+                    <span className="text-gray-400 italic">No products</span>
+                  )}
                 </td>
+
                 <td className="border p-2">{sale.totalAmount.toFixed(2)}</td>
                 <td className="border p-2">
                   <div>{sale.productTemplateId?.name}</div>

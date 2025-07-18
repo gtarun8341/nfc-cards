@@ -1,7 +1,7 @@
 "use client"; // Next.js Client Component
 
 import { useEffect, useState } from "react";
-
+import toast from "react-hot-toast";
 const CompanyDetailsForm = ({ onDataChange, initialData }) => {
   const [logoSizeMB, setLogoSizeMB] = useState(null);
 
@@ -147,7 +147,7 @@ const CompanyDetailsForm = ({ onDataChange, initialData }) => {
               if (file) {
                 const sizeMB = file.size / (1024 * 1024);
                 if (sizeMB > 5) {
-                  alert("File size should not exceed 5 MB.");
+                  toast.error("File size should not exceed 5 MB.");
                   e.target.value = "";
                   setLogoSizeMB(null); // Reset display
                   return;

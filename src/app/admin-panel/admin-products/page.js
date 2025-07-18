@@ -1,8 +1,8 @@
 "use client"; // Next.js Client Component
 import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
-import axios from "axios";
 import api from "../../apiConfig/axiosConfig"; // Ensure you have the right API config
+import toast from "react-hot-toast";
 
 const ProductCataloguePage = () => {
   const [catalogue, setCatalogue] = useState([]);
@@ -10,7 +10,8 @@ const ProductCataloguePage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
-
+  const [categories, setCategories] = useState([]);
+  const [units, setUnits] = useState([]);
   const [currentProduct, setCurrentProduct] = useState({
     name: "",
     type: "",
@@ -27,14 +28,24 @@ const ProductCataloguePage = () => {
   const [editProductId, setEditProductId] = useState(null);
 
   useEffect(() => {
-    fetchProducts(); // Fetch products when the component mounts
+    fetchProducts();
+    fetchCategoryAndUnits();
+    // Fetch products when the component mounts
   }, []);
+  const fetchCategoryAndUnits = async () => {
+    const token = localStorage.getItem("authToken");
+    try {
+      const { data } = await api.get("/api/category-units", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCategories(data.categories || []);
+      setUnits(data.units || []);
+    } catch (err) {
+      console.error("Failed to fetch categories and units:", err);
+      toast.error("Failed to load categories/units");
+    }
+  };
 
-  // useEffect(() => {
-  //   handleSearchAndFilter();
-  // }, [searchQuery, filterType, catalogue]);
-
-  // Handle form input changes
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "image") {
@@ -85,63 +96,52 @@ const ProductCataloguePage = () => {
           config
         );
       }
+      toast.success(
+        isEditing
+          ? "Product updated successfully!"
+          : "Product added successfully!"
+      );
 
       resetForm();
       fetchProducts(); // Refresh product list after adding/updating
     } catch (error) {
+      toast.error("Failed to save product. Please try again.");
       console.error("Error adding/updating product:", error);
     }
   };
 
-  // Fetch products
   const fetchProducts = async () => {
     const token = localStorage.getItem("adminAuthToken");
     try {
-      const { data } = await api.get("/api/addAdminProduct/all-products", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const params = new URLSearchParams();
+
+      if (searchQuery) params.append("search", encodeURIComponent(searchQuery));
+      if (filterType) params.append("type", filterType);
+      if (filterCategory) params.append("category", filterCategory);
+
+      const queryString = params.toString();
+
+      const { data } = await api.get(
+        `/api/addAdminProduct/all-products?${queryString}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
       setCatalogue(data.products);
     } catch (error) {
+      toast.error("Failed to load products.");
       console.error("Error fetching products:", error);
     }
   };
 
-  // Handle search and filter
-  const handleSearchAndFilter = useCallback(() => {
-    let updatedCatalogue = catalogue;
-
-    if (searchQuery) {
-      updatedCatalogue = updatedCatalogue.filter(
-        (product) =>
-          product.productName
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          product.productPrice.toString().includes(searchQuery) ||
-          product.discount.toString().includes(searchQuery) ||
-          product.productType
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          product.category.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    if (filterType) {
-      updatedCatalogue = updatedCatalogue.filter(
-        (product) => product.productType === filterType
-      );
-    }
-    if (filterCategory) {
-      updatedCatalogue = updatedCatalogue.filter(
-        (product) => product.category === filterCategory
-      );
-    }
-    setFilteredCatalogue(updatedCatalogue);
-  }, [searchQuery, filterType, filterCategory, catalogue]);
-
   useEffect(() => {
-    handleSearchAndFilter();
-  }, [handleSearchAndFilter]);
+    const debounceTimer = setTimeout(() => {
+      fetchProducts();
+    }, 300); // debounce by 300ms
 
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery, filterType, filterCategory]);
   // Edit product
   const editProduct = (product) => {
     setCurrentProduct({
@@ -167,8 +167,10 @@ const ProductCataloguePage = () => {
       await api.delete(`/api/addAdminProduct/delete-product/${productId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      toast.success("Product deleted successfully!");
       fetchProducts(); // Refresh product list after deletion
     } catch (error) {
+      toast.error("Failed to delete product.");
       console.error("Error deleting product:", error);
     }
   };
@@ -203,7 +205,7 @@ const ProductCataloguePage = () => {
           placeholder="Search by name, price, discount, or type"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="border border-gray-300 p-3 rounded-md w-full mr-4"
+          className="border border-gray-300 p-3 rounded-md w-full"
         />
         <select
           value={filterType}
@@ -220,12 +222,11 @@ const ProductCataloguePage = () => {
           className="border border-gray-300 p-3 rounded-md"
         >
           <option value="">All Category</option>
-          <option value="grocery">Grocery</option>
-          <option value="electronics">Electronics</option>
-          <option value="clothing">Clothing</option>
-          <option value="furniture">Furniture</option>
-          <option value="services">Services</option>
-          <option value="other">Other</option>
+          {categories.map((cat, index) => (
+            <option key={index} value={cat.name}>
+              {cat.name}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -261,11 +262,13 @@ const ProductCataloguePage = () => {
             required
           >
             <option value="">Select Units</option>
-            <option value="kg">Kilograms (kg)</option>
-            <option value="g">Grams (g)</option>
-            <option value="litre">Litres (L)</option>
-            <option value="ml">Millilitres (ml)</option>
-            <option value="piece">Piece</option>
+            {units.map((unit, index) => (
+              <option key={index} value={unit.name}>
+                {unit.abbreviation
+                  ? `${unit.name} (${unit.abbreviation})`
+                  : unit.name}
+              </option>
+            ))}
           </select>
           <select
             name="category"
@@ -274,12 +277,11 @@ const ProductCataloguePage = () => {
             className="border border-gray-300 p-3 rounded-md"
           >
             <option value="">Select Category</option>
-            <option value="grocery">Grocery</option>
-            <option value="electronics">Electronics</option>
-            <option value="clothing">Clothing</option>
-            <option value="furniture">Furniture</option>
-            <option value="services">Services</option>
-            <option value="other">Other</option>
+            {categories.map((cat, index) => (
+              <option key={index} value={cat.name}>
+                {cat.name}
+              </option>
+            ))}
           </select>
           <input
             type="text"

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import api from "../../apiConfig/axiosConfig"; // Adjust path if needed
+import toast from "react-hot-toast";
 
 const AdminContactUsPage = () => {
   const [contacts, setContacts] = useState([]);
@@ -11,40 +12,44 @@ const AdminContactUsPage = () => {
   const [total, setTotal] = useState(0);
   const limit = 10;
 
-  const fetchContacts = async (page = 1) => {
+  const fetchContacts = async (search = "", page = 1) => {
     try {
       const token = localStorage.getItem("adminAuthToken");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        params: {
+          search: encodeURIComponent(search), // ✅ Ensure URL-encoding
+          page,
+          limit,
+        },
       };
 
       const response = await api.get(
-        `/api/contactUs-form/admin/contactUs?page=${page}&limit=${limit}`,
+        `/api/contactUs-form/admin/contactUs`,
         config
       );
       const { data, total: totalCount } = response.data;
       setContacts(data);
-      setFilteredContacts(data);
       setTotal(totalCount);
     } catch (error) {
       console.error("Error fetching contact entries:", error);
+      toast.error("Failed to fetch contact entries");
     }
   };
 
-  const handleSearch = (e) => {
-    const value = e.target.value.toLowerCase();
-    setSearchTerm(value);
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      fetchContacts(searchTerm, page); // ✅ Pass search and page
+    }, 400); // debounce 400ms
 
-    const filtered = contacts.filter(
-      (c) =>
-        c.name?.toLowerCase().includes(value) ||
-        c.email?.toLowerCase().includes(value) ||
-        c.mobile?.includes(value) ||
-        c.service?.toLowerCase().includes(value)
-    );
-    setFilteredContacts(filtered);
+    return () => clearTimeout(delay); // cleanup
+  }, [searchTerm, page]);
+
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+    setPage(1); // optional: reset page to 1 on new search
   };
 
   const handleDelete = async (id) => {
@@ -58,9 +63,12 @@ const AdminContactUsPage = () => {
       };
 
       await api.delete(`/api/contactUs-form/contactUs/${id}`, config);
+      toast.success("Entry deleted successfully");
+
       fetchContacts(page);
     } catch (error) {
       console.error("Error deleting contact:", error);
+      toast.error("Failed to delete entry");
     }
   };
 
@@ -98,8 +106,8 @@ const AdminContactUsPage = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredContacts.length > 0 ? (
-            filteredContacts.map((contact) => (
+          {contacts.length > 0 ? (
+            contacts.map((contact) => (
               <tr key={contact._id} className="border-b">
                 <td className="px-4 py-2">{contact.name}</td>
                 <td className="px-4 py-2">{contact.email}</td>

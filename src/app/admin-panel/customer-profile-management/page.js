@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import api from "../../apiConfig/axiosConfig"; // Adjust the path as needed
 import * as XLSX from "xlsx";
-
+import toast from "react-hot-toast";
 const CustomerProfileManagementPage = () => {
   const [customers, setCustomers] = useState([]);
   const [editCustomer, setEditCustomer] = useState(null);
@@ -18,33 +18,39 @@ const CustomerProfileManagementPage = () => {
   // useEffect(() => {
   const fetchCustomers = async () => {
     try {
-      const token = localStorage.getItem("adminAuthToken"); // Assuming token is stored here
+      const token = localStorage.getItem("adminAuthToken");
       const config = {
         headers: {
-          Authorization: `Bearer ${token}`, // Attach the token
+          Authorization: `Bearer ${token}`,
         },
       };
       const response = await api.get(
-        `/api/users/users?page=${page}&limit=10`,
+        `/api/users/users?page=${page}&limit=10&search=${encodeURIComponent(
+          searchTerm
+        )}`,
         config
-      ); // Assuming '/api/users' is your route to fetch customers
-      console.log(response.data);
-      setCustomers(response.data.users); // <- response.data.users from backend
+      );
+      setCustomers(response.data.users);
       setTotalPages(response.data.totalPages);
     } catch (error) {
       console.error("Error fetching customers:", error);
+      toast.error("Failed to fetch customers");
     }
   };
+
   //   fetchCustomers();
   // }, []);
   useEffect(() => {
-    fetchCustomers();
-  }, [page]);
-  // Handle edit functionality
-  const handleEdit = (customer) => {
-    setEditCustomer(customer);
-    setUpdatedName(customer.name);
-  };
+    const timeout = setTimeout(() => {
+      fetchCustomers();
+    }, 500); // debounce 500ms
+
+    return () => clearTimeout(timeout);
+  }, [page, searchTerm]);
+
+  useEffect(() => {
+    setPage(1); // Reset to page 1 on search term change
+  }, [searchTerm]);
 
   // Update customer
   const handleUpdate = async (id) => {
@@ -61,8 +67,10 @@ const CustomerProfileManagementPage = () => {
       );
       setCustomers(updatedCustomers);
       setEditCustomer(null);
+      toast.success("Customer name updated");
     } catch (error) {
       console.error("Error updating customer:", error);
+      toast.error("Failed to update customer");
     }
   };
 
@@ -83,9 +91,10 @@ const CustomerProfileManagementPage = () => {
             : customer
         )
       );
-      alert(res.data.message);
+      toast.success("Customer deleted");
     } catch (error) {
       console.error("Error deleting customer:", error);
+      toast.error("Failed to delete customer");
     }
   };
   const handleReactivate = async (userId) => {
@@ -93,15 +102,15 @@ const CustomerProfileManagementPage = () => {
       const token = localStorage.getItem("adminAuthToken"); // Assuming token is stored here
       const config = {
         headers: {
-          authorization: `Bearer ${token}`, // Attach the token
+          Authorization: `Bearer ${token}`, // Attach the token
         },
       };
       const res = await api.put(`/api/users/reactivate/${userId}`, config);
-      alert(res.data.message);
+      toast.success(res.data.message || "User reactivated");
       fetchCustomers(); // refresh your user list
     } catch (error) {
       console.error("Error reactivating user:", error);
-      alert("Failed to reactivate user.");
+      toast.error("Failed to reactivate user");
     }
   };
 
@@ -111,21 +120,27 @@ const CustomerProfileManagementPage = () => {
     setShowPasswordModal(true);
   };
   const handleDownloadExcel = () => {
-    const exportData = customers.map((customer) => ({
-      Name: customer.name,
-      Email: customer.email,
-      Phone: customer.phone || "-",
-      Company: customer.companyName || "-",
-      Profession: customer.profession || "-",
-      CreatedAt: new Date(customer.createdAt).toLocaleString(),
-    }));
+    try {
+      const exportData = customers.map((customer) => ({
+        Name: customer.name,
+        Email: customer.email,
+        Phone: customer.phone || "-",
+        Company: customer.companyName || "-",
+        Profession: customer.profession || "-",
+        CreatedAt: new Date(customer.createdAt).toLocaleString(),
+      }));
 
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Customer Data");
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Customer Data");
 
-    const fileName = `All_Customers_Details.xlsx`;
-    XLSX.writeFile(workbook, fileName);
+      const fileName = `All_Customers_Details.xlsx`;
+      XLSX.writeFile(workbook, fileName);
+      toast.success("Excel downloaded successfully");
+    } catch (error) {
+      console.error("Excel download failed", error);
+      toast.error("Failed to download Excel");
+    }
   };
 
   const submitPasswordReset = async () => {
@@ -141,134 +156,150 @@ const CustomerProfileManagementPage = () => {
         { newPassword },
         config
       );
-      alert("Password updated successfully");
+      toast.success("Password reset successfully");
       setShowPasswordModal(false);
     } catch (error) {
       console.error("Error resetting password:", error);
-      alert("Failed to reset password");
+      toast.error("Failed to reset password");
     }
   };
-
-  // Filter customers based on search term
-  const filteredCustomers = customers.filter(
-    (customer) =>
-      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
-    <div className="max-w-4xl mx-auto p-5 border rounded shadow-lg bg-white">
-      <h2 className="text-2xl font-semibold text-center mb-5">
+    <div className="max-w-7xl mx-auto p-5 border rounded shadow-lg bg-white">
+      <h2 className="text-2xl font-semibold text-center mb-6">
         Customer Profile Management
       </h2>
 
-      {/* Search Bar */}
-      <div className="mb-5">
+      {/* Search & Export */}
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <input
           type="text"
           placeholder="Search by name or email..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="border px-4 py-2 rounded w-full"
+          className="border px-4 py-2 rounded w-full sm:w-1/2"
         />
+
         <button
           onClick={handleDownloadExcel}
-          className="ml-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full sm:w-auto"
         >
           Download Excel
         </button>
       </div>
 
       {/* Customer Table */}
-      <table className="min-w-full bg-white border rounded">
-        <thead>
-          <tr>
-            <th className="py-2 px-4 bg-gray-100 text-left border-b">Name</th>
-            <th className="py-2 px-4 bg-gray-100 text-left border-b">Email</th>
-            <th className="py-2 px-4 bg-gray-100 text-left border-b">Phone</th>
-            <th className="py-2 px-4 bg-gray-100 text-left border-b">
-              Company
-            </th>
-            <th className="py-2 px-4 bg-gray-100 text-left border-b">
-              Profession
-            </th>
-            <th className="py-2 px-4 bg-gray-100 text-left border-b">Status</th>
-
-            <th className="py-2 px-4 bg-gray-100 text-left border-b">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredCustomers.map((customer) => (
-            <tr key={customer._id} className="border-b">
-              <td className="py-2 px-4">
-                {editCustomer?._id === customer._id ? (
-                  <input
-                    type="text"
-                    value={updatedName}
-                    onChange={(e) => setUpdatedName(e.target.value)}
-                    className="border rounded px-2 py-1"
-                  />
-                ) : (
-                  customer.name
-                )}
-              </td>
-              <td className="py-2 px-4">{customer.email}</td>
-              <td className="py-2 px-4">{customer.phone || "-"}</td>
-              <td className="py-2 px-4">{customer.companyName || "-"}</td>
-              <td className="py-2 px-4">{customer.profession || "-"}</td>
-              <td className="py-2 px-4">
-                {customer.isDeleted ? (
-                  <span className="text-red-600 font-semibold">Deleted</span>
-                ) : (
-                  <span className="text-green-600 font-semibold">Active</span>
-                )}
-              </td>
-              <td className="py-2 px-4">
-                {editCustomer?._id === customer._id ? (
-                  <button
-                    onClick={() => handleUpdate(customer._id)}
-                    className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                  >
-                    Save
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleEdit(customer)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 mr-2"
-                  >
-                    Edit
-                  </button>
-                )}
-                <button
-                  onClick={() => handleResetPassword(customer._id)}
-                  className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border rounded">
+          <thead>
+            <tr>
+              {[
+                "Name",
+                "Email",
+                "Phone",
+                "Company",
+                "Profession",
+                "Status",
+                "Actions",
+              ].map((header) => (
+                <th
+                  key={header}
+                  className="py-2 px-4 bg-gray-100 text-left border-b whitespace-nowrap"
                 >
-                  Reset Password
-                </button>
-                {customer.isDeleted ? (
-                  <button
-                    onClick={() => handleReactivate(customer._id)}
-                    className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                  >
-                    Reactivate
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleDelete(customer._id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
-                )}
-              </td>
+                  {header}
+                </th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {customers.map((customer) => (
+              <tr key={customer._id} className="border-b align-top">
+                {/* Name */}
+                <td className="py-2 px-4">
+                  {editCustomer?._id === customer._id ? (
+                    <input
+                      type="text"
+                      value={updatedName}
+                      onChange={(e) => setUpdatedName(e.target.value)}
+                      className="border rounded px-2 py-1"
+                    />
+                  ) : (
+                    customer.name
+                  )}
+                </td>
+
+                {/* Email */}
+                <td className="py-2 px-4">{customer.email}</td>
+
+                {/* Phone */}
+                <td className="py-2 px-4">{customer.phone || "-"}</td>
+
+                {/* Company */}
+                <td className="py-2 px-4">{customer.companyName || "-"}</td>
+
+                {/* Profession */}
+                <td className="py-2 px-4">{customer.profession || "-"}</td>
+
+                {/* Status */}
+                <td className="py-2 px-4">
+                  {customer.isDeleted ? (
+                    <span className="text-red-600 font-semibold">Deleted</span>
+                  ) : (
+                    <span className="text-green-600 font-semibold">Active</span>
+                  )}
+                </td>
+
+                {/* Actions */}
+                <td className="py-2 px-4 space-y-1">
+                  <div className="flex flex-wrap gap-2">
+                    {editCustomer?._id === customer._id ? (
+                      <button
+                        onClick={() => handleUpdate(customer._id)}
+                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                      >
+                        Save
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleEdit(customer)}
+                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                      >
+                        Edit
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => handleResetPassword(customer._id)}
+                      className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                    >
+                      Reset Password
+                    </button>
+
+                    {customer.isDeleted ? (
+                      <button
+                        onClick={() => handleReactivate(customer._id)}
+                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                      >
+                        Reactivate
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleDelete(customer._id)}
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center mt-4 space-x-4">
+        <div className="flex justify-center items-center mt-6 space-x-4">
           <button
             disabled={page === 1}
             onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
@@ -288,6 +319,8 @@ const CustomerProfileManagementPage = () => {
           </button>
         </div>
       )}
+
+      {/* Reset Password Modal */}
       {showPasswordModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-md w-96">

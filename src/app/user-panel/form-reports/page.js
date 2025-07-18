@@ -4,6 +4,7 @@ import api from "../../apiConfig/axiosConfig";
 import ReportSummaryCard from "../../components/ReportSummaryCard";
 import ReportBarChart from "../../components/ReportBarChart";
 import ReportPieChart from "../../components/ReportPieChart";
+import { toast } from "react-hot-toast"; // ✅ Toast import
 
 export default function FormReviews() {
   const [data, setData] = useState(null);
@@ -35,6 +36,7 @@ export default function FormReviews() {
         setData({ totalForms, formTypes });
       } catch (error) {
         console.error("Error fetching feedback summary:", error.message);
+        toast.error("Failed to load form reports.");
       }
     };
 

@@ -9,6 +9,7 @@ import {
   FaExternalLinkAlt,
   FaCheckCircle,
 } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 const MiniWebsitePage = () => {
   const [templates, setTemplates] = useState([]);
@@ -34,6 +35,7 @@ const MiniWebsitePage = () => {
       const data = res.data.stats ? res.data.stats[0] : res.data;
       setStats(data);
     } catch (err) {
+      toast.error("Failed to fetch usage stats");
       console.error("Error fetching template change stats", err);
     }
   };
@@ -71,6 +73,8 @@ const MiniWebsitePage = () => {
         await previewTemplate(template._id);
       }
     } catch (error) {
+      toast.error("Error fetching templates");
+
       console.error("Error fetching templates:", error);
     } finally {
       setLoading(false);
@@ -100,6 +104,8 @@ const MiniWebsitePage = () => {
       );
       setPreviewHtml((prev) => ({ ...prev, [templateId]: response.data }));
     } catch (error) {
+      toast.error("Failed to load preview");
+
       console.error("Error fetching template preview:", error);
     }
   };
@@ -121,6 +127,8 @@ const MiniWebsitePage = () => {
       newWindow.document.write(response.data);
       newWindow.document.close();
     } catch (error) {
+      toast.error("Failed to open preview");
+
       console.error("Error fetching template:", error);
     }
   };
@@ -144,7 +152,9 @@ const MiniWebsitePage = () => {
         generatedLink: response.data.link,
       });
       await fetchStats(); // <-- refresh limits
+      toast.success("Template selected successfully");
     } catch (error) {
+      toast.error("Failed to select template");
       console.error("Error selecting template:", error);
     }
   };
@@ -165,7 +175,9 @@ const MiniWebsitePage = () => {
       );
       setSelectedTemplateData(null);
       await fetchStats(); // <-- refresh limits
+      toast.success("Template deselected");
     } catch (error) {
+      toast.error("Failed to delete selected template");
       console.error("Error deleting selected template:", error);
     }
   };

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import api from "../apiConfig/axiosConfig";
+import toast from "react-hot-toast";
 const MAX_IMAGE_SIZE_MB = 1;
 
 const ProductDetailsForm = ({ onDataChange, initialData }) => {
@@ -17,7 +18,8 @@ const ProductDetailsForm = ({ onDataChange, initialData }) => {
       category: "",
     },
   ]);
-
+  const [categories, setCategories] = useState([]);
+  const [units, setUnits] = useState([]);
   const [uploadStats, setUploadStats] = useState({
     uploadedCount: 0,
     uploadLimit: 0,
@@ -38,10 +40,17 @@ const ProductDetailsForm = ({ onDataChange, initialData }) => {
         },
       };
       try {
-        const res = await api.get("/api/products/product-upload-stats", config); // use actual API route
-        setUploadStats(res.data);
+        const [statsRes, catUnitRes] = await Promise.all([
+          api.get("/api/products/product-upload-stats", config),
+          api.get("/api/category-units", config),
+        ]);
+
+        setUploadStats(statsRes.data);
+        setCategories(catUnitRes.data.categories || []);
+        setUnits(catUnitRes.data.units || []);
       } catch (err) {
         console.error("Failed to fetch product stats", err);
+        toast.error("Failed to fetch product stats", err);
       }
     };
 
@@ -74,6 +83,7 @@ const ProductDetailsForm = ({ onDataChange, initialData }) => {
     if (name === "productImage" && newValue) {
       const sizeMB = newValue.size / (1024 * 1024);
       if (sizeMB > MAX_IMAGE_SIZE_MB) {
+        toast.error("Image must be less than or equal to 1MB.");
         setError("Image must be less than or equal to 1MB.");
         return;
       }
@@ -93,6 +103,9 @@ const ProductDetailsForm = ({ onDataChange, initialData }) => {
       remaining !== "unlimited" && products.length >= remaining;
 
     if (maxReached) {
+      toast.error(
+        "You have reached your product upload limit.Upgrade your subscription plan to add more products"
+      );
       setError(
         "You have reached your product upload limit.Upgrade your subscription plan to add more products"
       );
@@ -120,6 +133,14 @@ const ProductDetailsForm = ({ onDataChange, initialData }) => {
     setProducts(updatedProducts);
     onDataChange({ products: updatedProducts });
   };
+  const categoryOptions = [
+    ["", "Select Category"],
+    ...categories.map((c) => [c.name, c.name]),
+  ];
+  const unitOptions = [
+    ["", "Select Unit"],
+    ...units.map((u) => [u.abbreviation || u.name, u.name]),
+  ];
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-xl border border-gray-200">
@@ -209,15 +230,7 @@ const ProductDetailsForm = ({ onDataChange, initialData }) => {
                 "category",
                 product.category,
                 index,
-                [
-                  ["", "Select Category"],
-                  ["grocery", "Grocery"],
-                  ["electronics", "Electronics"],
-                  ["clothing", "Clothing"],
-                  ["furniture", "Furniture"],
-                  ["services", "Services"],
-                  ["other", "Other"],
-                ],
+                categoryOptions,
                 handleChange
               )}
 
@@ -226,14 +239,7 @@ const ProductDetailsForm = ({ onDataChange, initialData }) => {
                 "units",
                 product.units,
                 index,
-                [
-                  ["", "Select Units"],
-                  ["kg", "Kilograms (kg)"],
-                  ["g", "Grams (g)"],
-                  ["litre", "Litres (L)"],
-                  ["ml", "Millilitres (ml)"],
-                  ["piece", "Piece"],
-                ],
+                unitOptions,
                 handleChange
               )}
             </div>

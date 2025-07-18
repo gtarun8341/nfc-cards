@@ -1,7 +1,7 @@
 "use client"; // Next.js Client Component
 
 import { useEffect, useState } from "react";
-
+import toast from "react-hot-toast";
 const AboutCompanyForm = ({ onDataChange, initialData }) => {
   const [fileInfos, setFileInfos] = useState([]);
 
@@ -33,7 +33,8 @@ const AboutCompanyForm = ({ onDataChange, initialData }) => {
       const selectedFiles = Array.from(files);
 
       if (selectedFiles.length > maxFiles) {
-        alert("You can upload a maximum of 10 documents.");
+        toast.error("You can upload a maximum of 10 documents.");
+
         return;
       }
 
@@ -49,7 +50,7 @@ const AboutCompanyForm = ({ onDataChange, initialData }) => {
       });
 
       if (rejectedFiles.length > 0) {
-        alert(
+        toast.error(
           `These files exceed 1 MB and were not uploaded:\n${rejectedFiles.join(
             ", "
           )}`

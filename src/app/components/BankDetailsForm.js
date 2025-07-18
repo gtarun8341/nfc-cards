@@ -1,7 +1,7 @@
 "use client"; // Next.js Client Component
 
 import { useEffect, useState } from "react";
-
+import toast from "react-hot-toast";
 const BankDetailsForm = ({ onDataChange, initialData }) => {
   const [qrFileInfos, setQrFileInfos] = useState([]);
 
@@ -41,7 +41,7 @@ const BankDetailsForm = ({ onDataChange, initialData }) => {
       const selectedFiles = Array.from(files);
 
       if (selectedFiles.length > maxFiles) {
-        alert("You can upload a maximum of 4 QR code images.");
+        toast.error("You can upload a maximum of 4 QR code images.");
         return;
       }
 
@@ -57,7 +57,7 @@ const BankDetailsForm = ({ onDataChange, initialData }) => {
       });
 
       if (rejectedFiles.length > 0) {
-        alert(
+        toast.error(
           `These files exceed 1 MB and were not uploaded:\n${rejectedFiles.join(
             ", "
           )}`

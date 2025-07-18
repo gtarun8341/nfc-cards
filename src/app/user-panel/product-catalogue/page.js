@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import api from "../../apiConfig/axiosConfig"; // Ensure you have the right API config
+import { toast } from "react-hot-toast"; // ✅ Add toast
 
 const ProductCataloguePage = () => {
   const [catalogue, setCatalogue] = useState([]);
@@ -18,17 +19,40 @@ const ProductCataloguePage = () => {
   });
   const [uploadedCount, setUploadedCount] = useState(0);
   const [uploadLimit, setUploadLimit] = useState(0);
-
+  const [categories, setCategories] = useState([]);
+  const [units, setUnits] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editProductId, setEditProductId] = useState(null);
   const [userId, setUserId] = useState(null); // Add a state to store the ID
   const [searchQuery, setSearchQuery] = useState(""); // State to store search query
   const [error, setError] = useState(""); // State to store validation error
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   useEffect(() => {
     fetchProducts(); // Fetch products when the component mounts
+    fetchCategoryAndUnits();
   }, []);
+  const fetchCategoryAndUnits = async () => {
+    const token = localStorage.getItem("authToken");
+    try {
+      const { data } = await api.get("/api/category-units", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCategories(data.categories || []);
+      setUnits(data.units || []);
+    } catch (err) {
+      console.error("Failed to fetch categories and units:", err);
+      toast.error("Failed to load categories/units");
+    }
+  };
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      setCurrentPage(1); // Reset to first page on new search
+      fetchProducts();
+    }, 500); // Debounce for 500ms
 
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
   // Handle form input changes
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -54,17 +78,22 @@ const ProductCataloguePage = () => {
       !currentProduct.category
     ) {
       setError("All fields are required.");
+      toast.error("All fields are required."); // ✅ toast error
+
       return;
     }
 
     if (isNaN(currentProduct.price)) {
       setError("Price must be a valid number.");
+      toast.error("Price must be a valid number."); // ✅ toast error
+
       return;
     }
 
     // If adding a product, ensure image is provided
     if (!isEditing && !currentProduct.image) {
       setError("Image is required when adding a product.");
+      toast.error("Image is required when adding a product.");
       return;
     }
 
@@ -102,41 +131,54 @@ const ProductCataloguePage = () => {
           formData,
           config
         );
+        toast.success("Product updated successfully!"); // ✅ toast
+
         console.log(response);
       } else {
         // Add new product if not editing
         console.log(formData);
         response = await api.post("/api/products/", formData, config);
+        toast.success("Product added successfully!"); // ✅ toast
       }
 
       resetForm();
       fetchProducts(); // Refresh product list after adding/updating
     } catch (error) {
       console.error("Error adding/updating product:", error);
-      setError(
+      const errMsg =
         error.response?.data?.message ||
-          "An unexpected error occurred while saving the product."
-      );
+        "An unexpected error occurred while saving the product.";
+      setError(errMsg);
+      toast.error(errMsg); // ✅ toast
     }
   };
 
   // Fetch products
   const fetchProducts = async () => {
-    console.log(api.defaults.baseURL);
     const token = localStorage.getItem("authToken");
     try {
-      const { data } = await api.get("/api/products/", {
+      const response = await api.get(`/api/products`, {
         headers: { Authorization: `Bearer ${token}` },
+        params: {
+          search: encodeURIComponent(searchQuery),
+          page: currentPage,
+          limit: 10,
+        },
       });
-      console.log(data);
-      setCatalogue(data.products);
-      setUserId(data.id); // Store the ID in state
-      setUploadedCount(data.uploadedCount);
-      setUploadLimit(data.uploadLimit);
+      setCatalogue(response.data.products);
+      setUploadedCount(response.data.uploadedCount);
+      setUploadLimit(response.data.uploadLimit);
+      setTotalPages(response.data.totalPages);
+      setUserId(response.data.id);
     } catch (error) {
       console.error("Error fetching products:", error);
+      toast.error("Failed to load products");
     }
   };
+
+  useEffect(() => {
+    fetchProducts();
+  }, [currentPage]);
 
   // Edit product
   const editProduct = (product) => {
@@ -164,13 +206,16 @@ const ProductCataloguePage = () => {
       await api.delete(`/api/products/${productId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      toast.success("Product deleted successfully!"); // ✅ toast
+
       fetchProducts(); // Refresh product list after deletion
     } catch (error) {
       console.error("Error deleting product:", error);
-      setError(
+      const errMsg =
         error.response?.data?.message ||
-          "An unexpected error occurred while deleting the product."
-      );
+        "An unexpected error occurred while deleting the product.";
+      setError(errMsg);
+      toast.error(errMsg);
     }
   };
 
@@ -189,14 +234,6 @@ const ProductCataloguePage = () => {
     setIsEditing(false);
     setEditProductId(null);
   };
-
-  // Filter catalogue based on search query
-  const filteredCatalogue = catalogue.filter(
-    (product) =>
-      product.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.hsnCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.gst.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <div className="container mx-auto p-6 bg-gray-50 rounded-lg shadow-lg">
@@ -233,10 +270,10 @@ const ProductCataloguePage = () => {
       <div className="mb-6">
         <input
           type="text"
-          placeholder="Search by Name, HSN Code or GST"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-md"
+          placeholder="Search by name, HSN, or GST"
+          className="border border-gray-300 rounded px-4 py-2 mb-4 w-full"
         />
       </div>
 
@@ -301,11 +338,13 @@ const ProductCataloguePage = () => {
             className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
           >
             <option value="">Select Units</option>
-            <option value="kg">Kilograms (kg)</option>
-            <option value="g">Grams (g)</option>
-            <option value="litre">Litres (L)</option>
-            <option value="ml">Millilitres (ml)</option>
-            <option value="piece">Piece</option>
+            {units.map((unit, index) => (
+              <option key={index} value={unit.name}>
+                {unit.abbreviation
+                  ? `${unit.name} (${unit.abbreviation})`
+                  : unit.name}
+              </option>
+            ))}
           </select>
           <select
             name="category"
@@ -314,12 +353,11 @@ const ProductCataloguePage = () => {
             className="mt-1 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
           >
             <option value="">Select Category</option>
-            <option value="grocery">Grocery</option>
-            <option value="electronics">Electronics</option>
-            <option value="clothing">Clothing</option>
-            <option value="furniture">Furniture</option>
-            <option value="services">Services</option>
-            <option value="other">Other</option>
+            {categories.map((cat, index) => (
+              <option key={index} value={cat.name}>
+                {cat.name}
+              </option>
+            ))}
           </select>
           <input
             type="file"
@@ -353,7 +391,7 @@ const ProductCataloguePage = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredCatalogue.map((product) => (
+            {catalogue.map((product) => (
               <tr key={product._id} className="hover:bg-gray-100">
                 <td className="py-3 px-4 border-b">{product.productName}</td>
                 <td className="py-3 px-4 border-b">{product.productType}</td>
@@ -399,6 +437,27 @@ const ProductCataloguePage = () => {
             ))}
           </tbody>
         </table>
+        <div className="flex justify-center mt-4 gap-2">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="px-4 py-2 text-gray-700 font-semibold">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );

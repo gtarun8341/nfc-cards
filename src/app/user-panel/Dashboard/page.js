@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import api from "../../apiConfig/axiosConfig";
+import toast from "react-hot-toast";
 
 const CustomerDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -46,6 +47,8 @@ const CustomerDashboard = () => {
           status: data.data.currentPlan.status,
         });
       } catch (error) {
+        toast.error("Failed to load user stats");
+
         console.error("Error fetching user stats:", error.message);
       }
     };
@@ -65,6 +68,7 @@ const CustomerDashboard = () => {
         });
       } catch (error) {
         console.error("Error fetching feedback summary:", error.message);
+        toast.error("Failed to load feedback summary");
       }
     };
 
@@ -88,6 +92,7 @@ const CustomerDashboard = () => {
         });
       } catch (error) {
         console.error("Error fetching product sales summary:", error.message);
+        toast.error("Failed to load product sales summary");
       }
     };
 

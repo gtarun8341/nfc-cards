@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import api from "../../apiConfig/axiosConfig";
+import toast from "react-hot-toast";
 const defaultLimitations = {
   miniWebsite: "",
+  nfccard: "",
   pdfVisitingCard: "",
   businessProfile: "",
   businessEssentials: "",
@@ -34,17 +36,21 @@ const AdminPlansPage = () => {
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        const response = await api.get("/api/subscription/allplans");
+        const response = await api.get(
+          `/api/subscription/allplans?search=${encodeURIComponent(search)}`
+        );
         setPlans(response.data);
         setFilteredPlans(response.data);
         setLoading(false);
       } catch (error) {
-        setError("Failed to load subscription plans");
+        setError("Failed to load subscription plans", error);
+        toast.error("Failed to load subscription plans");
         setLoading(false);
       }
     };
+
     fetchPlans();
-  }, []);
+  }, [search]); // <-- Also add 'search' as a dependency to re-fetch when search changes
 
   const handleAddPlan = async () => {
     const formattedPlan = {
@@ -66,11 +72,13 @@ const AdminPlansPage = () => {
       setPlans([...plans, response.data.plan]);
       setFilteredPlans([...plans, response.data.plan]);
       closeModal();
+      toast.success("Subscription plan added successfully");
     } catch (error) {
+      console.error(error);
       setError("Failed to add subscription plan");
+      toast.error("Failed to add subscription plan");
     }
   };
-
   const handleEditPlan = async () => {
     const formattedPlan = {
       ...editPlan,
@@ -96,11 +104,13 @@ const AdminPlansPage = () => {
       setPlans(updatedPlans);
       setFilteredPlans(updatedPlans);
       closeModal();
+      toast.success("Subscription plan updated successfully");
     } catch (error) {
+      console.error(error);
       setError("Failed to update subscription plan");
+      toast.error("Failed to update subscription plan");
     }
   };
-
   const toggleDeletePlan = async (id, shouldDelete) => {
     try {
       const token = localStorage.getItem("adminAuthToken");
@@ -118,20 +128,20 @@ const AdminPlansPage = () => {
       );
       setPlans(updatedPlans);
       setFilteredPlans(updatedPlans);
+      toast.success(
+        shouldDelete ? "Plan moved to trash" : "Plan restored successfully"
+      );
     } catch (error) {
+      console.error(error);
       setError("Failed to update delete status");
+      toast.error("Failed to update plan status");
     }
   };
-
   const handleSearch = (e) => {
     const value = e.target.value;
     setSearch(value);
-    const filtered = plans.filter((plan) =>
-      plan.title.toLowerCase().includes(value.toLowerCase())
-    );
-    setFilteredPlans(filtered);
+    // fetchPlans(value); // fetch from backend directly
   };
-
   const openAddModal = () => {
     setNewPlan({
       title: "",
@@ -162,80 +172,76 @@ const AdminPlansPage = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6">
-      <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-6">
-        Manage Subscription Plans
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      <h1 className="text-2xl md:text-3xl font-bold text-center mb-8">
+        Subscription Plan Management
       </h1>
-      {error && <p className="text-red-500 text-center">{error}</p>}
 
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
+      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+
+      <div className="flex flex-col sm:flex-row sm:justify-between gap-4 mb-6">
         <input
           type="text"
           value={search}
           onChange={handleSearch}
           placeholder="Search plans by title..."
-          className="p-3 border border-gray-300 rounded-md w-full sm:w-1/2"
+          className="w-full sm:w-1/2 px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200 outline-none"
         />
         <button
           onClick={openAddModal}
-          className="p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 w-full sm:w-auto"
+          className="px-5 py-3 bg-blue-600 text-white font-medium rounded-md shadow hover:bg-blue-700 transition"
         >
-          Add New Plan
+          + Add New Plan
         </button>
       </div>
 
       {loading ? (
         <div className="text-center text-gray-500">Loading plans...</div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-200 text-sm sm:text-base">
-            <thead>
+        <div className="overflow-x-auto rounded-lg shadow">
+          <table className="min-w-full text-sm text-left bg-white border border-gray-200">
+            <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
               <tr>
-                <th className="px-4 sm:px-6 py-3 border-b">Title</th>
-                <th className="px-4 sm:px-6 py-3 border-b">Price</th>
-                <th className="px-4 sm:px-6 py-3 border-b">Currency</th>
-                <th className="px-4 sm:px-6 py-3 border-b">Features</th>
-                <th className="px-4 sm:px-6 py-3 border-b">Duration</th>
+                <th className="px-4 py-3 border-b">Title</th>
+                <th className="px-4 py-3 border-b">Price</th>
+                <th className="px-4 py-3 border-b">Currency</th>
+                <th className="px-4 py-3 border-b">Features</th>
+                <th className="px-4 py-3 border-b">Duration</th>
                 {Object.keys(defaultLimitations).map((key) => (
-                  <th
-                    key={key}
-                    className="px-4 sm:px-6 py-3 border-b capitalize"
-                  >
+                  <th key={key} className="px-4 py-3 border-b capitalize">
                     {key.replace(/([A-Z])/g, " $1")}
                   </th>
                 ))}
-                <th className="px-4 sm:px-6 py-3 border-b">Actions</th>
+                <th className="px-4 py-3 border-b text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredPlans.map((plan) => (
-                <tr key={plan._id} className="hover:bg-gray-50">
-                  <td className="px-4 sm:px-6 py-4 border-b">{plan.title}</td>
-                  <td className="px-4 sm:px-6 py-4 border-b">{plan.price}</td>
-                  <td className="px-4 sm:px-6 py-4 border-b">
-                    {plan.currency}
-                  </td>
-                  <td className="px-4 sm:px-6 py-4 border-b">
+              {filteredPlans.map((plan, index) => (
+                <tr
+                  key={plan._id}
+                  className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                >
+                  <td className="px-4 py-4 border-b">{plan.title}</td>
+                  <td className="px-4 py-4 border-b">₹{plan.price}</td>
+                  <td className="px-4 py-4 border-b">{plan.currency}</td>
+                  <td className="px-4 py-4 border-b">
                     {Array.isArray(plan.features)
                       ? plan.features.join(", ")
                       : plan.features}
                   </td>
-                  <td className="px-4 sm:px-6 py-4 border-b">
+                  <td className="px-4 py-4 border-b">
                     {plan.expiryMonths} months
                   </td>
                   {Object.keys(defaultLimitations).map((key) => (
-                    <td
-                      key={key}
-                      className="px-4 sm:px-6 py-4 border-b text-center"
-                    >
-                      {plan.limitations?.[key] || "-"}
+                    <td key={key} className="px-4 py-4 border-b text-center">
+                      {plan.limitations?.[key] ?? "-"}
                     </td>
                   ))}
-                  <td className="px-4 sm:px-6 py-4 border-b flex flex-wrap gap-2">
+                  <td className="px-4 py-4 border-b text-center space-x-2">
                     {plan.isDeleted ? (
                       <button
                         onClick={() => toggleDeletePlan(plan._id, false)}
-                        className="p-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                        className="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
                       >
                         Restore
                       </button>
@@ -243,13 +249,13 @@ const AdminPlansPage = () => {
                       <>
                         <button
                           onClick={() => openEditModal(plan)}
-                          className="p-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+                          className="px-3 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => toggleDeletePlan(plan._id, true)}
-                          className="p-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                          className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
                         >
                           Delete
                         </button>
@@ -263,12 +269,27 @@ const AdminPlansPage = () => {
         </div>
       )}
 
+      {/* Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4">
-          <div className="bg-white w-full max-w-screen-sm sm:max-w-xl p-6 rounded-xl shadow-2xl overflow-y-auto max-h-[90vh]">
-            <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-center">
-              {editing ? "Edit Plan" : "Add a New Plan"}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 px-4">
+          <div className="bg-white w-full max-w-2xl p-6 rounded-xl shadow-lg overflow-y-auto max-h-[90vh]">
+            <h2 className="text-xl font-semibold mb-4 text-center">
+              {editing ? "Edit Subscription Plan" : "Create New Plan"}
             </h2>
+
+            <div className="text-sm text-yellow-800 bg-yellow-100 p-4 rounded-md border border-yellow-300 mb-4">
+              <p className="font-semibold">Guidelines for Templates:</p>
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li>
+                  All templates must have the same value for templateChanges.
+                </li>
+                <li>
+                  Use <code>0</code> to hide/restrict a template.
+                </li>
+                <li>Don’t leave any limitation field empty.</li>
+              </ul>
+            </div>
+
             <div className="space-y-4">
               <input
                 type="text"
@@ -279,7 +300,7 @@ const AdminPlansPage = () => {
                     : setNewPlan({ ...newPlan, title: e.target.value })
                 }
                 placeholder="Plan Title"
-                className="w-full p-3 border border-gray-300 rounded-md"
+                className="w-full px-4 py-3 border rounded-md shadow-sm"
               />
               <input
                 type="number"
@@ -290,7 +311,7 @@ const AdminPlansPage = () => {
                     : setNewPlan({ ...newPlan, price: e.target.value })
                 }
                 placeholder="Price"
-                className="w-full p-3 border border-gray-300 rounded-md"
+                className="w-full px-4 py-3 border rounded-md shadow-sm"
               />
               <select
                 value={editing ? editPlan.currency : newPlan.currency}
@@ -299,7 +320,7 @@ const AdminPlansPage = () => {
                     ? setEditPlan({ ...editPlan, currency: e.target.value })
                     : setNewPlan({ ...newPlan, currency: e.target.value })
                 }
-                className="w-full p-3 border border-gray-300 rounded-md"
+                className="w-full px-4 py-3 border rounded-md shadow-sm"
               >
                 <option value="INR">INR</option>
               </select>
@@ -312,7 +333,7 @@ const AdminPlansPage = () => {
                     : setNewPlan({ ...newPlan, expiryMonths: e.target.value })
                 }
                 placeholder="Duration (in months)"
-                className="w-full p-3 border border-gray-300 rounded-md"
+                className="w-full px-4 py-3 border rounded-md shadow-sm"
               />
               <textarea
                 value={editing ? editPlan.features : newPlan.features}
@@ -322,7 +343,7 @@ const AdminPlansPage = () => {
                     : setNewPlan({ ...newPlan, features: e.target.value })
                 }
                 placeholder="Features (comma-separated)"
-                className="w-full p-3 border border-gray-300 rounded-md"
+                className="w-full px-4 py-3 border rounded-md shadow-sm"
               ></textarea>
               {Object.entries(
                 (editing ? editPlan?.limitations : newPlan?.limitations) || {}
@@ -332,7 +353,7 @@ const AdminPlansPage = () => {
                   type="text"
                   value={value}
                   placeholder={key}
-                  className="w-full p-3 border border-gray-300 rounded-md"
+                  className="w-full px-4 py-3 border rounded-md shadow-sm"
                   onChange={(e) =>
                     editing
                       ? setEditPlan({
@@ -354,16 +375,16 @@ const AdminPlansPage = () => {
               ))}
             </div>
 
-            <div className="flex justify-end gap-2 mt-6">
+            <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={closeModal}
-                className="p-3 bg-gray-400 text-white rounded-md hover:bg-gray-500"
+                className="px-5 py-3 bg-gray-400 text-white rounded-md hover:bg-gray-500"
               >
                 Cancel
               </button>
               <button
                 onClick={editing ? handleEditPlan : handleAddPlan}
-                className="p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="px-5 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               >
                 {editing ? "Update Plan" : "Add Plan"}
               </button>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
+import toast from "react-hot-toast";
 const MAX_IMAGES = 10;
 const MAX_IMAGE_SIZE_MB = 5;
 
@@ -22,13 +22,15 @@ const GalleryImagesForm = ({ onDataChange, initialData }) => {
 
     // Limit number of images
     if (newFiles.length + galleryImages.length > MAX_IMAGES) {
-      alert(`You can only upload up to ${MAX_IMAGES} images.`);
+      toast.error(`You can only upload up to ${MAX_IMAGES} images.`);
       return;
     }
 
     newFiles.forEach((file) => {
       const sizeMB = file.size / (1024 * 1024);
       if (sizeMB > MAX_IMAGE_SIZE_MB) {
+        toast.error(`"${file.name}" exceeds 5MB limit.`);
+
         newErrors.push(`"${file.name}" exceeds 5MB limit.`);
       } else {
         validFiles.push(file);

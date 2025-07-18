@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import api from "../../apiConfig/axiosConfig";
+import toast from "react-hot-toast";
 
 const AllCardPurchases = () => {
   const [purchases, setPurchases] = useState([]);
@@ -21,7 +22,9 @@ const AllCardPurchases = () => {
         },
       };
       const { data } = await api.get(
-        `/api/cardPurchase/all-purchases?page=${page}&limit=10`,
+        `/api/cardPurchase/all-purchases?page=${page}&limit=10&search=${encodeURIComponent(
+          searchTerm
+        )}&status=${encodeURIComponent(statusFilter)}`,
         config
       );
 
@@ -37,6 +40,7 @@ const AllCardPurchases = () => {
       setTotalPages(data.totalPages || 1);
     } catch (error) {
       console.error("Error fetching all card purchases:", error.message);
+      toast.error("Failed to load purchases.");
       setPurchases([]);
     } finally {
       setLoading(false);
@@ -78,40 +82,12 @@ const AllCardPurchases = () => {
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
       });
+      toast.success(`Status updated to "${newStatus}"`);
     } catch (error) {
       console.error("Error updating card purchase status:", error.message);
-      alert("Failed to update status. Please try again.");
+      toast.error("Failed to update status. Please try again.");
     }
   };
-
-  useEffect(() => {
-    const filterData = () => {
-      let filteredData = purchases;
-
-      // Apply search filter
-      if (searchTerm) {
-        filteredData = filteredData.filter(
-          (purchase) =>
-            purchase.trackingId.includes(searchTerm) ||
-            purchase.user.name
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase()) ||
-            purchase.user.email.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      }
-
-      // Apply status filter
-      if (statusFilter) {
-        filteredData = filteredData.filter(
-          (purchase) => purchase.status === statusFilter
-        );
-      }
-
-      setFilteredPurchases(filteredData);
-    };
-
-    filterData();
-  }, [searchTerm, statusFilter, purchases]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
@@ -144,7 +120,7 @@ const AllCardPurchases = () => {
 
       {loading ? (
         <div className="text-center">Loading...</div>
-      ) : filteredPurchases.length === 0 ? (
+      ) : purchases.length === 0 ? (
         <div className="text-center text-gray-500">No purchases found.</div>
       ) : (
         <div className="overflow-x-auto">
@@ -167,7 +143,7 @@ const AllCardPurchases = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredPurchases.map((purchase) => (
+              {purchases.map((purchase) => (
                 <tr key={purchase.id} className="border-t">
                   <td className="p-2 text-center">{purchase.trackingId}</td>
                   <td className="p-2 text-center">{purchase.cardType}</td>

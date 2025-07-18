@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import api from "../../apiConfig/axiosConfig"; // Adjust path as needed
+import toast from "react-hot-toast";
 
 const TemplateManagement = () => {
   const [files, setFiles] = useState([]);
@@ -36,6 +37,7 @@ const TemplateManagement = () => {
       formData.append("files", file);
       formData.append("names", templateNames[index] || file.name.split(".")[0]);
     });
+    const toastId = toast.loading("Uploading templates...");
 
     try {
       const token = localStorage.getItem("adminAuthToken");
@@ -50,17 +52,18 @@ const TemplateManagement = () => {
         formData,
         config
       );
-      alert(response.data.message);
+      toast.success(response.data.message || "Templates uploaded!", {
+        id: toastId,
+      });
 
       // Reset form
       setFiles([]);
       setTemplateNames([]);
     } catch (error) {
       console.error("Upload error:", error);
-      alert("Error uploading templates.");
+      toast.error("Error uploading templates.");
     }
   };
-
   return (
     <div className="p-6">
       <h2 className="text-2xl font-semibold mb-4">Upload Templates</h2>

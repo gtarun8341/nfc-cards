@@ -1,41 +1,43 @@
 "use client"; // Next.js Client Component
 
-import { useState, useEffect } from 'react';
-import api from '../../apiConfig/axiosConfig'; // Adjust the path as needed
-import { FiCopy, FiEdit, FiTrash2, FiKey } from 'react-icons/fi'; // Import the required icons
+import { useState, useEffect } from "react";
+import api from "../../apiConfig/axiosConfig"; // Adjust the path as needed
+import { FiCopy, FiEdit, FiTrash2, FiKey } from "react-icons/fi"; // Import the required icons
+import toast from "react-hot-toast";
 
 const StaffManagementPage = () => {
   const [staff, setStaff] = useState([]);
   const [newStaff, setNewStaff] = useState({
-    name: '',
-    mobileNumber: '',
-    address: '',
-    city: '',
-    pincode: '',
-    state: '',
+    name: "",
+    mobileNumber: "",
+    address: "",
+    city: "",
+    pincode: "",
+    state: "",
   });
   const [modalOpen, setModalOpen] = useState(false);
   const [editStaff, setEditStaff] = useState(null); // For editing staff
 
   // Fetch staff on component mount
-useEffect(() => {
-  fetchStaff();
-}, []);
+  useEffect(() => {
+    fetchStaff();
+  }, []);
   // Fetch all staff on component mount
-    const fetchStaff = async () => {
-      try {
-        const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`, // Attach the token
-          },
-        };
-        const { data } = await api.get('/api/staffRoutes/staff', config); // Fetch staff data
-        setStaff(data);
-      } catch (error) {
-        console.error('Error fetching staff:', error);
-      }
-    };
+  const fetchStaff = async () => {
+    try {
+      const token = localStorage.getItem("adminAuthToken"); // Assuming token is stored here
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach the token
+        },
+      };
+      const { data } = await api.get("/api/staffRoutes/staff", config); // Fetch staff data
+      setStaff(data);
+    } catch (error) {
+      console.error("Error fetching staff:", error);
+      toast.error("Failed to fetch staff");
+    }
+  };
   // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,25 +49,31 @@ useEffect(() => {
     if (Object.values(newStaff).some((field) => !field.trim())) return;
 
     try {
-      const token = localStorage.getItem('adminAuthToken'); // Assuming token is stored here
+      const token = localStorage.getItem("adminAuthToken"); // Assuming token is stored here
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
-      const { data } = await api.post('/api/staffRoutes/staff', newStaff, config); // Send POST request to add staff
+      const { data } = await api.post(
+        "/api/staffRoutes/staff",
+        newStaff,
+        config
+      ); // Send POST request to add staff
       setStaff([...staff, data.staff]);
       setNewStaff({
-        name: '',
-        mobileNumber: '',
-        address: '',
-        city: '',
-        pincode: '',
-        state: '',
+        name: "",
+        mobileNumber: "",
+        address: "",
+        city: "",
+        pincode: "",
+        state: "",
       });
       closeModal();
+      toast.success("Staff added successfully");
     } catch (error) {
-      console.error('Error adding staff:', error);
+      console.error("Error adding staff:", error);
+      toast.error("Failed to add staff");
     }
   };
 
@@ -86,24 +94,34 @@ useEffect(() => {
   // Update staff
   const handleUpdate = async () => {
     try {
-      const token = localStorage.getItem('adminAuthToken');
+      const token = localStorage.getItem("adminAuthToken");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
-      await api.put(`/api/staffRoutes/staff/${editStaff.staffId}`, newStaff, config); // Update staff data
-      setStaff(staff.map((s) => (s.staffId === editStaff.staffId ? { ...s, ...newStaff } : s)));
+      await api.put(
+        `/api/staffRoutes/staff/${editStaff.staffId}`,
+        newStaff,
+        config
+      ); // Update staff data
+      setStaff(
+        staff.map((s) =>
+          s.staffId === editStaff.staffId ? { ...s, ...newStaff } : s
+        )
+      );
       closeModal();
+      toast.success("Staff updated successfully");
     } catch (error) {
-      console.error('Error updating staff:', error);
+      console.error("Error updating staff:", error);
+      toast.error("Failed to update staff");
     }
   };
 
   // Delete staff
   const handleDelete = async (staffId) => {
     try {
-      const token = localStorage.getItem('adminAuthToken');
+      const token = localStorage.getItem("adminAuthToken");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -111,14 +129,15 @@ useEffect(() => {
       };
       await api.delete(`/api/staffRoutes/staff/${staffId}`, config); // Delete staff
       setStaff(staff.filter((s) => s.staffId !== staffId));
+      toast.success("Staff deleted successfully");
     } catch (error) {
-      console.error('Error deleting staff:', error);
+      console.error("Error deleting staff:", error);
+      toast.error("Failed to delete staff");
     }
   };
-
   const handleChangePassword = async (staffId) => {
     try {
-      const token = localStorage.getItem('adminAuthToken');
+      const token = localStorage.getItem("adminAuthToken");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -129,24 +148,25 @@ useEffect(() => {
         {},
         config
       );
-      alert(`Password updated successfully.`);
+      toast.success("Password changed successfully");
       fetchStaff();
-
     } catch (error) {
-      console.error('Error changing password:', error);
-      alert('Failed to change password. Please try again.');
+      console.error("Error changing password:", error);
+      toast.error("Failed to change password");
     }
   };
-  
   // Copy to clipboard function
   const handleCopy = (text) => {
-    navigator.clipboard.writeText(text).then(() => {
-      alert('Copied to clipboard!');
-    }).catch((error) => {
-      console.error('Error copying text: ', error);
-    });
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        toast.success("Copied to clipboard!");
+      })
+      .catch((error) => {
+        console.error("Error copying text: ", error);
+        toast.error("Failed to copy");
+      });
   };
-
   // Modal toggle functions
   const openModal = () => {
     setModalOpen(true);
@@ -159,7 +179,9 @@ useEffect(() => {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <h2 className="text-2xl font-semibold text-center mb-5">Staff Management</h2>
+      <h2 className="text-2xl font-semibold text-center mb-5">
+        Staff Management
+      </h2>
 
       {/* Add Staff Button */}
       <button
@@ -177,7 +199,9 @@ useEffect(() => {
               <thead>
                 <tr>
                   <th className="px-6 py-3 border-b text-left">Name</th>
-                  <th className="px-6 py-3 border-b text-left">Mobile Number</th>
+                  <th className="px-6 py-3 border-b text-left">
+                    Mobile Number
+                  </th>
                   <th className="px-6 py-3 border-b text-left">City</th>
                   <th className="px-6 py-3 border-b text-left">Pincode</th>
                   <th className="px-6 py-3 border-b text-left">State</th>
@@ -217,20 +241,20 @@ useEffect(() => {
                         onClick={() => handleEdit(s)}
                         className="text-yellow-500 hover:text-yellow-600"
                       >
-    <FiEdit /> 
-    </button>
+                        <FiEdit />
+                      </button>
                       <button
                         onClick={() => handleDelete(s.staffId)}
                         className="text-red-500 hover:text-red-600"
                       >
-    <FiTrash2 /> 
-    </button>
+                        <FiTrash2 />
+                      </button>
                       <button
-    onClick={() => handleChangePassword(s.staffId)}
-    className="text-blue-500 hover:text-blue-600"
-  >
-    <FiKey />
-  </button>
+                        onClick={() => handleChangePassword(s.staffId)}
+                        className="text-blue-500 hover:text-blue-600"
+                      >
+                        <FiKey />
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -244,7 +268,9 @@ useEffect(() => {
       {modalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-md shadow-lg w-96">
-            <h2 className="text-2xl font-semibold mb-4">{editStaff ? 'Edit Staff' : 'Add New Staff'}</h2>
+            <h2 className="text-2xl font-semibold mb-4">
+              {editStaff ? "Edit Staff" : "Add New Staff"}
+            </h2>
             <div className="space-y-4">
               <input
                 type="text"
@@ -305,7 +331,7 @@ useEffect(() => {
                   onClick={editStaff ? handleUpdate : addStaff}
                   className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                 >
-                  {editStaff ? 'Update Staff' : 'Add Staff'}
+                  {editStaff ? "Update Staff" : "Add Staff"}
                 </button>
               </div>
             </div>

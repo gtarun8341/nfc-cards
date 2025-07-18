@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import api from "../../apiConfig/axiosConfig"; // Adjust path as needed
+import toast from "react-hot-toast";
+
 const AdminDashboard = () => {
   const customerDemographics = {
     locations: [
@@ -62,6 +64,7 @@ const AdminDashboard = () => {
       setCustomerStats(data.data);
     } catch (err) {
       console.error("Failed to fetch user stats:", err.message);
+      toast.error("Failed to fetch user stats");
     }
   };
 
@@ -73,6 +76,7 @@ const AdminDashboard = () => {
       setSalesStats(data.data);
     } catch (err) {
       console.error("Failed to fetch sales stats:", err.message);
+      toast.error("Failed to fetch sales stats");
     }
   };
 
@@ -84,6 +88,7 @@ const AdminDashboard = () => {
       setTopTemplates(data.data);
     } catch (err) {
       console.error("Failed to fetch top templates:", err.message);
+      toast.error("Failed to fetch top templates");
     }
   };
   return (

@@ -3,10 +3,9 @@
 import { useState, useEffect } from "react";
 import api from "../../apiConfig/axiosConfig";
 import * as XLSX from "xlsx";
-
+import toast from "react-hot-toast";
 const ProductsCategoriesPage = () => {
   const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -14,25 +13,27 @@ const ProductsCategoriesPage = () => {
   const [selectedDiscount, setSelectedDiscount] = useState("all");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  // Fetch products
-  // useEffect(() => {
   const fetchProducts = async () => {
     try {
-      const token = localStorage.getItem("adminAuthToken"); // Get the token
+      const token = localStorage.getItem("adminAuthToken");
       const config = {
         headers: {
-          Authorization: `Bearer ${token}`, // Attach the token
+          Authorization: `Bearer ${token}`,
         },
       };
+
       const response = await api.get(
-        `/api/user-details/admin/users-products?page=${page}&limit=10`,
+        `/api/user-details/admin/users-products?page=${page}&limit=10&search=${encodeURIComponent(
+          searchQuery
+        )}&productType=${selectedType}&discount=${selectedDiscount}`,
         config
       );
+
       setProducts(response.data.data);
-      setFilteredProducts(response.data.data); // Initialize filteredProducts
       setTotalPages(response.data.totalPages);
     } catch (err) {
       setError("Error fetching products");
+      toast.error("Failed to fetch products");
     } finally {
       setLoading(false);
     }
@@ -42,7 +43,8 @@ const ProductsCategoriesPage = () => {
   // }, []);
   useEffect(() => {
     fetchProducts();
-  }, [page]);
+  }, [page, searchQuery, selectedType, selectedDiscount]);
+
   // Handle search and filters
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -56,65 +58,45 @@ const ProductsCategoriesPage = () => {
     setSelectedDiscount(e.target.value);
   };
 
-  useEffect(() => {
-    let filtered = products;
-
-    // Filter by search query
-    if (searchQuery) {
-      filtered = filtered.filter((product) =>
-        product.userName.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    // Filter by product type
-    if (selectedType !== "all") {
-      filtered = filtered.filter(
-        (product) => product.productType === selectedType
-      );
-    }
-
-    // Filter by discount
-    if (selectedDiscount !== "all") {
-      filtered = filtered.filter(
-        (product) =>
-          (selectedDiscount === "withDiscount" && product.discount > 0) ||
-          (selectedDiscount === "noDiscount" && product.discount === 0)
-      );
-    }
-
-    setFilteredProducts(filtered);
-  }, [searchQuery, selectedType, selectedDiscount, products]);
   const handleDownloadUserProducts = (user) => {
     // First rows: User info
-    const userInfo = [
-      ["Name", user.userName],
-      ["Email", user.userEmail],
-      ["Phone", user.userPhone],
-      [], // Empty row for spacing
-    ];
+    try {
+      const userInfo = [
+        ["Name", user.userName],
+        ["Email", user.userEmail],
+        ["Phone", user.userPhone],
+        [], // Empty row for spacing
+      ];
 
-    // Product rows
-    const productData = user.products.map((product) => ({
-      "Product Name": product.productName,
-      "Price (₹)": product.productPrice,
-      Type: product.productType,
-      Units: product.units,
-      Discount: product.discount > 0 ? `${product.discount}%` : "No Discount",
-    }));
+      // Product rows
+      const productData = user.products.map((product) => ({
+        "Product Name": product.productName,
+        "Price (₹)": product.productPrice,
+        Type: product.productType,
+        Units: product.units,
+        Discount: product.discount > 0 ? `${product.discount}%` : "No Discount",
+      }));
 
-    // Convert product data to sheet format
-    const productSheet = XLSX.utils.json_to_sheet(productData, { origin: -1 });
+      // Convert product data to sheet format
+      const productSheet = XLSX.utils.json_to_sheet(productData, {
+        origin: -1,
+      });
 
-    // Create worksheet manually and insert user info
-    const worksheet = XLSX.utils.aoa_to_sheet(userInfo);
-    XLSX.utils.sheet_add_json(worksheet, productData, { origin: -1 });
+      // Create worksheet manually and insert user info
+      const worksheet = XLSX.utils.aoa_to_sheet(userInfo);
+      XLSX.utils.sheet_add_json(worksheet, productData, { origin: -1 });
 
-    // Create and export workbook
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Products");
+      // Create and export workbook
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Products");
 
-    const fileName = `${user.userName.replace(/\s+/g, "_")}_Products.xlsx`;
-    XLSX.writeFile(workbook, fileName);
+      const fileName = `${user.userName.replace(/\s+/g, "_")}_Products.xlsx`;
+      XLSX.writeFile(workbook, fileName);
+      toast.success("Excel downloaded successfully");
+    } catch (error) {
+      console.error("Excel download failed", error);
+      toast.error("Failed to download Excel");
+    }
   };
 
   return (
@@ -153,8 +135,8 @@ const ProductsCategoriesPage = () => {
         </select>
       </div>
 
-      {filteredProducts.length > 0 ? (
-        filteredProducts.map((user, index) => (
+      {products.length > 0 ? (
+        products.map((user, index) => (
           <div
             key={index}
             className="mb-8 border rounded shadow p-4 bg-gray-50"

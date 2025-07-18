@@ -3,33 +3,54 @@
 import React, { useEffect, useState } from "react";
 import api from "../../apiConfig/axiosConfig"; // Adjust the path as needed
 import * as XLSX from "xlsx";
+import toast from "react-hot-toast";
 
 const EnquiriesPage = () => {
   const [enquiries, setEnquiries] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState(""); // State to store search term
 
   useEffect(() => {
     const fetchEnquiries = async () => {
+      setLoading(true);
       const token = localStorage.getItem("authToken");
-
       try {
-        const response = await api.get("/api/enquiry/user", {
-          headers: {
-            Authorization: `Bearer ${token}`, // Include the token in the request header
-          },
-        });
-        setEnquiries(response.data);
+        const response = await api.get(
+          `/api/enquiry/user?page=${currentPage}&limit=10&search=${encodeURIComponent(
+            debouncedSearch
+          )}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setEnquiries(response.data.data);
+        setTotalPages(response.data.totalPages);
       } catch (err) {
         setError(err.message);
+        toast.error("Failed to load enquiries");
       } finally {
         setLoading(false);
       }
     };
 
     fetchEnquiries();
-  }, []);
+  }, [currentPage, debouncedSearch]);
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      setCurrentPage(1); // reset page
+      setDebouncedSearch(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
+
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this enquiry?"
@@ -43,41 +64,37 @@ const EnquiriesPage = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      alert("Enquiry deleted successfully");
+      toast.success("Enquiry deleted successfully");
       setEnquiries((prev) => prev.filter((enquiry) => enquiry._id !== id));
     } catch (error) {
       console.error("Delete failed:", error);
-      alert("Failed to delete enquiry");
+      toast.error("Failed to delete enquiry");
     }
   };
   const handleDownload = () => {
-    if (enquiries.length === 0) return alert("No enquiries to download");
+    if (enquiries.length === 0) return toast.error("No enquiries to download");
+    try {
+      // Step 1: Prepare data
+      const data = enquiries.map((enq) => ({
+        Name: enq.name,
+        Email: enq.email,
+        Phone: enq.phone,
+        Message: enq.message,
+      }));
 
-    // Step 1: Prepare data
-    const data = enquiries.map((enq) => ({
-      Name: enq.name,
-      Email: enq.email,
-      Phone: enq.phone,
-      Message: enq.message,
-    }));
+      // Step 2: Create worksheet and workbook
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Enquiries");
 
-    // Step 2: Create worksheet and workbook
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Enquiries");
-
-    // Step 3: Export to Excel
-    XLSX.writeFile(workbook, "enquiries.xlsx");
+      // Step 3: Export to Excel
+      XLSX.writeFile(workbook, "enquiries.xlsx");
+      toast.success("Enquiries downloaded successfully!");
+    } catch (error) {
+      console.error("Download failed:", error);
+      toast.error("Failed to download enquiries");
+    }
   };
-  // Filter enquiries based on search term
-  const filteredEnquiries = enquiries.filter((enquiry) => {
-    const lowercasedSearchTerm = searchTerm.toLowerCase();
-    return (
-      enquiry.name.toLowerCase().includes(lowercasedSearchTerm) ||
-      enquiry.email.toLowerCase().includes(lowercasedSearchTerm) ||
-      enquiry.phone.toLowerCase().includes(lowercasedSearchTerm)
-    );
-  });
 
   if (loading) {
     return <p className="text-center text-lg">Loading enquiries...</p>;
@@ -94,14 +111,14 @@ const EnquiriesPage = () => {
       {/* Search Bar */}
       <div className="mb-4">
         <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search by Name, Email, or Phone"
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
       <button
+        type="button" // ✅ Important
         onClick={handleDownload}
         className="mb-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
       >
@@ -130,7 +147,7 @@ const EnquiriesPage = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredEnquiries.map((enquiry) => (
+            {enquiries.map((enquiry) => (
               <tr
                 key={enquiry._id}
                 className="hover:bg-gray-100 transition duration-150"
@@ -151,6 +168,27 @@ const EnquiriesPage = () => {
             ))}
           </tbody>
         </table>
+        <div className="flex justify-between mt-4">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="px-4 py-2 text-gray-700">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );

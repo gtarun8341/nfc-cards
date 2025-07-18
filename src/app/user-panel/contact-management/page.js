@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../apiConfig/axiosConfig"; // Adjust the path as needed
 import * as XLSX from "xlsx";
+import toast from "react-hot-toast";
 
 const ContactManagementPage = () => {
   const [contact, setContact] = useState({
@@ -26,44 +27,45 @@ const ContactManagementPage = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [editContactId, setEditContactId] = useState(null); // Track contact being edited
   const [searchQuery, setSearchQuery] = useState(""); // State to store search query
-  const [filteredContacts, setFilteredContacts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(10); // Can make dynamic if needed
 
   useEffect(() => {
-    fetchContacts();
-  }, []);
+    fetchContacts(currentPage);
+  }, [currentPage]);
 
-  useEffect(() => {
-    filterContacts();
-  }, [contacts, searchQuery]); // Re-run filter when contacts or searchQuery change
-
-  const fetchContacts = async () => {
+  const fetchContacts = async (page = 1) => {
     try {
-      const token = localStorage.getItem("authToken"); // Assuming token is stored here
+      const token = localStorage.getItem("authToken");
       const config = {
         headers: {
-          Authorization: `Bearer ${token}`, // Attach the token
+          Authorization: `Bearer ${token}`,
         },
       };
-      const response = await api.get("/api/contacts", config); // GET request to fetch contacts
-      setContacts(response.data);
+
+      const response = await api.get(
+        `/api/contacts?search=${encodeURIComponent(
+          searchQuery
+        )}&page=${page}&limit=${limit}`,
+        config
+      );
+
+      setContacts(response.data.data);
+      setTotalPages(response.data.totalPages);
     } catch (error) {
       console.error("Error fetching contacts:", error);
+      toast.error("Failed to fetch contacts");
     }
   };
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      setCurrentPage(1); // Reset to page 1 on new search
+      fetchContacts(1); // Fetch page 1
+    }, 500);
 
-  const filterContacts = () => {
-    const query = searchQuery.toLowerCase();
-    const filtered = contacts.filter(
-      (contact) =>
-        contact.name.toLowerCase().includes(query) ||
-        contact.profession.toLowerCase().includes(query) ||
-        contact.companyName.toLowerCase().includes(query) ||
-        contact.mobileNumber.toLowerCase().includes(query) ||
-        contact.email.toLowerCase().includes(query) ||
-        contact.website.toLowerCase().includes(query)
-    );
-    setFilteredContacts(filtered);
-  };
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
 
   const handleChange = (e) => {
     setContact((prevContact) => ({
@@ -72,37 +74,44 @@ const ContactManagementPage = () => {
     }));
   };
   const handleDownload = (contact) => {
-    const contactData = [
-      {
-        Name: contact.name,
-        Reference: contact.reference,
-        Profession: contact.profession,
-        Industry: contact.industry,
-        Category: contact.category,
-        Designation: contact.designation,
-        "Company Name": contact.companyName,
-        "Mobile Number": contact.mobileNumber,
-        Email: contact.email,
-        Website: contact.website,
-        Address: contact.address,
-        City: contact.city,
-        State: contact.state,
-        "Pin Code": contact.pinCode,
-      },
-    ];
+    try {
+      const contactData = [
+        {
+          Name: contact.name,
+          Reference: contact.reference,
+          Profession: contact.profession,
+          Industry: contact.industry,
+          Category: contact.category,
+          Designation: contact.designation,
+          "Company Name": contact.companyName,
+          "Mobile Number": contact.mobileNumber,
+          Email: contact.email,
+          Website: contact.website,
+          Address: contact.address,
+          City: contact.city,
+          State: contact.state,
+          "Pin Code": contact.pinCode,
+        },
+      ];
 
-    const worksheet = XLSX.utils.json_to_sheet(contactData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Contact Info");
+      const worksheet = XLSX.utils.json_to_sheet(contactData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Contact Info");
 
-    const fileName = `${contact.name || "contact"}_Details.xlsx`;
-    XLSX.writeFile(workbook, fileName);
+      const fileName = `${contact.name || "contact"}_Details.xlsx`;
+      XLSX.writeFile(workbook, fileName);
+      toast.success(`Downloaded ${fileName}`);
+    } catch (err) {
+      console.error("Download error:", err);
+      toast.error("Failed to download contact");
+    }
   };
   const handleDelete = async (contactId) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this contact?"
     );
     if (!confirmDelete) return;
+    const toastId = toast.loading("Deleting contact...");
 
     try {
       const token = localStorage.getItem("authToken");
@@ -112,15 +121,18 @@ const ContactManagementPage = () => {
         },
       };
       await api.delete(`/api/contacts/contacts/${contactId}`, config);
-      alert("Contact deleted successfully.");
-      fetchContacts(); // Refresh list
+      toast.success("Contact deleted successfully", { id: toastId });
+      fetchContacts();
     } catch (error) {
       console.error("Error deleting contact:", error);
-      alert("Failed to delete contact.");
+      toast.error("Failed to delete contact", { id: toastId });
     }
   };
-
   const handleSubmit = async (e) => {
+    const toastId = toast.loading(
+      editContactId ? "Updating contact..." : "Adding contact..."
+    );
+
     e.preventDefault();
     try {
       const token = localStorage.getItem("authToken");
@@ -137,11 +149,11 @@ const ContactManagementPage = () => {
           { ...contact, contactId: editContactId },
           config
         );
-        alert("Contact updated successfully");
+        toast.success("Contact updated successfully", { id: toastId });
       } else {
         // Add new contact if not editing
         await api.post("/api/contacts", contact, config);
-        alert("Contact added successfully");
+        toast.success("Contact added successfully", { id: toastId });
       }
 
       fetchContacts(); // Fetch updated contacts
@@ -165,6 +177,7 @@ const ContactManagementPage = () => {
       setEditContactId(null); // Reset edit mode
     } catch (error) {
       console.error("Error saving contact:", error);
+      toast.error("Failed to save contact", { id: toastId });
     }
   };
 
@@ -178,7 +191,7 @@ const ContactManagementPage = () => {
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white shadow-md rounded-lg overflow-hidden">
       <h1 className="text-2xl font-semibold text-center mb-4">
-        Contact Management
+        Manage Contacts
       </h1>
 
       <button
@@ -387,7 +400,7 @@ const ContactManagementPage = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredContacts.map((contact, index) => (
+            {contacts.map((contact, index) => (
               <tr key={index} className="border-b">
                 <td className="px-4 py-2">{contact.name}</td>
                 <td className="px-4 py-2">{contact.reference}</td>
@@ -427,6 +440,25 @@ const ContactManagementPage = () => {
             ))}
           </tbody>
         </table>
+        <div className="flex justify-center mt-4 gap-2">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          >
+            Prev
+          </button>
+          <span className="px-2 py-1">
+            {currentPage} / {totalPages}
+          </span>
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );

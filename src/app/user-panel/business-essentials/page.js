@@ -9,6 +9,7 @@ import {
   FaExternalLinkAlt,
   FaCheckCircle,
 } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 const BusinessEssentialsPage = () => {
   const [templates, setTemplates] = useState([]);
@@ -34,6 +35,8 @@ const BusinessEssentialsPage = () => {
       const data = res.data.stats ? res.data.stats[0] : res.data;
       setStats(data);
     } catch (err) {
+      toast.error("Failed to fetch usage stats");
+
       console.error("Error fetching template change stats", err);
     }
   };
@@ -74,6 +77,8 @@ const BusinessEssentialsPage = () => {
         await previewTemplate(template._id);
       }
     } catch (error) {
+      toast.error("Error fetching templates");
+
       console.error("Error fetching templates:", error);
     } finally {
       setLoading(false);
@@ -103,6 +108,8 @@ const BusinessEssentialsPage = () => {
       );
       setPreviewHtml((prev) => ({ ...prev, [templateId]: response.data }));
     } catch (error) {
+      toast.error("Failed to load preview");
+
       console.error("Error fetching template preview:", error);
     }
   };
@@ -124,6 +131,8 @@ const BusinessEssentialsPage = () => {
       newWindow.document.write(response.data);
       newWindow.document.close();
     } catch (error) {
+      toast.error("Failed to open preview");
+
       console.error("Error fetching template:", error);
     }
   };
@@ -147,7 +156,9 @@ const BusinessEssentialsPage = () => {
         generatedLink: response.data.link,
       });
       await fetchStats();
+      toast.success("Template selected successfully");
     } catch (error) {
+      toast.error("Failed to select template");
       console.error("Error selecting template:", error);
     }
   };
@@ -168,7 +179,9 @@ const BusinessEssentialsPage = () => {
       );
       setSelectedTemplateData(null);
       await fetchStats();
+      toast.success("Template deselected");
     } catch (error) {
+      toast.error("Failed to delete selected template");
       console.error("Error deleting selected template:", error);
     }
   };

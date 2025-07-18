@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import api from "../apiConfig/axiosConfig";
-
+import toast from "react-hot-toast";
 const EnquiryForm = ({
   imageSrc = "/images/enquiry.png", // Update path if needed
 }) => {
@@ -23,7 +23,7 @@ const EnquiryForm = ({
     e.preventDefault();
     try {
       await api.post("/api/contactUs-form/contactUs", formData);
-      alert("Enquiry submitted!");
+      toast.success("Enquiry submitted!");
       setFormData({
         name: "",
         email: "",
@@ -33,6 +33,7 @@ const EnquiryForm = ({
       });
     } catch (err) {
       console.error("Error submitting enquiry:", err);
+      toast.error("Failed to submit enquiry. Please try aagain ");
     }
   };
   return (

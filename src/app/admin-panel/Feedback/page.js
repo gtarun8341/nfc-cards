@@ -1,98 +1,99 @@
-"use client"; // Next.js Client Component
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import api from '../../apiConfig/axiosConfig';
+import React, { useEffect, useState } from "react";
+import api from "../../apiConfig/axiosConfig";
+import toast from "react-hot-toast";
 
 const FeedbackPage = () => {
   const [feedbackList, setFeedbackList] = useState([]);
-  const [filteredFeedback, setFilteredFeedback] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const limit = 10;
 
   useEffect(() => {
     fetchFeedback();
-  }, []);
-  
+  }, [searchTerm, page]);
+
   const fetchFeedback = async () => {
     try {
-      const token = localStorage.getItem('adminAuthToken');
+      const token = localStorage.getItem("adminAuthToken");
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const response = await api.get('/api/feedback', config);
-      setFeedbackList(response.data);
-      setFilteredFeedback(response.data);
-    } catch (error) {
-      console.error('Error fetching feedback:', error);
-    }
-  };
-  
+      const response = await api.get("/api/feedback", {
+        params: { search: searchTerm, page, limit },
+        ...config,
+      });
 
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
-    const filtered = feedbackList.filter((feedback) => {
-      const nameMatch = feedback.userId.name.toLowerCase().includes(e.target.value.toLowerCase());
-      const emailMatch = feedback.userId.email.toLowerCase().includes(e.target.value.toLowerCase());
-      return nameMatch || emailMatch;
-    });
-    setFilteredFeedback(filtered);
+      setFeedbackList(response.data.data);
+      setTotal(response.data.total);
+    } catch (error) {
+      console.error("Error fetching feedback:", error);
+      toast.error("Failed to fetch feedback");
+    }
   };
 
   const deleteFeedback = async (id) => {
     try {
-      const token = localStorage.getItem('adminAuthToken');
+      const token = localStorage.getItem("adminAuthToken");
       const config = { headers: { Authorization: `Bearer ${token}` } };
       await api.delete(`/api/feedback/${id}`, config);
+      toast.success("Feedback deleted");
       fetchFeedback();
-      setFeedbackList(feedbackList.filter((feedback) => feedback._id !== id));
-      setFilteredFeedback(filteredFeedback.filter((feedback) => feedback._id !== id));
     } catch (error) {
-      console.error('Error deleting feedback:', error);
+      console.error("Error deleting feedback:", error);
+      toast.error("Failed to delete feedback");
     }
   };
 
   const updateStatus = async (id, status) => {
     try {
-      const token = localStorage.getItem('adminAuthToken');
+      const token = localStorage.getItem("adminAuthToken");
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const response = await api.put(`/api/feedback/${id}/status`, { status }, config);
+      await api.put(`/api/feedback/${id}/status`, { status }, config);
+      toast.success("Feedback status updated");
       fetchFeedback();
-      setFeedbackList(
-        feedbackList.map((feedback) =>
-          feedback._id === id ? { ...feedback, status: response.data.feedback.status } : feedback
-        )
-      );
     } catch (error) {
-      console.error('Error updating feedback status:', error);
+      console.error("Error updating status:", error);
+      toast.error("Failed to update status");
     }
   };
 
+  const totalPages = Math.ceil(total / limit);
+
   return (
-    <div className="max-w-4xl mx-auto p-5 border rounded shadow-lg bg-white">
+    <div className="max-w-5xl mx-auto p-5 border rounded shadow-lg bg-white">
       <h2 className="text-2xl font-semibold text-center mb-5">User Feedback</h2>
-      <div className="mb-5">
-        <input
-          type="text"
-          placeholder="Search by name or email"
-          value={searchTerm}
-          onChange={handleSearch}
-          className="w-full p-2 border border-gray-300 rounded"
-        />
-      </div>
-      <table className="min-w-full table-auto">
+
+      <input
+        type="text"
+        placeholder="Search by name or email"
+        value={searchTerm}
+        onChange={(e) => {
+          setPage(1);
+          setSearchTerm(e.target.value);
+        }}
+        className="w-full mb-5 p-2 border border-gray-300 rounded"
+      />
+
+      <table className="min-w-full table-auto mb-4">
         <thead>
           <tr className="bg-gray-100">
-            <th className="px-4 py-2 text-left">Feedback</th>
-            <th className="px-4 py-2 text-left">User Name</th>
-            <th className="px-4 py-2 text-left">Email</th>
-            <th className="px-4 py-2 text-left">Status</th>
-            <th className="px-4 py-2 text-left">Actions</th>
+            <th className="px-4 py-2">Feedback</th>
+            <th className="px-4 py-2">User Name</th>
+            <th className="px-4 py-2">Email</th>
+            <th className="px-4 py-2">Status</th>
+            <th className="px-4 py-2">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {filteredFeedback.length > 0 ? (
-            filteredFeedback.map((feedback) => (
+          {feedbackList.length > 0 ? (
+            feedbackList.map((feedback) => (
               <tr key={feedback._id} className="border-b">
-                <td className="px-4 py-2">{feedback.about} - {feedback.feedback}</td>
-                <td className="px-4 py-2">{feedback.userId.name}</td>
-                <td className="px-4 py-2">{feedback.userId.email}</td>
+                <td className="px-4 py-2">
+                  {feedback.about} - {feedback.feedback}
+                </td>
+                <td className="px-4 py-2">{feedback.user.name}</td>
+                <td className="px-4 py-2">{feedback.user.email}</td>
                 <td className="px-4 py-2">
                   <select
                     value={feedback.status}
@@ -116,11 +117,33 @@ const FeedbackPage = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="5" className="px-4 py-2 text-center">No feedback found</td>
+              <td colSpan="5" className="px-4 py-2 text-center">
+                No feedback found
+              </td>
             </tr>
           )}
         </tbody>
       </table>
+
+      <div className="flex justify-between">
+        <button
+          disabled={page === 1}
+          onClick={() => setPage((prev) => prev - 1)}
+          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+        >
+          Prev
+        </button>
+        <span className="px-4 py-2">
+          Page {page} of {totalPages}
+        </span>
+        <button
+          disabled={page >= totalPages}
+          onClick={() => setPage((prev) => prev + 1)}
+          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };

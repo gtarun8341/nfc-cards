@@ -1,16 +1,17 @@
 "use client"; // Next.js Client Component
 
-import { useState, useEffect } from 'react';
-import api from '../../apiConfig/axiosConfig'; // Import Axios instance
-import MultiStepForm from '../../components/MultiStepForm'; // Assuming MultiStepForm is in the same folder
-import PasswordChangePage from './PasswordChangePage/page'; // Import the PasswordChangePage component
+import { useState, useEffect } from "react";
+import api from "../../apiConfig/axiosConfig"; // Import Axios instance
+import MultiStepForm from "../../components/MultiStepForm"; // Assuming MultiStepForm is in the same folder
+import PasswordChangePage from "./PasswordChangePage/page"; // Import the PasswordChangePage component
+import toast from "react-hot-toast";
 
 const AccountFormPage = () => {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [userDetails, setUserDetails] = useState({
-    name: '',
-    email: '',
-    displayName: '',
+    name: "",
+    email: "",
+    displayName: "",
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,13 +20,13 @@ const AccountFormPage = () => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const token = localStorage.getItem('authToken'); // Retrieve the JWT token from localStorage
+        const token = localStorage.getItem("authToken"); // Retrieve the JWT token from localStorage
         const config = {
           headers: {
             Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
           },
         };
-        const { data } = await api.get('/api/users/profile', config); // Make API request
+        const { data } = await api.get("/api/users/profile", config); // Make API request
         setUserDetails({
           name: data.name,
           email: data.email,
@@ -33,8 +34,10 @@ const AccountFormPage = () => {
         });
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching user details:', err);
-        setError('Failed to load user details');
+        console.error("Error fetching user details:", err);
+        setError("Failed to load user details");
+        toast.error("Failed to load user details");
+
         setLoading(false);
       }
     };
@@ -44,31 +47,53 @@ const AccountFormPage = () => {
 
   const steps = [
     {
-      title: 'Edit Account Details',
+      title: "Edit Account Details",
       fields: [
-        { name: 'name', type: 'text', label: 'Full Name', placeholder: 'Enter your name', required: true },
-        { name: 'email', type: 'email', label: 'Email Address', placeholder: 'Enter your email', required: true },
-        { name: 'displayName', type: 'text', label: 'Display Name', placeholder: 'Enter your display name', required: true },
+        {
+          name: "name",
+          type: "text",
+          label: "Full Name",
+          placeholder: "Enter your name",
+          required: true,
+        },
+        {
+          name: "email",
+          type: "email",
+          label: "Email Address",
+          placeholder: "Enter your email",
+          required: true,
+        },
+        {
+          name: "displayName",
+          type: "text",
+          label: "Display Name",
+          placeholder: "Enter your display name",
+          required: true,
+        },
       ],
     },
   ];
 
   const handleProfileUpdate = async (formData) => {
     try {
-        console.log(formData,"data sending ")
-      const token = localStorage.getItem('authToken'); // Retrieve the JWT token from localStorage
+      console.log(formData, "data sending ");
+      const token = localStorage.getItem("authToken"); // Retrieve the JWT token from localStorage
       const config = {
         headers: {
           Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
         },
       };
 
-      const response = await api.put('/api/users/profileUpdate', formData, config); // Send the updated data to the server
+      const response = await api.put(
+        "/api/users/profileUpdate",
+        formData,
+        config
+      ); // Send the updated data to the server
       setUserDetails(response.data); // Update user details in the state
-      alert('Profile updated successfully!');
+      toast.success("Profile updated successfully!");
     } catch (err) {
-      console.error('Error updating profile:', err);
-      alert('Failed to update profile');
+      console.error("Error updating profile:", err);
+      toast.error("Failed to update profile");
     }
   };
 
@@ -85,10 +110,10 @@ const AccountFormPage = () => {
         <PasswordChangePage onBack={() => setIsChangingPassword(false)} />
       ) : (
         <>
-          <MultiStepForm 
-            steps={steps} 
-            formTitle="Edit Account Details" 
-            initialFormData={userDetails} 
+          <MultiStepForm
+            steps={steps}
+            formTitle="Edit Account Details"
+            initialFormData={userDetails}
             onSubmit={handleProfileUpdate} // Pass the update handler to the form
           />
           <button

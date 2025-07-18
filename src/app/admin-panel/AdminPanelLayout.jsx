@@ -121,6 +121,36 @@ const AdminPanelLayout = ({ children }) => {
       ],
     },
     {
+      name: "User Management",
+      icon: ChartBarIcon, // or any relevant icon
+      submenu: [
+        {
+          name: "Customer Profile Management",
+          path: "/admin-panel/customer-profile-management",
+          icon: UserIcon,
+          onClick: () => setActiveForm("customer-profile-management"),
+        },
+        {
+          name: "Customer Company Management",
+          path: "/admin-panel/customer-company-management",
+          icon: CogIcon,
+          onClick: () => setActiveForm("customer-company-management"),
+        },
+        {
+          name: "Customer Management",
+          path: "/admin-panel/customer-management",
+          icon: UserIcon,
+          onClick: () => setActiveForm("customer-management"),
+        },
+      ],
+    },
+    {
+      name: "Categories & Units",
+      path: "/admin-panel/AllCategoriesUnits",
+      icon: InboxIcon,
+      onClick: () => setActiveForm("AllCategoriesUnits"),
+    },
+    {
       name: "All Card Purchases",
       path: "/admin-panel/All-Card-Purchases",
       icon: InboxIcon,
@@ -150,24 +180,24 @@ const AdminPanelLayout = ({ children }) => {
       icon: CogIcon,
       onClick: () => setActiveForm("staff-management"),
     },
-    {
-      name: "Customer Profile Management",
-      path: "/admin-panel/customer-profile-management",
-      icon: UserIcon,
-      onClick: () => setActiveForm("customer-profile-management"),
-    },
-    {
-      name: "Customer Company Management",
-      path: "/admin-panel/customer-company-management",
-      icon: CogIcon,
-      onClick: () => setActiveForm("customer-company-management"),
-    },
-    {
-      name: "Customer Management",
-      path: "/admin-panel/customer-management",
-      icon: UserIcon,
-      onClick: () => setActiveForm("customer-management"),
-    },
+    // {
+    //   name: "Customer Profile Management",
+    //   path: "/admin-panel/customer-profile-management",
+    //   icon: UserIcon,
+    //   onClick: () => setActiveForm("customer-profile-management"),
+    // },
+    // {
+    //   name: "Customer Company Management",
+    //   path: "/admin-panel/customer-company-management",
+    //   icon: CogIcon,
+    //   onClick: () => setActiveForm("customer-company-management"),
+    // },
+    // {
+    //   name: "Customer Management",
+    //   path: "/admin-panel/customer-management",
+    //   icon: UserIcon,
+    //   onClick: () => setActiveForm("customer-management"),
+    // },
     // { name: 'Payment Gateway Integration', path: 'payment-gateway', icon: AdjustmentsHorizontalIcon, onClick: () => setActiveForm('payment-gateway') },
     {
       name: "Products & Categories",

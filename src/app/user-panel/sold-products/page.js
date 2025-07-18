@@ -10,29 +10,39 @@ const SoldProducts = () => {
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
   // Fetch sales data
   const fetchSalesData = useCallback(async () => {
-    const token = localStorage.getItem("authToken"); // Get the token
-
-    if (!token) return; // Ensure the token is available before making the API call
+    if (!token) return;
 
     try {
+      const encodedSearch = encodeURIComponent(searchQuery);
       const response = await api.get(
-        `/api/order/user-sales-data?page=${page}&limit=10`,
+        `/api/order/user-sales-data?page=${page}&limit=10&search=${encodedSearch}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
       setSales(response.data.data);
-      console.log(response.data.data);
       setTotalPages(response.data.totalPages);
     } catch (error) {
       console.error("Error fetching sales data:", error);
     }
-  }, [token]);
+  }, [token, page, searchQuery]);
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      setPage(1); // Reset to first page
+      fetchSalesData();
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
+
   useEffect(() => {
     fetchSalesData();
   }, [page]);
+
   const handleDownload = () => {
     if (sales.length === 0) {
       alert("No sales data to download.");
@@ -110,20 +120,6 @@ const SoldProducts = () => {
     }
   }, [token, fetchSalesData]);
 
-  // Filter sales data based on the search query
-  const filteredSales = sales.filter((sale) => {
-    const titleMatch = sale.products.some((product) =>
-      product.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    const invoiceMatch = sale.invoiceNumber
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const trackingMatch = sale.trackingNumber
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    return titleMatch || invoiceMatch || trackingMatch;
-  });
-
   return (
     <div className="max-w-6xl mx-auto p-6 border rounded-lg shadow-lg bg-white">
       <h2 className="text-2xl font-semibold text-center mb-6">
@@ -171,14 +167,14 @@ const SoldProducts = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredSales.length === 0 ? (
+          {sales.length === 0 ? (
             <tr>
               <td colSpan="11" className="py-3 px-4 text-center text-gray-500">
                 No sales found.
               </td>
             </tr>
           ) : (
-            filteredSales.map((sale) => {
+            sales.map((sale) => {
               const priceWithGst = sale.gstOnPurchase
                 ? (
                     sale.totalAmount -
@@ -189,20 +185,29 @@ const SoldProducts = () => {
               return (
                 <tr key={sale._id} className="text-center border-t">
                   <td className="border p-3 text-sm">
-                    {sale.products.map((product) => (
-                      <div key={product.title}>{product.title}</div>
-                    ))}
+                    {Array.isArray(sale.products)
+                      ? sale.products.map((product, idx) => (
+                          <div key={idx}>{product.title}</div>
+                        ))
+                      : "No products"}
                   </td>
+
                   <td className="border p-3 text-sm">
-                    {sale.products.map((product) => (
-                      <div key={product.title}>{product.quantity}</div>
-                    ))}
+                    {Array.isArray(sale.products)
+                      ? sale.products.map((product, idx) => (
+                          <div key={idx}>{product.quantity}</div>
+                        ))
+                      : "N/A"}
                   </td>
+
                   <td className="border p-3 text-sm">
-                    {sale.products.map((product) => (
-                      <div key={product.title}>{product.price.toFixed(2)}</div>
-                    ))}
+                    {Array.isArray(sale.products)
+                      ? sale.products.map((product, idx) => (
+                          <div key={idx}>{product.price?.toFixed(2)}</div>
+                        ))
+                      : "N/A"}
                   </td>
+
                   <td className="border p-3 text-sm">
                     {sale.totalAmount.toFixed(2)}
                   </td>

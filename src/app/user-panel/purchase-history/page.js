@@ -1,29 +1,43 @@
 "use client";
-import { useState, useEffect } from 'react';
-import api from '../../apiConfig/axiosConfig';
+import { useState, useEffect } from "react";
+import api from "../../apiConfig/axiosConfig";
+import { toast } from "react-hot-toast";
 
 const PurchaseHistoryPage = () => {
   const [plans, setPlans] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(null);
   const [error, setError] = useState(null);
-
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem("authToken");
 
-    const fetchPlans = async () => {
+    const timeout = setTimeout(async () => {
+      setLoading(true);
       try {
-        const response = await api.get('/api/user-plans/user-plans', {
+        const { data } = await api.get("/api/user-plans/user-plans", {
           headers: { Authorization: `Bearer ${token}` },
+          params: {
+            page,
+            limit: 10,
+            search: encodeURIComponent(searchQuery.trim()),
+          },
         });
-        setPlans(response.data);
-      } catch (error) {
-        console.error('Failed to fetch user plans:', error);
+        setPlans(data.plans || []);
+        setTotalPages(data.totalPages || 1);
+      } catch (err) {
+        toast.error("Failed to fetch your purchase history");
+        setPlans([]);
+        setTotalPages(1);
+      } finally {
+        setLoading(false);
       }
-    };
+    }, 500); // debounce for 500ms
 
-    fetchPlans();
-  }, []);
+    return () => clearTimeout(timeout);
+  }, [page, searchQuery]);
 
   const handleDownloadInvoice = async (trackingId) => {
     setDownloading(trackingId);
@@ -34,7 +48,10 @@ const PurchaseHistoryPage = () => {
         `${api.defaults.baseURL}/api/user-plans/download-invoice/${trackingId}`,
         {
           method: "GET",
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/pdf" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/pdf",
+          },
         }
       );
       if (!response.ok) {
@@ -49,9 +66,12 @@ const PurchaseHistoryPage = () => {
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
+      toast.success(`Invoice for ${trackingId} downloaded`); // ✅ Toast success
     } catch (error) {
       console.error("Error downloading invoice:", error);
-      setError(`Failed to download invoice for ${trackingId}`);
+      const message = `Failed to download invoice for ${trackingId}`;
+      setError(message);
+      toast.error(message); // ✅ Toast error
     } finally {
       setDownloading(null);
     }
@@ -96,10 +116,16 @@ const PurchaseHistoryPage = () => {
             filteredPlans.map((plan) => (
               <tr key={plan._id} className="hover:bg-gray-100">
                 <td className="py-3 px-4 border-b">{plan.title}</td>
-                <td className="py-3 px-4 border-b">{new Date(plan.startDate).toLocaleDateString()}</td>
-                <td className="py-3 px-4 border-b">{new Date(plan.expiryDate).toLocaleDateString()}</td>
                 <td className="py-3 px-4 border-b">
-                  {new Date() < new Date(plan.expiryDate) ? 'Active' : 'Expired'}
+                  {new Date(plan.startDate).toLocaleDateString()}
+                </td>
+                <td className="py-3 px-4 border-b">
+                  {new Date(plan.expiryDate).toLocaleDateString()}
+                </td>
+                <td className="py-3 px-4 border-b">
+                  {new Date() < new Date(plan.expiryDate)
+                    ? "Active"
+                    : "Expired"}
                 </td>
                 <td className="py-3 px-4 border-b">
                   <button
@@ -107,7 +133,7 @@ const PurchaseHistoryPage = () => {
                     className="bg-blue-500 text-white py-1 px-3 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-200 transition-colors"
                     disabled={downloading === plan._id}
                   >
-                    {downloading === plan._id ? 'Downloading...' : 'Download'}
+                    {downloading === plan._id ? "Downloading..." : "Download"}
                   </button>
                 </td>
               </tr>

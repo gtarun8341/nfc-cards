@@ -10,7 +10,7 @@ import ProductDetailsForm from "../../components/ProductDetailsForm";
 import GalleryImagesForm from "../../components/GalleryImagesForm";
 import AdditionalForm from "../../components/AdditionalForm";
 import { CheckCircle, AlertCircle } from "lucide-react";
-
+import toast from "react-hot-toast";
 const UserFormPage = () => {
   const [formData, setFormData] = useState({
     companyName: "",
@@ -162,6 +162,8 @@ const UserFormPage = () => {
       } catch (error) {
         if (error.response && error.response.status === 404) {
           // Handle 404 error (User details not found)
+          toast.info("No user details found. Please fill in manually.");
+
           console.log("User details not found, skipping pre-fill.");
         } else {
           // Handle other errors
@@ -170,6 +172,7 @@ const UserFormPage = () => {
             ...prevMessages,
             "Error fetching user details",
           ]);
+          toast.error("Error fetching user details");
         }
         setLoading(false); // Stop loading even if there's an error
       }
@@ -473,6 +476,8 @@ const UserFormPage = () => {
           config
         );
         setSuccessMessage("Form updated successfully!");
+        toast.success("Form updated successfully!");
+
         console.log("Update Response:", response.data);
       } else {
         // New submission (no prefilled data)
@@ -482,12 +487,16 @@ const UserFormPage = () => {
           config
         );
         setSuccessMessage("Form submitted successfully!");
+        toast.success("Form submitted successfully!");
+
         console.log("Response:", response.data);
       }
 
       window.location.reload(); // Refresh the page
     } catch (error) {
       console.error("Submission error:", error);
+      toast.error("Error submitting the form");
+
       setErrorMessages([...errorMessages, "Error submitting the form"]);
     }
   };

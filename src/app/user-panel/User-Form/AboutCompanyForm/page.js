@@ -1,6 +1,7 @@
 "use client"; // Next.js Client Component
 
 import { useEffect, useState } from "react";
+import { toast } from "react-hot-toast"; // ✅ Toast import
 
 const AboutCompanyForm = ({ onDataChange, initialData }) => {
   const [data, setData] = useState({
@@ -27,7 +28,7 @@ const AboutCompanyForm = ({ onDataChange, initialData }) => {
     const { name, value, files } = e.target;
     if (name === "documents") {
       if (files.length > 10) {
-        alert("You can upload a maximum of 10 documents.");
+        toast.error("You can upload a maximum of 10 documents.");
         return;
       }
       const newFiles = Array.from(files);
@@ -41,10 +42,14 @@ const AboutCompanyForm = ({ onDataChange, initialData }) => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-xl border border-gray-200">
-      <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">About Company</h2>
+      <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
+        About Company
+      </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Established Year</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Established Year
+          </label>
           <input
             type="text"
             name="establishedYear"
@@ -56,7 +61,9 @@ const AboutCompanyForm = ({ onDataChange, initialData }) => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Nature of Business</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Nature of Business
+          </label>
           <input
             type="text"
             name="natureOfBusiness"
@@ -68,7 +75,9 @@ const AboutCompanyForm = ({ onDataChange, initialData }) => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">GST Number</label>
+          <label className="block text-sm font-medium text-gray-700">
+            GST Number
+          </label>
           <input
             type="text"
             name="gstNumber"
@@ -79,7 +88,9 @@ const AboutCompanyForm = ({ onDataChange, initialData }) => {
           />
         </div>
         <div className="col-span-1 md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700">About Company</label>
+          <label className="block text-sm font-medium text-gray-700">
+            About Company
+          </label>
           <textarea
             name="description"
             placeholder="Description"
@@ -90,7 +101,9 @@ const AboutCompanyForm = ({ onDataChange, initialData }) => {
           />
         </div>
         <div className="col-span-1 md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700">Terms and Conditions</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Terms and Conditions
+          </label>
           <textarea
             name="termsAndConditions"
             placeholder="Enter Terms and Conditions"
@@ -101,7 +114,9 @@ const AboutCompanyForm = ({ onDataChange, initialData }) => {
           />
         </div>
         <div className="col-span-1 md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700">Messages</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Messages
+          </label>
           <textarea
             name="messages"
             placeholder="Enter Messages"
@@ -112,7 +127,9 @@ const AboutCompanyForm = ({ onDataChange, initialData }) => {
           />
         </div>
         <div className="col-span-1 md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700">Documents (Max 10)</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Documents (Max 10)
+          </label>
           <input
             type="file"
             name="documents"
@@ -125,10 +142,14 @@ const AboutCompanyForm = ({ onDataChange, initialData }) => {
         <div className="col-span-1 md:col-span-2">
           {data.documents.length > 0 && (
             <div>
-              <h3 className="text-sm font-medium text-gray-700">Uploaded Documents:</h3>
+              <h3 className="text-sm font-medium text-gray-700">
+                Uploaded Documents:
+              </h3>
               <ul className="mt-2 list-disc pl-5">
                 {data.documents.map((file, index) => (
-                  <li key={index} className="text-gray-600">{file.name}</li>
+                  <li key={index} className="text-gray-600">
+                    {file.name}
+                  </li>
                 ))}
               </ul>
             </div>

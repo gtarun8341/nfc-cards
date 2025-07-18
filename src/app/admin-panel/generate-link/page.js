@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import api from "../../apiConfig/axiosConfig";
+import toast from "react-hot-toast";
 
 const GenerateLinkPage = () => {
   const [link, setLink] = useState("");
@@ -20,22 +21,29 @@ const GenerateLinkPage = () => {
           Authorization: `Bearer ${token}`, // Attach the token
         },
       };
+      const encodedSearch = encodeURIComponent(searchTerm);
       const response = await api.get(
-        `/api/selectedtemplates/qr?page=${page}&limit=10`,
+        `/api/selectedtemplates/qr?page=${page}&limit=10&search=${encodedSearch}`,
         config
       );
       setUserTemplates(response.data.selectedTemplateData);
       setTotalPages(response.data.totalPages);
     } catch (error) {
       console.error("Error fetching selected templates:", error);
+      toast.error("Failed to fetch templates");
     }
   };
 
   //   fetchUserTemplates();
   // }, []);
+
   useEffect(() => {
-    fetchUserTemplates();
-  }, [page]);
+    const delay = setTimeout(() => {
+      fetchUserTemplates();
+    }, 500); // Debounce time
+
+    return () => clearTimeout(delay);
+  }, [page, searchTerm]);
 
   const handleLinkDisplay = (templateLink, index) => {
     // Toggle visibility of the link when button is clicked
@@ -47,22 +55,8 @@ const GenerateLinkPage = () => {
     }
   };
 
-  // Filtering templates based on search term
-  const filteredTemplates = userTemplates.filter((template) => {
-    const { name, email, phone } = template.userDetails;
-    const search = searchTerm.toLowerCase();
-
-    return (
-      name.toLowerCase().includes(search) ||
-      email.toLowerCase().includes(search) ||
-      phone.toLowerCase().includes(search) ||
-      template.templateId?.toLowerCase().includes(search) ||
-      template.templateName?.toLowerCase().includes(search) // Filter by template name
-    );
-  });
-
   return (
-    <div className="max-w-5xl mx-auto p-5 border rounded-lg shadow-lg bg-white">
+    <div className="max-w-7xl mx-auto p-5 border rounded-lg shadow-lg bg-white">
       <h2 className="text-2xl font-semibold text-center mb-5">
         Generate Link for Customer
       </h2>
@@ -79,7 +73,7 @@ const GenerateLinkPage = () => {
       </div>
 
       {/* Display the user's templates in a table format */}
-      {filteredTemplates.length > 0 ? (
+      {userTemplates.length > 0 ? (
         <table className="min-w-full table-auto border-collapse mb-6">
           <thead>
             <tr className="bg-gray-100">
@@ -93,7 +87,7 @@ const GenerateLinkPage = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredTemplates.map((template, index) => (
+            {userTemplates.map((template, index) => (
               <tr key={index} className="hover:bg-gray-50">
                 <td className="px-4 py-2 border">
                   {template.userDetails.name}

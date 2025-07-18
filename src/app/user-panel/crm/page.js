@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../apiConfig/axiosConfig"; // Adjust the path as needed
 import * as XLSX from "xlsx";
+import toast from "react-hot-toast";
 
 const CRMPage = () => {
   const [formData, setFormData] = useState({
@@ -24,37 +25,49 @@ const CRMPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState(""); // State for search input
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
 
   // Fetch existing CRM entries
   useEffect(() => {
     const fetchCRMEntries = async () => {
+      setLoading(true);
       try {
-        const token = localStorage.getItem("authToken"); // Assuming token is stored here
+        const token = localStorage.getItem("authToken");
         const config = {
-          headers: {
-            Authorization: `Bearer ${token}`, // Attach the token
-          },
+          headers: { Authorization: `Bearer ${token}` },
         };
-        const response = await api.get("/api/crm", config); // GET request to fetch CRM data
-        setCrmEntries(response.data);
+
+        const res = await api.get(
+          `/api/crm?search=${encodeURIComponent(
+            debouncedSearch
+          )}&page=${currentPage}&limit=10`,
+          config
+        );
+
+        setCrmEntries(res.data.data);
+        setTotalPages(res.data.totalPages);
       } catch (error) {
-        console.error("Error fetching CRM entries:", error);
+        toast.error("Failed to fetch CRM entries");
+        console.error("Fetch error:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchCRMEntries();
-  }, []);
+  }, [debouncedSearch, currentPage]);
 
-  const filteredEntries = crmEntries.filter((entry) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      entry.name?.toLowerCase().includes(query) ||
-      entry.companyName?.toLowerCase().includes(query) ||
-      entry.phoneNumber?.toLowerCase().includes(query) ||
-      entry.date?.toLowerCase().includes(query) ||
-      entry.subject?.toLowerCase().includes(query)
-    );
-  });
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      setCurrentPage(1); // Reset to first page on search
+      setDebouncedSearch(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -69,6 +82,9 @@ const CRMPage = () => {
         Authorization: `Bearer ${token}`,
       },
     };
+    const toastId = toast.loading(
+      isEditing ? "Updating CRM entry..." : "Adding CRM entry..."
+    );
 
     try {
       if (isEditing) {
@@ -78,7 +94,7 @@ const CRMPage = () => {
           formData,
           config
         );
-        alert("CRM entry updated successfully!");
+        toast.success("CRM entry updated successfully!", { id: toastId });
 
         // Update entry in state without re-fetching
         setCrmEntries((prevEntries) =>
@@ -92,7 +108,7 @@ const CRMPage = () => {
       } else {
         // Add new entry
         const response = await api.post("/api/crm", formData, config);
-        alert("CRM entry added successfully!");
+        toast.success("CRM entry added successfully!", { id: toastId });
         setCrmEntries((prevEntries) => [
           ...prevEntries,
           response.data.crmEntry,
@@ -116,9 +132,16 @@ const CRMPage = () => {
       setIsAdding(false); // Hide the form
     } catch (error) {
       console.error("Error saving CRM data:", error);
+      toast.error("Failed to save CRM entry", { id: toastId });
     }
   };
   const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this entry?"
+    );
+    if (!confirmDelete) return;
+
+    const toastId = toast.loading("Deleting entry...");
     const token = localStorage.getItem("authToken");
     const config = {
       headers: {
@@ -126,48 +149,51 @@ const CRMPage = () => {
       },
     };
 
-    if (confirm("Are you sure you want to delete this entry?")) {
-      try {
-        await api.delete(`/api/crm/${id}`, config);
-        alert("Deleted successfully!");
+    try {
+      await api.delete(`/api/crm/${id}`, config);
+      toast.success("Entry deleted successfully", { id: toastId });
 
-        // Remove from local state
-        setCrmEntries((prevEntries) =>
-          prevEntries.filter((entry) => entry._id !== id)
-        );
-      } catch (error) {
-        console.error("Delete error:", error);
-      }
+      setCrmEntries((prevEntries) =>
+        prevEntries.filter((entry) => entry._id !== id)
+      );
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error("Failed to delete entry", { id: toastId });
     }
   };
 
   const handleDownload = (entry) => {
-    const entryData = [
-      {
-        Date: formatDate(entry.date),
-        Direction: entry.direction,
-        "Start Time": entry.startTime,
-        "End Time": entry.endTime,
-        Name: entry.name,
-        "Company Name": entry.companyName,
-        "Phone Number": entry.phoneNumber,
-        Subject: entry.subject,
-        Notes: entry.notes,
-        "Action Items": entry.actionItems,
-        "Follow-up Needed": entry.followUpNeeded ? "Yes" : "No",
-      },
-    ];
+    try {
+      const entryData = [
+        {
+          Date: formatDate(entry.date),
+          Direction: entry.direction,
+          "Start Time": entry.startTime,
+          "End Time": entry.endTime,
+          Name: entry.name,
+          "Company Name": entry.companyName,
+          "Phone Number": entry.phoneNumber,
+          Subject: entry.subject,
+          Notes: entry.notes,
+          "Action Items": entry.actionItems,
+          "Follow-up Needed": entry.followUpNeeded ? "Yes" : "No",
+        },
+      ];
 
-    // Create a new workbook and worksheet
-    const worksheet = XLSX.utils.json_to_sheet(entryData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "CRM Entry");
+      // Create a new workbook and worksheet
+      const worksheet = XLSX.utils.json_to_sheet(entryData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "CRM Entry");
 
-    // Generate a binary string and trigger download
-    const fileName = `${entry.name || "entry"}_CRM.xlsx`;
-    XLSX.writeFile(workbook, fileName);
+      // Generate a binary string and trigger download
+      const fileName = `${entry.name || "entry"}_CRM.xlsx`;
+      XLSX.writeFile(workbook, fileName);
+      toast.success(`Downloaded ${fileName}`);
+    } catch (err) {
+      console.error("Download error:", err);
+      toast.error("Failed to download entry");
+    }
   };
-
   const handleEdit = (entry) => {
     const formattedDate = entry.date ? entry.date.split("T")[0] : "";
 
@@ -427,7 +453,7 @@ const CRMPage = () => {
             className="p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-green-300"
           />
         </div>
-        {filteredEntries.length === 0 ? (
+        {crmEntries.length === 0 ? (
           <p>No CRM entries available.</p>
         ) : (
           <table className="min-w-full border-collapse border border-gray-300">
@@ -448,7 +474,7 @@ const CRMPage = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredEntries.map((entry) => (
+              {crmEntries.map((entry) => (
                 <tr key={entry._id}>
                   <td className="p-2 border-b">{formatDate(entry.date)}</td>
                   <td className="p-2 border-b">{entry.direction}</td>
@@ -488,6 +514,27 @@ const CRMPage = () => {
             </tbody>
           </table>
         )}
+        <div className="flex justify-between mt-4">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="px-4 py-2 text-gray-700">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation"; // Use next/navigation for app directory
 import api from "../../../apiConfig/axiosConfig"; // Import the Axios instance
+import toast from "react-hot-toast";
 
 const AdminOnePageBusinessProfilePage = () => {
   const [templates, setTemplates] = useState([]);
@@ -40,6 +41,7 @@ const AdminOnePageBusinessProfilePage = () => {
       // }
     } catch (error) {
       console.error("Error fetching templates:", error);
+      toast.error("Failed to fetch templates");
     } finally {
       setLoading(false);
     }
@@ -67,12 +69,23 @@ const AdminOnePageBusinessProfilePage = () => {
       setPreviewHtml((prev) => ({ ...prev, [templateId]: response.data })); // Set the rendered HTML to state
     } catch (error) {
       console.error("Error fetching template preview:", error);
+      toast.error("Preview fetch failed for a template");
     }
   };
 
   // Handle template deletion
-  const handleDeleteTemplate = async (templateId) => {
+  const handleDeleteTemplate = async (templateId, usageCount) => {
     try {
+      if (
+        usageCount > 0 &&
+        !window.confirm(
+          `This template is currently used by ${usageCount} user${
+            usageCount === 1 ? "" : "s"
+          }. Deleting it may affect their mini websites. Are you sure you want to delete it?`
+        )
+      ) {
+        return; // User cancelled deletion
+      }
       const token = localStorage.getItem("adminAuthToken"); // Retrieve the JWT token again
       const config = {
         headers: {
@@ -86,15 +99,13 @@ const AdminOnePageBusinessProfilePage = () => {
         config
       );
 
-      // After successful deletion, remove the template from state
-      setTemplates((prevTemplates) =>
-        prevTemplates.filter((template) => template._id !== templateId)
-      );
+      toast.success("Template deleted successfully");
+      fetchTemplates(); // Fetch fresh list to get consistent pagination
     } catch (error) {
       console.error("Error deleting template:", error);
+      toast.error("Failed to delete template");
     }
   };
-
   const handleViewTemplate = async (templateId) => {
     try {
       const token = localStorage.getItem("adminAuthToken"); // Retrieve the JWT token again
@@ -115,6 +126,7 @@ const AdminOnePageBusinessProfilePage = () => {
       newWindow.document.close();
     } catch (error) {
       console.error("Error fetching template:", error);
+      toast.error("Failed to load template in new window");
     }
   };
 
@@ -172,7 +184,12 @@ const AdminOnePageBusinessProfilePage = () => {
 
                   {/* Button to delete the template */}
                   <button
-                    onClick={() => handleDeleteTemplate(template._id)} // Delete template
+                    onClick={() =>
+                      handleDeleteTemplate(
+                        template._id,
+                        template.usageCount || 0
+                      )
+                    } // Delete template
                     className="text-red-500 hover:underline inline-block"
                   >
                     Delete Template

@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import api from "../../apiConfig/axiosConfig"; // Adjust the path as needed
+import toast from "react-hot-toast";
 
 const ContactDeveloperPage = () => {
   const [complaints, setComplaints] = useState([]);
   const [filteredComplaints, setFilteredComplaints] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Function to fetch complaints from the server
   const fetchComplaints = async () => {
@@ -23,21 +25,31 @@ const ContactDeveloperPage = () => {
       setFilteredComplaints(response.data);
     } catch (error) {
       console.error("Error fetching complaints:", error);
+      toast.error("Failed to load complaints.");
     }
   };
 
   // Function to handle search input change
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
-    const filtered = complaints.filter((complaint) => {
-      const user = complaint.userId || {};
-      const nameMatch =
-        user.name && user.name.toLowerCase().includes(e.target.value.toLowerCase());
-      const emailMatch =
-        user.email && user.email.toLowerCase().includes(e.target.value.toLowerCase());
-      return nameMatch || emailMatch;
-    });
-    setFilteredComplaints(filtered);
+  const handleSearch = async (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    try {
+      const token = localStorage.getItem("adminAuthToken");
+      const config = {
+        headers: { Authorization: `Bearer ${token}` },
+      };
+
+      const response = await api.get(
+        `/api/contact-developer?search=${encodeURIComponent(value)}`,
+        config
+      );
+
+      setFilteredComplaints(response.data);
+    } catch (error) {
+      console.error("Search failed:", error);
+      toast.error("Search failed.");
+    }
   };
 
   const updateComplaintStatus = async (id, status) => {
@@ -50,9 +62,12 @@ const ContactDeveloperPage = () => {
       };
 
       await api.put(`/api/contact-developer/${id}/status`, { status }, config);
+      toast.success(`Status updated to "${status}"`);
+
       fetchComplaints();
     } catch (error) {
       console.error("Error updating complaint status:", error);
+      toast.error("Failed to update complaint status.");
     }
   };
 
@@ -66,9 +81,12 @@ const ContactDeveloperPage = () => {
       };
 
       await api.delete(`/api/contact-developer/${id}`, config);
+      toast.success("Complaint deleted successfully");
+
       fetchComplaints();
     } catch (error) {
       console.error("Error deleting complaint:", error);
+      toast.error("Failed to delete complaint.");
     }
   };
 
@@ -78,7 +96,9 @@ const ContactDeveloperPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-5 border rounded shadow-lg bg-white">
-      <h2 className="text-2xl font-semibold text-center mb-5">Contact Developer</h2>
+      <h2 className="text-2xl font-semibold text-center mb-5">
+        Contact Developer
+      </h2>
 
       <div className="mb-5">
         <input
@@ -104,13 +124,19 @@ const ContactDeveloperPage = () => {
           {filteredComplaints.length > 0 ? (
             filteredComplaints.map((complaint) => (
               <tr key={complaint._id} className="border-b">
-                <td className="px-4 py-2">{complaint.about}-{complaint.complaint}</td>
+                <td className="px-4 py-2">
+                  {complaint.about}-{complaint.complaint}
+                </td>
                 <td className="px-4 py-2">{complaint.userId?.name || "N/A"}</td>
-                <td className="px-4 py-2">{complaint.userId?.email || "N/A"}</td>
+                <td className="px-4 py-2">
+                  {complaint.userId?.email || "N/A"}
+                </td>
                 <td className="px-4 py-2">
                   <select
                     value={complaint.status || "Pending"}
-                    onChange={(e) => updateComplaintStatus(complaint._id, e.target.value)}
+                    onChange={(e) =>
+                      updateComplaintStatus(complaint._id, e.target.value)
+                    }
                     className="border rounded px-2 py-1"
                   >
                     <option value="Pending">Pending</option>
@@ -130,7 +156,9 @@ const ContactDeveloperPage = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="5" className="px-4 py-2 text-center">No complaints found</td>
+              <td colSpan="5" className="px-4 py-2 text-center">
+                No complaints found
+              </td>
             </tr>
           )}
         </tbody>

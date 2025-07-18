@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import api from "../../apiConfig/axiosConfig";
-
+import toast from "react-hot-toast";
 const LandingMediaAdmin = () => {
   const [form, setForm] = useState({
     page: "",
@@ -52,12 +52,25 @@ const LandingMediaAdmin = () => {
 
   const fetchMedia = async () => {
     try {
+      const token = localStorage.getItem("adminAuthToken"); // Get the token
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach the token
+        },
+      };
       setLoading(true);
-      const { data } = await api.get("/api/landing", {
-        params: { page: form.page },
-      });
+      const { data } = await api.get(
+        "/api/landing",
+        {
+          params: { page: form.page },
+        },
+        config
+      );
       console.log(data);
       setMediaList(data);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch media");
     } finally {
       setLoading(false);
     }
@@ -65,19 +78,29 @@ const LandingMediaAdmin = () => {
 
   const handleSubmit = async () => {
     try {
+      const token = localStorage.getItem("adminAuthToken"); // Get the token
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach the token
+        },
+      };
       const mediaListPayload = form.mediaList.map((item) => ({
         mediaType: form.mediaType,
         title: item.title,
         driveLink: item.driveLink,
       }));
 
-      await api.post("/api/landing/upload", {
-        page: form.page,
-        section: form.section,
-        mediaList: mediaListPayload,
-      });
+      await api.post(
+        "/api/landing/upload",
+        {
+          page: form.page,
+          section: form.section,
+          mediaList: mediaListPayload,
+        },
+        config
+      );
 
-      alert("Uploaded");
+      toast.success("Media uploaded successfully");
       fetchMedia();
       setForm({
         page: "",
@@ -86,24 +109,55 @@ const LandingMediaAdmin = () => {
         mediaList: [{ title: "", driveLink: "" }],
       });
     } catch (e) {
-      alert("Upload failed");
+      toast.error("Upload failed");
     }
   };
   const handleUpdate = async () => {
     if (!editingGroupId || editingIndex === null) return;
+    try {
+      const token = localStorage.getItem("adminAuthToken"); // Get the token
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach the token
+        },
+      };
+      await api.patch(
+        `/api/landing/edit/${editingGroupId}/${editingIndex}`,
+        {
+          title: editTitle,
+          driveLink: editLink,
+          mediaType:
+            mediaList.find((g) => g._id === editingGroupId)?.media[editingIndex]
+              ?.mediaType || "image",
+        },
+        config
+      );
+      toast.success("Media updated");
 
-    await api.patch(`/api/landing/edit/${editingGroupId}/${editingIndex}`, {
-      title: editTitle,
-      driveLink: editLink,
-      mediaType:
-        mediaList.find((g) => g._id === editingGroupId)?.media[editingIndex]
-          ?.mediaType || "image",
-    });
-
-    setIsEditing(false);
-    setEditingGroupId(null);
-    setEditingIndex(null);
-    fetchMedia();
+      setIsEditing(false);
+      setEditingGroupId(null);
+      setEditingIndex(null);
+      fetchMedia();
+    } catch (e) {
+      console.error("Update failed:", e);
+      toast.error("Failed to update media");
+    }
+  };
+  const handleDelete = async (groupId, mediaIndex) => {
+    try {
+      const token = localStorage.getItem("adminAuthToken"); // Get the token
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach the token
+        },
+      };
+      await api.delete(`/api/landing/delete/${groupId}/${mediaIndex}`, config);
+      toast.success("Media deleted successfully");
+      fetchMedia();
+    } catch (error) {
+      console.error("Delete failed:", error);
+      toast.error("Failed to delete media");
+    }
   };
 
   useEffect(() => {
@@ -309,13 +363,7 @@ const LandingMediaAdmin = () => {
                               Edit
                             </button>
                             <button
-                              onClick={() =>
-                                api
-                                  .delete(
-                                    `/api/landing/delete/${group._id}/${index}`
-                                  )
-                                  .then(fetchMedia)
-                              }
+                              onClick={() => handleDelete(group._id, index)}
                               className="text-red-500 text-sm hover:underline"
                             >
                               Delete
