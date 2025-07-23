@@ -276,7 +276,7 @@ const NFCCardsPage = () => {
               const result = verifyResponse.data;
 
               if (result.status === "success") {
-                toast.success("Payment successful! ");
+                toast.success("Payment successful!.Check in Card Purchases");
 
                 setIsModalOpen(false); // Close the modal on success
               } else {

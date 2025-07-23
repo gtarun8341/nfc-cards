@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import api from "../../apiConfig/axiosConfig"; // Adjust the path as needed
 import * as XLSX from "xlsx";
 import toast from "react-hot-toast";
+import Pagination from "../../components/Pagination"; // Adjust path based on your folder structure
+
 const CustomerProfileManagementPage = () => {
   const [customers, setCustomers] = useState([]);
   const [editCustomer, setEditCustomer] = useState(null);
@@ -298,26 +300,12 @@ const CustomerProfileManagementPage = () => {
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center mt-6 space-x-4">
-          <button
-            disabled={page === 1}
-            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="text-lg font-semibold">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            disabled={page === totalPages}
-            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
-            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
+      {customers.length > 0 && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={(page) => setPage(page)}
+        />
       )}
 
       {/* Reset Password Modal */}

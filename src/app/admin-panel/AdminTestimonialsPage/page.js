@@ -9,6 +9,8 @@ const AdminTestimonialsPage = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredTestimonials, setFilteredTestimonials] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
   const [newTestimonial, setNewTestimonial] = useState({
     image: null,
     date: new Date().toISOString().split("T")[0], // Set initial date to today's date in "YYYY-MM-DD" format
@@ -61,6 +63,7 @@ const AdminTestimonialsPage = () => {
   }, [searchTerm]);
 
   const handleAddTestimonial = async () => {
+    setIsSubmitting(true);
     const formData = new FormData();
     for (const key in newTestimonial) {
       formData.append(key, newTestimonial[key]);
@@ -80,12 +83,12 @@ const AdminTestimonialsPage = () => {
         config
       );
       setTestimonials([response.data.testimonial, ...testimonials]);
-      setFilteredTestimonials([response.data.testimonial, ...testimonials]);
       closeModal();
       toast.success("Testimonial added successfully!");
     } catch (error) {
-      setError("Failed to add testimonial");
       toast.error("Failed to add testimonial.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -124,6 +127,7 @@ const AdminTestimonialsPage = () => {
   };
 
   const handleDeleteTestimonial = async (id) => {
+    setDeletingId(id);
     try {
       const token = localStorage.getItem("adminAuthToken");
       const config = {
@@ -132,20 +136,17 @@ const AdminTestimonialsPage = () => {
         },
       };
       await api.delete(`/api/testimonials/delete/${id}`, config);
-      setTestimonials(
-        testimonials.filter((testimonial) => testimonial._id !== id)
-      );
-      setFilteredTestimonials(
-        filteredTestimonials.filter((testimonial) => testimonial._id !== id)
-      );
+      setTestimonials(testimonials.filter((t) => t._id !== id));
       toast.success("Testimonial deleted successfully!");
     } catch (error) {
-      setError("Failed to delete testimonial");
       toast.error("Failed to delete testimonial.");
+    } finally {
+      setDeletingId(null);
     }
   };
 
   const handleUpdateTestimonial = async () => {
+    setIsSubmitting(true);
     const formData = new FormData();
     for (const key in newTestimonial) {
       formData.append(key, newTestimonial[key]);
@@ -171,18 +172,12 @@ const AdminTestimonialsPage = () => {
             : testimonial
         )
       );
-      setFilteredTestimonials(
-        filteredTestimonials.map((testimonial) =>
-          testimonial._id === editingTestimonial._id
-            ? response.data.testimonial
-            : testimonial
-        )
-      );
       closeModal();
       toast.success("Testimonial updated successfully!");
     } catch (error) {
       toast.error("Failed to update testimonial.");
-      setError("Failed to update testimonial");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -217,6 +212,10 @@ const AdminTestimonialsPage = () => {
 
       {loading ? (
         <div className="text-center text-gray-500">Loading testimonials...</div>
+      ) : testimonials.length === 0 ? (
+        <div className="text-center text-gray-500 py-4">
+          No testimonials added.
+        </div>
       ) : (
         <table className="min-w-full bg-white border border-gray-200">
           <thead>
@@ -264,10 +263,11 @@ const AdminTestimonialsPage = () => {
                     Edit
                   </button>
                   <button
-                    className="p-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                    className="p-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={() => handleDeleteTestimonial(testimonial._id)}
+                    disabled={deletingId === testimonial._id}
                   >
-                    Delete
+                    {deletingId === testimonial._id ? "Deleting..." : "Delete"}
                   </button>
                 </td>
               </tr>
@@ -458,9 +458,17 @@ const AdminTestimonialsPage = () => {
                     ? handleUpdateTestimonial
                     : handleAddTestimonial
                 }
-                className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                disabled={isSubmitting}
+                className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {editingTestimonial ? "Update" : "Add"} Testimonial
+                {isSubmitting
+                  ? editingTestimonial
+                    ? "Updating..."
+                    : "Adding..."
+                  : editingTestimonial
+                  ? "Update"
+                  : "Add"}{" "}
+                Testimonial
               </button>
             </div>
           </div>

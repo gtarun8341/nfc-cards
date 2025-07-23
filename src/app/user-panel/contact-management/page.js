@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import api from "../../apiConfig/axiosConfig"; // Adjust the path as needed
 import * as XLSX from "xlsx";
 import toast from "react-hot-toast";
+import Pagination from "../../components/Pagination"; // Adjust path based on your folder structure
 
 const ContactManagementPage = () => {
   const [contact, setContact] = useState({
@@ -400,65 +401,64 @@ const ContactManagementPage = () => {
             </tr>
           </thead>
           <tbody>
-            {contacts.map((contact, index) => (
-              <tr key={index} className="border-b">
-                <td className="px-4 py-2">{contact.name}</td>
-                <td className="px-4 py-2">{contact.reference}</td>
-                <td className="px-4 py-2">{contact.profession}</td>
-                <td className="px-4 py-2">{contact.industry}</td>
-                <td className="px-4 py-2">{contact.category}</td>
-                <td className="px-4 py-2">{contact.designation}</td>
-                <td className="px-4 py-2">{contact.companyName}</td>
-                <td className="px-4 py-2">{contact.mobileNumber}</td>
-                <td className="px-4 py-2">{contact.email}</td>
-                <td className="px-4 py-2">{contact.website}</td>
-                <td className="px-4 py-2">{contact.address}</td>
-                <td className="px-4 py-2">{contact.city}</td>
-                <td className="px-4 py-2">{contact.state}</td>
-                <td className="px-4 py-2">{contact.pinCode}</td>
-                <td className="px-4 py-2 flex gap-2">
-                  <button
-                    onClick={() => handleEdit(contact._id)}
-                    className="text-blue-500 hover:text-blue-700"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDownload(contact)}
-                    className="text-green-600 hover:text-green-800"
-                  >
-                    Download
-                  </button>
-                  <button
-                    onClick={() => handleDelete(contact._id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Delete
-                  </button>
+            {contacts.length === 0 ? (
+              <tr>
+                <td
+                  colSpan="15"
+                  className="px-4 py-6 text-center text-gray-500"
+                >
+                  No contacts added.
                 </td>
               </tr>
-            ))}
+            ) : (
+              contacts.map((contact, index) => (
+                <tr key={index} className="border-b">
+                  <td className="px-4 py-2">{contact.name}</td>
+                  <td className="px-4 py-2">{contact.reference}</td>
+                  <td className="px-4 py-2">{contact.profession}</td>
+                  <td className="px-4 py-2">{contact.industry}</td>
+                  <td className="px-4 py-2">{contact.category}</td>
+                  <td className="px-4 py-2">{contact.designation}</td>
+                  <td className="px-4 py-2">{contact.companyName}</td>
+                  <td className="px-4 py-2">{contact.mobileNumber}</td>
+                  <td className="px-4 py-2">{contact.email}</td>
+                  <td className="px-4 py-2">{contact.website}</td>
+                  <td className="px-4 py-2">{contact.address}</td>
+                  <td className="px-4 py-2">{contact.city}</td>
+                  <td className="px-4 py-2">{contact.state}</td>
+                  <td className="px-4 py-2">{contact.pinCode}</td>
+                  <td className="px-4 py-2 flex gap-2">
+                    <button
+                      onClick={() => handleEdit(contact._id)}
+                      className="text-blue-500 hover:text-blue-700"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDownload(contact)}
+                      className="text-green-600 hover:text-green-800"
+                    >
+                      Download
+                    </button>
+                    <button
+                      onClick={() => handleDelete(contact._id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}{" "}
           </tbody>
         </table>
-        <div className="flex justify-center mt-4 gap-2">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-          >
-            Prev
-          </button>
-          <span className="px-2 py-1">
-            {currentPage} / {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
+        {contact.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => setCurrentPage(page)}
+          />
+        )}
       </div>
     </div>
   );

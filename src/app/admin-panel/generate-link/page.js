@@ -128,26 +128,12 @@ const GenerateLinkPage = () => {
       ) : (
         <p className="text-center text-gray-500">No templates available</p>
       )}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center mt-4 space-x-4">
-          <button
-            disabled={page === 1}
-            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="text-lg font-semibold">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            disabled={page === totalPages}
-            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
-            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
+      {userTemplates.length > 0 && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={(page) => setPage(page)}
+        />
       )}
     </div>
   );

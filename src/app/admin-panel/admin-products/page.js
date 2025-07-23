@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
 import api from "../../apiConfig/axiosConfig"; // Ensure you have the right API config
 import toast from "react-hot-toast";
+import Pagination from "../../components/Pagination"; // Adjust path based on your folder structure
 
 const ProductCataloguePage = () => {
   const [catalogue, setCatalogue] = useState([]);
@@ -12,6 +13,10 @@ const ProductCataloguePage = () => {
   const [filterCategory, setFilterCategory] = useState("");
   const [categories, setCategories] = useState([]);
   const [units, setUnits] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10; // products per page
+
   const [currentProduct, setCurrentProduct] = useState({
     name: "",
     type: "",
@@ -114,6 +119,8 @@ const ProductCataloguePage = () => {
     const token = localStorage.getItem("adminAuthToken");
     try {
       const params = new URLSearchParams();
+      params.append("page", currentPage);
+      params.append("limit", limit);
 
       if (searchQuery) params.append("search", encodeURIComponent(searchQuery));
       if (filterType) params.append("type", filterType);
@@ -128,7 +135,8 @@ const ProductCataloguePage = () => {
         }
       );
 
-      setCatalogue(data.products);
+      setCatalogue(data.products || []);
+      setTotalPages(data.totalPages || 1); // Make sure your backend returns this
     } catch (error) {
       toast.error("Failed to load products.");
       console.error("Error fetching products:", error);
@@ -138,10 +146,11 @@ const ProductCataloguePage = () => {
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
       fetchProducts();
-    }, 300); // debounce by 300ms
+    }, 300);
 
     return () => clearTimeout(debounceTimer);
-  }, [searchQuery, filterType, filterCategory]);
+  }, [searchQuery, filterType, filterCategory, currentPage]);
+
   // Edit product
   const editProduct = (product) => {
     setCurrentProduct({
@@ -352,53 +361,69 @@ const ProductCataloguePage = () => {
             </tr>
           </thead>
           <tbody>
-            {catalogue.map((product) => (
-              <tr key={product._id} className="hover:bg-gray-100">
-                <td className="py-3 px-4 border-b">{product.productName}</td>
-                <td className="py-3 px-4 border-b">{product.productType}</td>
-                <td className="py-3 px-4 border-b">{product.productPrice}</td>
-                <td className="py-3 px-4 border-b">{product.discount}</td>
-                <td className="py-3 px-4 border-b">{product.hsnCode}</td>
-                <td className="py-3 px-4 border-b">{product.gst}</td>
-                <td className="py-3 px-4 border-b">{product.units}</td>
-                <td className="py-3 px-4 border-b">{product.category}</td>
-                <td className="py-3 px-4 border-b">
-                  {product.productImages &&
-                    product.productImages[0] &&
-                    (() => {
-                      const imageUrl = `${api.defaults.baseURL}/uploads/adminproducts/${product.productImages[0]}`;
-                      console.log("Image URL:", imageUrl); // Log the URL
-                      return (
-                        <Image
-                          src={imageUrl} // Use base URL for images
-                          alt={product.productName}
-                          width={500} // Set a reasonable default width
-                          height={500}
-                          layout="intrinsic"
-                          className="h-16 w-16 object-cover"
-                        />
-                      );
-                    })()}
-                </td>
-
-                <td className="py-3 px-4 border-b flex space-x-2">
-                  <button
-                    onClick={() => editProduct(product)}
-                    className="bg-yellow-500 text-white p-2 rounded-md hover:bg-yellow-600 transition duration-200"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => deleteProduct(product._id)}
-                    className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600 transition duration-200"
-                  >
-                    Delete
-                  </button>
+            {catalogue.length === 0 ? (
+              <tr>
+                <td
+                  colSpan="10"
+                  className="py-4 px-4 text-center text-gray-500"
+                >
+                  No products added.
                 </td>
               </tr>
-            ))}
+            ) : (
+              catalogue.map((product) => (
+                <tr key={product._id} className="hover:bg-gray-100">
+                  <td className="py-3 px-4 border-b">{product.productName}</td>
+                  <td className="py-3 px-4 border-b">{product.productType}</td>
+                  <td className="py-3 px-4 border-b">{product.productPrice}</td>
+                  <td className="py-3 px-4 border-b">{product.discount}</td>
+                  <td className="py-3 px-4 border-b">{product.hsnCode}</td>
+                  <td className="py-3 px-4 border-b">{product.gst}</td>
+                  <td className="py-3 px-4 border-b">{product.units}</td>
+                  <td className="py-3 px-4 border-b">{product.category}</td>
+                  <td className="py-3 px-4 border-b">
+                    {product.productImages &&
+                      product.productImages[0] &&
+                      (() => {
+                        const imageUrl = `${api.defaults.baseURL}/uploads/adminproducts/${product.productImages[0]}`;
+                        return (
+                          <Image
+                            src={imageUrl}
+                            alt={product.productName}
+                            width={500}
+                            height={500}
+                            layout="intrinsic"
+                            className="h-16 w-16 object-cover"
+                          />
+                        );
+                      })()}
+                  </td>
+                  <td className="py-3 px-4 border-b flex space-x-2">
+                    <button
+                      onClick={() => editProduct(product)}
+                      className="bg-yellow-500 text-white p-2 rounded-md hover:bg-yellow-600 transition duration-200"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => deleteProduct(product._id)}
+                      className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600 transition duration-200"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
+        {catalogue.length > 0 && (
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(page) => setPage(page)}
+          />
+        )}
       </div>
     </div>
   );

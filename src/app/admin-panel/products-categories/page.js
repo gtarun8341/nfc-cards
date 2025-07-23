@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import api from "../../apiConfig/axiosConfig";
 import * as XLSX from "xlsx";
 import toast from "react-hot-toast";
+import Pagination from "../../components/Pagination"; // Adjust path based on your folder structure
+
 const ProductsCategoriesPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,8 +15,10 @@ const ProductsCategoriesPage = () => {
   const [selectedDiscount, setSelectedDiscount] = useState("all");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
   const fetchProducts = async () => {
     try {
+      setLoading(true);
       const token = localStorage.getItem("adminAuthToken");
       const config = {
         headers: {
@@ -39,13 +43,10 @@ const ProductsCategoriesPage = () => {
     }
   };
 
-  //   fetchProducts();
-  // }, []);
   useEffect(() => {
     fetchProducts();
   }, [page, searchQuery, selectedType, selectedDiscount]);
 
-  // Handle search and filters
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
@@ -59,34 +60,27 @@ const ProductsCategoriesPage = () => {
   };
 
   const handleDownloadUserProducts = (user) => {
-    // First rows: User info
     try {
       const userInfo = [
         ["Name", user.userName],
         ["Email", user.userEmail],
         ["Phone", user.userPhone],
-        [], // Empty row for spacing
+        [],
       ];
 
-      // Product rows
       const productData = user.products.map((product) => ({
         "Product Name": product.productName,
         "Price (₹)": product.productPrice,
         Type: product.productType,
         Units: product.units,
+        Category: product.category,
+        "Sold Count": product.soldCount,
         Discount: product.discount > 0 ? `${product.discount}%` : "No Discount",
       }));
 
-      // Convert product data to sheet format
-      const productSheet = XLSX.utils.json_to_sheet(productData, {
-        origin: -1,
-      });
-
-      // Create worksheet manually and insert user info
       const worksheet = XLSX.utils.aoa_to_sheet(userInfo);
       XLSX.utils.sheet_add_json(worksheet, productData, { origin: -1 });
 
-      // Create and export workbook
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Products");
 
@@ -104,7 +98,7 @@ const ProductsCategoriesPage = () => {
       <h2 className="text-2xl font-semibold text-center mb-5">Products</h2>
 
       {loading && <p>Loading products...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+      {/* {error && <p className="text-red-500">{error}</p>} */}
 
       {/* Search and filter options */}
       <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -135,7 +129,7 @@ const ProductsCategoriesPage = () => {
         </select>
       </div>
 
-      {products.length > 0 ? (
+      {products.length > 0 &&
         products.map((user, index) => (
           <div
             key={index}
@@ -177,7 +171,6 @@ const ProductsCategoriesPage = () => {
                     <td className="px-4 py-2 border">{product.units}</td>
                     <td className="px-4 py-2 border">{product.category}</td>
                     <td className="px-4 py-2 border">{product.soldCount}</td>
-
                     <td className="px-4 py-2 border">
                       {product.discount > 0
                         ? `${product.discount}%`
@@ -188,30 +181,20 @@ const ProductsCategoriesPage = () => {
               </tbody>
             </table>
           </div>
-        ))
-      ) : (
-        <p>No products found matching the criteria.</p>
+        ))}
+
+      {/* Show this only if loading is false and no data exists */}
+      {!loading && products.length === 0 && (
+        <p>No products added or not found matching the criteria.</p>
       )}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center mt-4 space-x-4">
-          <button
-            disabled={page === 1}
-            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="text-lg font-semibold">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            disabled={page === totalPages}
-            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
-            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
+
+      {/* Pagination */}
+      {products.length > 0 && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={(page) => setPage(page)}
+        />
       )}
     </div>
   );

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import api from "../../apiConfig/axiosConfig";
 import toast from "react-hot-toast"; // ✅ Import at top
+import Pagination from "../../components/Pagination"; // Adjust path based on your folder structure
 
 const PaymentManagementPage = () => {
   const [sales, setSales] = useState([]);
@@ -14,86 +15,37 @@ const PaymentManagementPage = () => {
   useEffect(() => {
     const fetchSalesData = async () => {
       try {
-        const token = localStorage.getItem("adminAuthToken"); // Get the token
+        const token = localStorage.getItem("adminAuthToken");
         const config = {
-          headers: {
-            Authorization: `Bearer ${token}`, // Attach the token
-          },
+          headers: { Authorization: `Bearer ${token}` },
         };
+
         const response = await api.get(
-          `/api/order/sales-data?page=${page}&limit=10`,
+          `/api/order/sales-data?page=${page}&limit=10&search=${encodeURIComponent(
+            searchTerm
+          )}&status=${statusFilter}`,
           config
         );
+
         setSales(response.data.data);
-        console.log(response.data.data);
-        setFilteredSales(response.data.data); // Initialize filtered sales
+        setFilteredSales(response.data.data);
         setTotalPages(response.data.totalPages);
       } catch (error) {
         console.error("Error fetching sales data:", error);
-        toast.error(`Failed to fetch sales data`);
+        toast.error("Failed to fetch sales data");
       }
     };
-    fetchSalesData();
-  }, []);
+
+    fetchSalesData(); // Only called when page changes or delayed search kicks in
+  }, [page, searchTerm, statusFilter]);
+
   useEffect(() => {
-    const filterSales = () => {
-      let filtered = sales.filter((sale) => {
-        const searchMatch =
-          Array.isArray(sale.products) &&
-          sale.products.some(
-            (product) =>
-              product?.title
-                ?.toLowerCase()
-                .includes(searchTerm.toLowerCase()) ||
-              product?.price?.toString().includes(searchTerm)
-          );
+    const delayDebounce = setTimeout(() => {
+      setPage(1); // Reset page when search or filter changes
+    }, 500);
 
-        const templateMatch =
-          sale.productTemplateId?.name
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          sale.productTemplateId?.email
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          sale.productTemplateId?.phone?.includes(searchTerm);
-
-        const invoiceMatch = sale.invoiceNumber
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase());
-
-        const trackingMatch = sale.trackingNumber
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase());
-
-        const userMatch =
-          sale.userDetails?.name
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          sale.userDetails?.email
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          sale.userDetails?.phone?.includes(searchTerm) ||
-          sale.userDetails?.address
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase());
-
-        const statusMatch = statusFilter ? sale.status === statusFilter : true;
-
-        return (
-          (searchMatch ||
-            templateMatch ||
-            invoiceMatch ||
-            trackingMatch ||
-            userMatch) &&
-          statusMatch
-        );
-      });
-
-      setFilteredSales(filtered);
-    };
-
-    filterSales();
-  }, [searchTerm, statusFilter, sales]);
+    return () => clearTimeout(delayDebounce);
+  }, [searchTerm, statusFilter]);
 
   const updateSaleField = async (id, field, value) => {
     try {
@@ -179,127 +131,126 @@ const PaymentManagementPage = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredSales.map((sale) => (
-              <tr key={sale._id}>
-                <td className="border p-2">
-                  {Array.isArray(sale.products) && sale.products.length > 0 ? (
-                    sale.products.map((product) => (
-                      <div key={product.title}>{product.title}</div>
-                    ))
-                  ) : (
-                    <span className="text-gray-400 italic">No products</span>
-                  )}
-                </td>
+            {filteredSales.length > 0 ? (
+              filteredSales.map((sale) => (
+                <tr key={sale._id}>
+                  <td className="border p-2">
+                    {Array.isArray(sale.products) &&
+                    sale.products.length > 0 ? (
+                      sale.products.map((product) => (
+                        <div key={product.title}>{product.title}</div>
+                      ))
+                    ) : (
+                      <span className="text-gray-400 italic">No products</span>
+                    )}
+                  </td>
 
-                <td className="border p-2">
-                  {Array.isArray(sale.products) && sale.products.length > 0 ? (
-                    sale.products.map((product) => (
-                      <div key={product.title}>{product.quantity}</div>
-                    ))
-                  ) : (
-                    <span className="text-gray-400 italic">No products</span>
-                  )}
-                </td>
+                  <td className="border p-2">
+                    {Array.isArray(sale.products) &&
+                    sale.products.length > 0 ? (
+                      sale.products.map((product) => (
+                        <div key={product.title}>{product.quantity}</div>
+                      ))
+                    ) : (
+                      <span className="text-gray-400 italic">No products</span>
+                    )}
+                  </td>
 
-                <td className="border p-2">
-                  {Array.isArray(sale.products) && sale.products.length > 0 ? (
-                    sale.products.map((product) => (
-                      <div key={product.title}>{product.price.toFixed(2)}</div>
-                    ))
-                  ) : (
-                    <span className="text-gray-400 italic">No products</span>
-                  )}
-                </td>
+                  <td className="border p-2">
+                    {Array.isArray(sale.products) &&
+                    sale.products.length > 0 ? (
+                      sale.products.map((product) => (
+                        <div key={product.title}>
+                          {product.price.toFixed(2)}
+                        </div>
+                      ))
+                    ) : (
+                      <span className="text-gray-400 italic">No products</span>
+                    )}
+                  </td>
 
-                <td className="border p-2">{sale.totalAmount.toFixed(2)}</td>
-                <td className="border p-2">
-                  <div>{sale.productTemplateId?.name}</div>
-                  <div>{sale.productTemplateId?.email}</div>
-                  <div>{sale.productTemplateId?.phone}</div>
-                </td>
-                <td className="border p-2">
-                  <div>{sale.userDetails?.name}</div>
-                  <div>{sale.userDetails?.email}</div>
-                  <div>{sale.userDetails?.phone}</div>
-                  <div>{sale.userDetails?.address}</div>
-                </td>
-                <td className="border p-2">
-                  <input
-                    type="number"
-                    className="border p-1 rounded"
-                    value={sale.gstOnPurchase || ""}
-                    onChange={(e) =>
-                      updateSaleField(
-                        sale._id,
-                        "gstOnPurchase",
-                        parseFloat(e.target.value)
-                      )
-                    }
-                  />
-                </td>
-                <td className="border p-2">
-                  {(
-                    sale.totalAmount -
-                    (sale.totalAmount * (sale.gstOnPurchase || 0)) / 100
-                  ).toFixed(2)}
-                </td>
-                <td className="border p-2">
-                  <input
-                    type="checkbox"
-                    checked={sale.paymentSettledToTemplateOwner}
-                    onChange={(e) =>
-                      updateSaleField(
-                        sale._id,
-                        "paymentSettledToTemplateOwner",
-                        e.target.checked
-                      )
-                    }
-                  />
-                </td>
-                <td className="border p-2">{sale.invoiceNumber}</td>
-                <td className="border p-2">{sale.trackingNumber}</td>
-                <td className="border p-2">
-                  <select
-                    value={sale.status}
-                    onChange={(e) =>
-                      updateSaleField(sale._id, "status", e.target.value)
-                    }
-                    className="border p-1 rounded"
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="Paid">Paid</option>
-                    <option value="Processing">Processing</option>
-                    <option value="Shipped">Shipped</option>
-                    <option value="Out for Delivery">Out for Delivery</option>
-                    <option value="Delivered">Delivered</option>
-                    <option value="Cancelled">Cancelled</option>
-                    <option value="Returned">Returned</option>
-                  </select>
+                  <td className="border p-2">{sale.totalAmount.toFixed(2)}</td>
+                  <td className="border p-2">
+                    <div>{sale.productTemplateId?.name}</div>
+                    <div>{sale.productTemplateId?.email}</div>
+                    <div>{sale.productTemplateId?.phone}</div>
+                  </td>
+                  <td className="border p-2">
+                    <div>{sale.userDetails?.name}</div>
+                    <div>{sale.userDetails?.email}</div>
+                    <div>{sale.userDetails?.phone}</div>
+                    <div>{sale.userDetails?.address}</div>
+                  </td>
+                  <td className="border p-2">
+                    <input
+                      type="number"
+                      className="border p-1 rounded"
+                      value={sale.gstOnPurchase || ""}
+                      onChange={(e) =>
+                        updateSaleField(
+                          sale._id,
+                          "gstOnPurchase",
+                          parseFloat(e.target.value)
+                        )
+                      }
+                    />
+                  </td>
+                  <td className="border p-2">
+                    {(
+                      sale.totalAmount -
+                      (sale.totalAmount * (sale.gstOnPurchase || 0)) / 100
+                    ).toFixed(2)}
+                  </td>
+                  <td className="border p-2">
+                    <input
+                      type="checkbox"
+                      checked={sale.paymentSettledToTemplateOwner}
+                      onChange={(e) =>
+                        updateSaleField(
+                          sale._id,
+                          "paymentSettledToTemplateOwner",
+                          e.target.checked
+                        )
+                      }
+                    />
+                  </td>
+                  <td className="border p-2">{sale.invoiceNumber}</td>
+                  <td className="border p-2">{sale.trackingNumber}</td>
+                  <td className="border p-2">
+                    <select
+                      value={sale.status}
+                      onChange={(e) =>
+                        updateSaleField(sale._id, "status", e.target.value)
+                      }
+                      className="border p-1 rounded"
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="Paid">Paid</option>
+                      <option value="Processing">Processing</option>
+                      <option value="Shipped">Shipped</option>
+                      <option value="Out for Delivery">Out for Delivery</option>
+                      <option value="Delivered">Delivered</option>
+                      <option value="Cancelled">Cancelled</option>
+                      <option value="Returned">Returned</option>
+                    </select>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={12} className="text-center text-gray-500 py-4">
+                  No payment management data found. No purchase done.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-        {totalPages > 1 && (
-          <div className="flex justify-center items-center mt-4 space-x-4">
-            <button
-              disabled={page === 1}
-              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-              className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <span className="text-lg font-semibold">
-              Page {page} of {totalPages}
-            </span>
-            <button
-              disabled={page === totalPages}
-              onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
-              className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
+        {filteredSales.length > 0 && (
+          <Pagination
+            currentPage={page} // ✅ Correct name
+            totalPages={totalPages}
+            onPageChange={(page) => setPage(page)} // ✅ Correct setter
+          />
         )}
       </div>
     </div>

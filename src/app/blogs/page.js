@@ -230,8 +230,12 @@ const BlogsPage = () => {
             Back to Blogs
           </button>
         </div>
-      ) : (
+      ) : filteredBlogs.length > 0 || blogs.length > 0 ? (
         renderRows()
+      ) : (
+        <p className="text-center text-gray-500 text-lg mt-10">
+          No blogs added yet.
+        </p>
       )}
     </div>
   );

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import AllFooter from "../components/AllFooter";
 import api from "../apiConfig/axiosConfig";
 import Script from "next/script";
+import toast from "react-hot-toast";
 
 export default function PurchasePage() {
   const router = useRouter();
@@ -59,9 +60,11 @@ function PurchaseContent({ router }) {
             });
           }
         } else {
+          toast.error("Invalid data format.Please try again");
           console.error("Invalid data format.");
         }
       } catch (error) {
+        toast.error("Invalid data format.Please try again");
         console.error("Error parsing purchase data:", error);
       }
     }
@@ -73,6 +76,8 @@ function PurchaseContent({ router }) {
   };
 
   const handlePayment = async () => {
+    const loadingToast = toast.loading("Initiating payment...");
+
     try {
       const amount = calculateTotalPrice();
 
@@ -85,6 +90,7 @@ function PurchaseContent({ router }) {
       });
 
       const orderData = response.data;
+      toast.dismiss(loadingToast);
 
       if (orderData && orderData.orderId) {
         const options = {
@@ -111,10 +117,11 @@ function PurchaseContent({ router }) {
             );
 
             const result = verifyResponse.data;
-            alert(result.message);
-
             if (result.status === "success") {
-              setTrackingNumber(result.order.trackingNumber); // Set tracking number on success
+              setTrackingNumber(result.order.trackingNumber);
+              toast.success(result.message || "Payment successful!");
+            } else {
+              toast.error(result.message || "Payment verification failed.");
             }
           },
           prefill: {
@@ -128,11 +135,14 @@ function PurchaseContent({ router }) {
         const razorpay = new window.Razorpay(options);
         razorpay.open();
       } else {
+        toast.error("Failed to create order.");
+
         console.error("Failed to create Razorpay order.");
       }
     } catch (error) {
+      toast.error("Payment initiation failed. Please try again.");
+
       console.error("Payment initiation failed:", error);
-      alert("Payment initiation failed. Please try again.");
     }
   };
 
@@ -165,9 +175,14 @@ function PurchaseContent({ router }) {
   };
 
   const handleDownloadInvoice = async () => {
-    if (!trackingNumber) return alert("Tracking number not available");
+    if (!trackingNumber) {
+      toast.error("Tracking number not available.");
+      return;
+    }
 
     setLoading(true);
+    toast.loading("Downloading invoice...");
+
     try {
       const response = await fetch(
         `${api.defaults.baseURL}/api/orderPaymentRoutes/download-invoice/${trackingNumber}`,
@@ -192,12 +207,20 @@ function PurchaseContent({ router }) {
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
+      toast.dismiss();
+      toast.success("Invoice downloaded successfully.");
     } catch (error) {
+      toast.dismiss();
+
       console.error("Error downloading invoice:", error);
-      alert("Failed to download invoice. Please try again.");
+      toast.error("Failed to download invoice. Please try again.");
     } finally {
       setLoading(false);
     }
+  };
+  const copyTrackingNumber = () => {
+    navigator.clipboard.writeText(trackingNumber);
+    toast.success("Tracking number copied to clipboard");
   };
 
   return (
@@ -214,7 +237,7 @@ function PurchaseContent({ router }) {
               Tracking Number: {trackingNumber}
             </p>
             <button
-              onClick={() => navigator.clipboard.writeText(trackingNumber)}
+              onClick={copyTrackingNumber}
               className="mt-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
             >
               Copy Tracking Number

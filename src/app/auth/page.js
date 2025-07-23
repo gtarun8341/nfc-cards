@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import api from "../apiConfig/axiosConfig";
 import AllFooter from "../components/AllFooter";
+import toast from "react-hot-toast"; // ✅ Import this
 
 export default function AuthPage() {
   const [isRegister, setIsRegister] = useState(false);
@@ -21,27 +22,48 @@ export default function AuthPage() {
     const requestData = isRegister
       ? { name, email, password, phone }
       : { email, password };
-    if (isRegister && (!name || !email || !password || !phone)) {
-      setLoading(false); // stop loading
-      return alert("All fields are required for registration.");
+
+    // Validation for registration
+    if (isRegister) {
+      // Registration validation
+      if (!name || !email || !password || !phone) {
+        setLoading(false);
+        return toast.error("All fields are required for registration.");
+      }
+      if (!/^\d{10}$/.test(phone)) {
+        setLoading(false);
+        return toast.error("Please enter a valid 10-digit phone number.");
+      }
+    } else {
+      // Login validation
+      if (!email || !password) {
+        setLoading(false);
+        return toast.error("Both email and password are required.");
+      }
     }
+
     try {
       const response = await api.post(apiEndpoint, requestData);
       console.log("Response:", response.data);
 
       if (!isRegister) {
         if (response.data.token) {
-          // User has an active plan
+          // Clear all previous tokens
           ["authToken", "staffAuthToken", "adminAuthToken"].forEach((token) => {
             document.cookie = `${token}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
             localStorage.removeItem(token);
           });
 
-          document.cookie = `authToken=${response.data.token}; path=/`; // Set auth token as a cookie
+          // Set new token
+          document.cookie = `authToken=${response.data.token}; path=/`;
           localStorage.setItem("authToken", response.data.token);
+          toast.success("Logged in Successfully");
+
           router.push("/user-panel/Dashboard");
         } else if (response.data.message?.includes("expired")) {
-          alert(response.data.message);
+          // ⚠️ FIX: Remove quotes around the toast message
+          toast.success(response.data.message);
+
           localStorage.setItem("_id", response.data._id);
           localStorage.setItem("userName", response.data.name);
           localStorage.setItem("userEmail", response.data.email);
@@ -50,22 +72,15 @@ export default function AuthPage() {
         }
       } else {
         // Registration successful
-        alert("Registration successful! Please log in to continue.");
+        toast.success("Registration successful! Please log in to continue.");
       }
     } catch (error) {
-      if (error.response) {
-        if (error.response.status === 401) {
-          alert("Invalid email or password");
-        } else if (error.response.status === 403) {
-          alert(error.response.data.message); // Account deactivated
-        } else if (error.response.status === 400) {
-          alert(error.response.data.message); // Registration: email already in use
-        } else {
-          console.error("Error during API request:", error);
-          alert("An error occurred. Please try again later.");
-        }
+      console.error("Error during API request:", error);
+
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
       } else {
-        console.error("Error during API request:", error);
+        toast.error("An error occurred. Please try again later.");
       }
     } finally {
       setLoading(false); // stop loading in all cases

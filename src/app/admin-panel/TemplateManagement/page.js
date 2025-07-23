@@ -7,6 +7,7 @@ const TemplateManagement = () => {
   const [files, setFiles] = useState([]);
   const [templateNames, setTemplateNames] = useState([]);
   const [templateType, setTemplateType] = useState("nfc");
+  const [uploading, setUploading] = useState(false);
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -26,7 +27,7 @@ const TemplateManagement = () => {
     e.preventDefault();
 
     if (files.length === 0) {
-      alert("Please select at least one file.");
+      toast.error("Please select at least one file.");
       return;
     }
 
@@ -37,7 +38,9 @@ const TemplateManagement = () => {
       formData.append("files", file);
       formData.append("names", templateNames[index] || file.name.split(".")[0]);
     });
+
     const toastId = toast.loading("Uploading templates...");
+    setUploading(true);
 
     try {
       const token = localStorage.getItem("adminAuthToken");
@@ -52,6 +55,7 @@ const TemplateManagement = () => {
         formData,
         config
       );
+
       toast.success(response.data.message || "Templates uploaded!", {
         id: toastId,
       });
@@ -61,9 +65,12 @@ const TemplateManagement = () => {
       setTemplateNames([]);
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("Error uploading templates.");
+      toast.error("Error uploading templates.", { id: toastId });
+    } finally {
+      setUploading(false);
     }
   };
+
   return (
     <div className="p-6">
       <h2 className="text-2xl font-semibold mb-4">Upload Templates</h2>
@@ -126,9 +133,14 @@ const TemplateManagement = () => {
 
         <button
           type="submit"
-          className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+          disabled={uploading}
+          className={`px-4 py-2 rounded-md text-white transition ${
+            uploading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-green-500 hover:bg-green-600"
+          }`}
         >
-          Upload
+          {uploading ? "Uploading..." : "Upload"}
         </button>
       </form>
     </div>

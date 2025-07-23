@@ -3,7 +3,8 @@
 import { useEffect, useState, useCallback } from "react";
 import api from "../../apiConfig/axiosConfig";
 import * as XLSX from "xlsx";
-
+import Pagination from "../../components/Pagination"; // Adjust path based on your folder structure
+import toast from "react-hot-toast";
 const SoldProducts = () => {
   const [sales, setSales] = useState([]);
   const [token, setToken] = useState(null); // State to store the token
@@ -26,6 +27,7 @@ const SoldProducts = () => {
       setSales(response.data.data);
       setTotalPages(response.data.totalPages);
     } catch (error) {
+      toast.error("Error fetching sales data.Please try again");
       console.error("Error fetching sales data:", error);
     }
   }, [token, page, searchQuery]);
@@ -42,55 +44,59 @@ const SoldProducts = () => {
   useEffect(() => {
     fetchSalesData();
   }, [page]);
-
   const handleDownload = () => {
     if (sales.length === 0) {
-      alert("No sales data to download.");
+      toast.error("No sales data to download.");
       return;
     }
 
-    const data = [];
+    try {
+      const data = [];
 
-    sales.forEach((sale) => {
-      sale.products.forEach((product) => {
-        const priceWithGst = sale.gstOnPurchase
-          ? (
-              sale.totalAmount -
-              (sale.totalAmount * sale.gstOnPurchase) / 100
-            ).toFixed(2)
-          : sale.totalAmount.toFixed(2);
+      sales.forEach((sale) => {
+        sale.products.forEach((product) => {
+          const priceWithGst = sale.gstOnPurchase
+            ? (
+                sale.totalAmount -
+                (sale.totalAmount * sale.gstOnPurchase) / 100
+              ).toFixed(2)
+            : sale.totalAmount.toFixed(2);
 
-        data.push({
-          "Invoice Number": sale.invoiceNumber,
-          "Tracking Number": sale.trackingNumber,
-          Status: sale.status,
-          Date: sale.createdAt,
-          "Buyer Name": sale?.userDetails?.name || "N/A",
-          "Buyer Email": sale?.userDetails?.email || "N/A",
-          Address: [
-            sale?.userDetails?.address,
-            sale?.userDetails?.state,
-            sale?.userDetails?.country,
-            sale?.userDetails?.pincode,
-          ]
-            .filter(Boolean)
-            .join(", "),
-
-          "Product Title": product.title,
-          Quantity: product.quantity,
-          "Price (Each)": product.price,
-          "Total Price": sale?.totalAmount,
-          "GST on Purchase (%)": sale?.gstOnPurchase || "N/A",
-          "Price with GST": priceWithGst || "N/A",
+          data.push({
+            "Invoice Number": sale.invoiceNumber,
+            "Tracking Number": sale.trackingNumber,
+            Status: sale.status,
+            Date: sale.createdAt,
+            "Buyer Name": sale?.userDetails?.name || "N/A",
+            "Buyer Email": sale?.userDetails?.email || "N/A",
+            Address: [
+              sale?.userDetails?.address,
+              sale?.userDetails?.state,
+              sale?.userDetails?.country,
+              sale?.userDetails?.pincode,
+            ]
+              .filter(Boolean)
+              .join(", "),
+            "Product Title": product.title,
+            Quantity: product.quantity,
+            "Price (Each)": product.price,
+            "Total Price": sale?.totalAmount,
+            "GST on Purchase (%)": sale?.gstOnPurchase || "N/A",
+            "Price with GST": priceWithGst || "N/A",
+          });
         });
       });
-    });
 
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sold Products");
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Sold Products");
 
-    XLSX.writeFile(workbook, "all_sold_products.xlsx");
+      XLSX.writeFile(workbook, "all_sold_products.xlsx");
+      toast.success("Excel downloaded successfully!");
+    } catch (error) {
+      console.error("Download failed:", error);
+      toast.error("Failed to download Excel.");
+    }
   };
   // Update sale status
   const updateStatus = async (id, newStatus) => {
@@ -100,9 +106,12 @@ const SoldProducts = () => {
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      toast.success("Status updated successfully!");
+
       fetchSalesData(); // Refresh data after status update
     } catch (error) {
       console.error("Error updating status:", error);
+      toast.error("Failed to update status.");
     }
   };
 
@@ -253,26 +262,12 @@ const SoldProducts = () => {
           )}
         </tbody>
       </table>
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center mt-4 space-x-4">
-          <button
-            disabled={page === 1}
-            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="text-lg font-semibold">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            disabled={page === totalPages}
-            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
-            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
+      {sales.length > 0 && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={(page) => setPage(page)}
+        />
       )}
     </div>
   );

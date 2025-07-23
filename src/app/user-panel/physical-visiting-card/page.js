@@ -278,7 +278,7 @@ const PhysicalVisitingCardPage = () => {
 
               const result = verifyResponse.data;
               if (result.status === "success") {
-                toast.success("Payment successful!");
+                toast.success("Payment successful!.Check in Card Purchases");
                 setIsModalOpen(false);
               } else {
                 toast.error("Payment verification failed.");

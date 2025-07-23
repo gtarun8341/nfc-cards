@@ -1,6 +1,6 @@
 "use client"; // Marking this as a Client Component
 
-import { useState } from "react";
+import { useState, useEffect } from "react"; // <-- added useEffect
 import api from "../apiConfig/axiosConfig";
 import HeroBanner from "../components/HeroBanner";
 import OurMoreProducts from "../components/OurMoreProducts";
@@ -11,10 +11,36 @@ export default function TrackOrderPage() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [trackType, setTrackType] = useState("order"); // Default selection
+  const [ourMoreProductsData, setOurMoreProductsData] = useState([]);
 
   const handleTrackingInput = (e) => {
     setTrackingNumber(e.target.value);
   };
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await api.get("/api/addAdminProduct/all-products");
+        const topProducts = response.data.products
+          .slice(0, 3)
+          .map((product) => ({
+            id: product._id,
+            icon: `${api.defaults.baseURL}/uploads/adminproducts/${product.productImages[0]}`,
+            title: product.productName,
+            description: product.productType,
+            price: `₹${product.productPrice}`,
+          }));
+        setOurMoreProductsData(topProducts);
+      } catch (error) {
+        console.error(
+          "Error fetching products for more products section:",
+          error
+        );
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const handleTrackOrder = async () => {
     try {
@@ -62,30 +88,6 @@ export default function TrackOrderPage() {
       setLoading(false);
     }
   };
-  const ourmoreproductsdata = [
-    {
-      id: 1,
-      icon: "https://via.placeholder.com/150",
-      title: "Product 1",
-      description: "Fast, secure, and scalable hosting.",
-      price: "$10.00",
-    },
-    {
-      id: 2,
-      icon: "https://via.placeholder.com/150",
-      title: "Product 2",
-      description: "Fast, secure, and scalable hosting.",
-      price: "$15.00",
-    },
-    {
-      id: 3,
-      icon: "https://via.placeholder.com/150",
-      title: "Product 3",
-      description: "Fast, secure, and scalable hosting.",
-      price: "$20.00",
-    },
-    // Add more products as needed
-  ];
 
   return (
     <div className="min-h-full flex flex-col justify-center items-center bg-white p-4">
@@ -210,7 +212,7 @@ export default function TrackOrderPage() {
       <OurMoreProducts
         headingTitle="Our More Products"
         headingDescription="Select the perfect package for your networking needs, from individual cards to enterprise solutions."
-        ourmoreproductsdata={ourmoreproductsdata}
+        ourmoreproductsdata={ourMoreProductsData}
       />
     </div>
   );

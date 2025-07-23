@@ -32,6 +32,7 @@ const AdminPlansPage = () => {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -53,6 +54,7 @@ const AdminPlansPage = () => {
   }, [search]); // <-- Also add 'search' as a dependency to re-fetch when search changes
 
   const handleAddPlan = async () => {
+    setIsSubmitting(true);
     const formattedPlan = {
       ...newPlan,
       features: newPlan.features.split(",").map((f) => f.trim()),
@@ -77,6 +79,8 @@ const AdminPlansPage = () => {
       console.error(error);
       setError("Failed to add subscription plan");
       toast.error("Failed to add subscription plan");
+    } finally {
+      setIsSubmitting(false);
     }
   };
   const handleEditPlan = async () => {
@@ -197,6 +201,11 @@ const AdminPlansPage = () => {
 
       {loading ? (
         <div className="text-center text-gray-500">Loading plans...</div>
+      ) : filteredPlans.length === 0 ? (
+        <div className="text-center text-lg text-gray-600 py-20">
+          There are no plans currently. <br />
+          Add new plans to display them on the subscription page.
+        </div>
       ) : (
         <div className="overflow-x-auto rounded-lg shadow">
           <table className="min-w-full text-sm text-left bg-white border border-gray-200">
@@ -224,11 +233,19 @@ const AdminPlansPage = () => {
                   <td className="px-4 py-4 border-b">{plan.title}</td>
                   <td className="px-4 py-4 border-b">₹{plan.price}</td>
                   <td className="px-4 py-4 border-b">{plan.currency}</td>
-                  <td className="px-4 py-4 border-b">
+                  <td
+                    className="px-4 py-4 border-b max-w-xs truncate"
+                    title={
+                      Array.isArray(plan.features)
+                        ? plan.features.join(", ")
+                        : plan.features
+                    }
+                  >
                     {Array.isArray(plan.features)
                       ? plan.features.join(", ")
                       : plan.features}
                   </td>
+
                   <td className="px-4 py-4 border-b">
                     {plan.expiryMonths} months
                   </td>
@@ -237,30 +254,32 @@ const AdminPlansPage = () => {
                       {plan.limitations?.[key] ?? "-"}
                     </td>
                   ))}
-                  <td className="px-4 py-4 border-b text-center space-x-2">
-                    {plan.isDeleted ? (
-                      <button
-                        onClick={() => toggleDeletePlan(plan._id, false)}
-                        className="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                      >
-                        Restore
-                      </button>
-                    ) : (
-                      <>
+                  <td className="px-4 py-4 border-b text-center">
+                    <div className="flex justify-center items-center gap-2 flex-wrap">
+                      {plan.isDeleted ? (
                         <button
-                          onClick={() => openEditModal(plan)}
-                          className="px-3 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+                          onClick={() => toggleDeletePlan(plan._id, false)}
+                          className="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
                         >
-                          Edit
+                          Restore
                         </button>
-                        <button
-                          onClick={() => toggleDeletePlan(plan._id, true)}
-                          className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-                        >
-                          Delete
-                        </button>
-                      </>
-                    )}
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => openEditModal(plan)}
+                            className="px-3 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => toggleDeletePlan(plan._id, true)}
+                            className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -384,9 +403,18 @@ const AdminPlansPage = () => {
               </button>
               <button
                 onClick={editing ? handleEditPlan : handleAddPlan}
-                className="px-5 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className={`px-5 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 ${
+                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={isSubmitting}
               >
-                {editing ? "Update Plan" : "Add Plan"}
+                {isSubmitting
+                  ? editing
+                    ? "Updating..."
+                    : "Adding..."
+                  : editing
+                  ? "Update Plan"
+                  : "Add Plan"}
               </button>
             </div>
           </div>

@@ -1,128 +1,134 @@
-"use client"; // Next.js Client Component
+"use client";
 
-import MultiStepForm from "../../../components/MultiStepForm"; // Assuming MultiStepForm is in the same folder
 import { useState } from "react";
-import api from "../../../apiConfig/axiosConfig"; // Importing the API config
+import api from "../../../apiConfig/axiosConfig";
 import toast from "react-hot-toast";
 
 const PasswordChangePage = ({ onBack }) => {
-  const [errorMessages, setErrorMessages] = useState([]); // State for error messages
-  const [successMessage, setSuccessMessage] = useState(""); // State for success message
+  const [formData, setFormData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmNewPassword: "",
+  });
 
-  const steps = [
-    {
-      title: "Change Password",
-      fields: [
-        {
-          name: "currentPassword",
-          type: "password",
-          label: "Current Password",
-          placeholder: "Enter your current password",
-          required: true,
-        },
-        {
-          name: "newPassword",
-          type: "password",
-          label: "New Password",
-          placeholder: "Enter a new password",
-          required: true,
-        },
-        {
-          name: "confirmNewPassword",
-          type: "password",
-          label: "Confirm New Password",
-          placeholder: "Confirm your new password",
-          required: true,
-        },
-      ],
-    },
-  ];
+  const [errors, setErrors] = useState([]);
+  const [loading, setLoading] = useState(false); // ⬅️ New loading state
 
-  const validatePasswords = (formData) => {
-    const errors = [];
-
-    if (formData.newPassword.length < 6) {
-      errors.push("New password must be at least 6 characters long.");
-    }
-
-    // // Add more complexity checks here if needed
-    // if (!/[A-Z]/.test(formData.newPassword)) {
-    //   errors.push('New password must contain at least one uppercase letter.');
-    // }
-
-    // if (!/\d/.test(formData.newPassword)) {
-    //   errors.push('New password must contain at least one number.');
-    // }
-
-    // if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.newPassword)) {
-    //   errors.push('New password must contain at least one special character.');
-    // }
-
-    return errors;
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (formData) => {
-    setErrorMessages([]); // Clear previous error messages
-    setSuccessMessage(""); // Clear previous success message
-
+  const validatePasswords = () => {
+    const errorList = [];
+    if (formData.newPassword.length < 6) {
+      errorList.push("New password must be at least 6 characters.");
+    }
     if (formData.newPassword !== formData.confirmNewPassword) {
-      toast.error("New passwords do not match!");
-      return;
+      errorList.push("New passwords do not match.");
     }
+    if (formData.newPassword === formData.currentPassword) {
+      errorList.push("New password cannot be the same as current password.");
+    }
+    return errorList;
+  };
 
-    const validationErrors = validatePasswords(formData);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrors([]);
+    const validationErrors = validatePasswords();
     if (validationErrors.length > 0) {
-      setErrorMessages(validationErrors); // Show all validation errors
+      setErrors(validationErrors);
       return;
     }
 
+    setLoading(true); // ⬅️ Begin loading
     try {
-      const token = localStorage.getItem("authToken"); // Retrieve the JWT token from localStorage
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`, // Attach the token to the Authorization header
-        },
-      };
-
-      // Make API call to change password
-      const response = await api.put(
+      const token = localStorage.getItem("authToken");
+      const { data } = await api.put(
         "/api/users/changePassword",
         {
           currentPassword: formData.currentPassword,
           newPassword: formData.newPassword,
         },
-        config
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
-
-      toast.success(response.data.message || "Password changed successfully!");
-      // Reset form fields if needed
+      toast.success(data.message || "Password changed successfully!");
+      onBack(); // Return to profile form
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to change password");
+    } finally {
+      setLoading(false); // ⬅️ Done loading
     }
   };
 
   return (
-    <div>
-      <MultiStepForm
-        steps={steps}
-        formTitle="Change Password"
-        onSubmit={handleSubmit}
-        onBack={onBack}
-      />
-      {errorMessages.length > 0 && (
-        <div className="error-messages">
-          {errorMessages.map((error, index) => (
-            <p key={index} style={{ color: "red" }}>
-              {error}
-            </p>
-          ))}
+    <div className="p-6 max-w-xl mx-auto">
+      <h2 className="text-xl font-bold mb-4">Change Password</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block mb-1">Current Password</label>
+          <input
+            type="password"
+            name="currentPassword"
+            value={formData.currentPassword}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+            required
+          />
         </div>
-      )}
-      {successMessage && (
-        <div className="success-message" style={{ color: "green" }}>
-          <p>{successMessage}</p>
+        <div>
+          <label className="block mb-1">New Password</label>
+          <input
+            type="password"
+            name="newPassword"
+            value={formData.newPassword}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+            required
+          />
         </div>
-      )}
+        <div>
+          <label className="block mb-1">Confirm New Password</label>
+          <input
+            type="password"
+            name="confirmNewPassword"
+            value={formData.confirmNewPassword}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
+        {errors.length > 0 && (
+          <div className="text-red-500 space-y-1">
+            {errors.map((err, i) => (
+              <p key={i}>{err}</p>
+            ))}
+          </div>
+        )}
+        <div className="flex justify-between">
+          <button
+            type="button"
+            onClick={onBack}
+            disabled={loading}
+            className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 disabled:opacity-50"
+          >
+            Back
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className={`${
+              loading
+                ? "bg-blue-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            } text-white px-4 py-2 rounded transition-all duration-200`}
+          >
+            {loading ? "Changing..." : "Change Password"}
+          </button>
+        </div>
+      </form>
     </div>
   );
 };

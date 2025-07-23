@@ -26,10 +26,21 @@ const OfferDiscountsEventsPage = () => {
         setProducts(response.data.products);
       } catch (error) {
         console.error("Error fetching products:", error);
-        toast.error("Failed to load products");
+
+        if (
+          error.response?.status === 404 &&
+          error.response?.data?.message === "User details not found"
+        ) {
+          toast.error("Add user details to add products and discounts.");
+          // setErrorMessage("Add user details to add products and discounts.");
+        } else {
+          toast.error("Failed to load products.");
+          // setErrorMessage("Failed to load products.");
+        }
+
+        setProducts([]); // Ensures products remains an empty array on failure
       }
     };
-
     fetchProducts();
   }, []);
 
@@ -190,52 +201,58 @@ const OfferDiscountsEventsPage = () => {
         </button>
       </form>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
-          <thead>
-            <tr className="bg-gray-200 text-gray-700 text-left">
-              <th className="py-3 px-4 border-b">Product Name</th>
-              <th className="py-3 px-4 border-b">Discount</th>
-              <th className="py-3 px-4 border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product) => (
-              <tr key={product._id} className="hover:bg-gray-100">
-                <td className="py-3 px-4 border-b">{product.productName}</td>
-                <td className="py-3 px-4 border-b">
-                  {product.discount ? `${product.discount}` : "No Discount"}
-                </td>
-                <td className="py-3 px-4 border-b flex space-x-2">
-                  {product.discount ? (
-                    <>
+      {products.length === 0 ? (
+        <div className="text-center text-gray-600 text-lg font-medium py-6">
+          {errorMessage || "Add products to apply discounts."}
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
+            <thead>
+              <tr className="bg-gray-200 text-gray-700 text-left">
+                <th className="py-3 px-4 border-b">Product Name</th>
+                <th className="py-3 px-4 border-b">Discount</th>
+                <th className="py-3 px-4 border-b">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((product) => (
+                <tr key={product._id} className="hover:bg-gray-100">
+                  <td className="py-3 px-4 border-b">{product.productName}</td>
+                  <td className="py-3 px-4 border-b">
+                    {product.discount ? `${product.discount}` : "No Discount"}
+                  </td>
+                  <td className="py-3 px-4 border-b flex space-x-2">
+                    {product.discount ? (
+                      <>
+                        <button
+                          onClick={() => editDiscount(product)}
+                          className="bg-yellow-500 text-white p-2 rounded-md hover:bg-yellow-600 transition duration-200"
+                        >
+                          Edit Discount
+                        </button>
+                        <button
+                          onClick={() => removeDiscount(product._id)}
+                          className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600 transition duration-200"
+                        >
+                          Remove Discount
+                        </button>
+                      </>
+                    ) : (
                       <button
                         onClick={() => editDiscount(product)}
-                        className="bg-yellow-500 text-white p-2 rounded-md hover:bg-yellow-600 transition duration-200"
+                        className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition duration-200"
                       >
-                        Edit Discount
+                        Add Discount
                       </button>
-                      <button
-                        onClick={() => removeDiscount(product._id)}
-                        className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600 transition duration-200"
-                      >
-                        Remove Discount
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      onClick={() => editDiscount(product)}
-                      className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition duration-200"
-                    >
-                      Add Discount
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import api from "../../apiConfig/axiosConfig"; // Adjust the path as needed
 import * as XLSX from "xlsx";
 import toast from "react-hot-toast";
+import Pagination from "../../components/Pagination"; // Adjust path based on your folder structure
 
 const EnquiriesPage = () => {
   const [enquiries, setEnquiries] = useState([]);
@@ -147,48 +148,45 @@ const EnquiriesPage = () => {
             </tr>
           </thead>
           <tbody>
-            {enquiries.map((enquiry) => (
-              <tr
-                key={enquiry._id}
-                className="hover:bg-gray-100 transition duration-150"
-              >
-                <td className="border-t py-2 px-4">{enquiry.name}</td>
-                <td className="border-t py-2 px-4">{enquiry.email}</td>
-                <td className="border-t py-2 px-4">{enquiry.phone}</td>
-                <td className="border-t py-2 px-4">{enquiry.message}</td>
-                <td className="border-t py-2 px-4">
-                  <button
-                    onClick={() => handleDelete(enquiry._id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Delete
-                  </button>
+            {enquiries.length === 0 ? (
+              <tr>
+                <td
+                  colSpan="5"
+                  className="py-4 px-4 text-center text-gray-500 font-medium"
+                >
+                  No enquiries to display.
                 </td>
               </tr>
-            ))}
+            ) : (
+              enquiries.map((enquiry) => (
+                <tr
+                  key={enquiry._id}
+                  className="hover:bg-gray-100 transition duration-150"
+                >
+                  <td className="border-t py-2 px-4">{enquiry.name}</td>
+                  <td className="border-t py-2 px-4">{enquiry.email}</td>
+                  <td className="border-t py-2 px-4">{enquiry.phone}</td>
+                  <td className="border-t py-2 px-4">{enquiry.message}</td>
+                  <td className="border-t py-2 px-4">
+                    <button
+                      onClick={() => handleDelete(enquiry._id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
-        <div className="flex justify-between mt-4">
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="px-4 py-2 text-gray-700">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
+        {enquiries.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => setCurrentPage(page)}
+          />
+        )}
       </div>
     </div>
   );

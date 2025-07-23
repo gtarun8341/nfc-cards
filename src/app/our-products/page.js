@@ -7,7 +7,7 @@ import { useState, useEffect } from "react"; // Import useState and useEffect fo
 import { useRouter } from "next/navigation"; // Correct import for Next.js 13
 import api from "../apiConfig/axiosConfig";
 import HeroBanner from "../components/HeroBanner";
-
+import toast from "react-hot-toast";
 export default function OurProductsPage() {
   const [products, setProducts] = useState([]); // State to manage fetched products
   const [cart, setCart] = useState({}); // State to manage cart items
@@ -24,6 +24,7 @@ export default function OurProductsPage() {
         setAdminId(response.data.adminId); // Set adminId
       } catch (error) {
         console.error("Error fetching products:", error);
+        toast.error("Failed to load products");
         setError("Failed to load products");
       } finally {
         setLoading(false);
@@ -70,39 +71,48 @@ export default function OurProductsPage() {
   };
 
   return (
-    <div className="relative">
-      <div className="container mx-auto p-6">
-        <div className="flex justify-center">
-          <HeroBanner text="SHOP NOW OUR EXCLUSIVE PRODUCTS" />
-        </div>
-        {loading ? (
-          <p>Loading products...</p>
-        ) : error ? (
-          <p>{error}</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map((product) => (
-              <ProductCard
-                key={product._id}
-                product={{
-                  id: product._id,
-                  icon: `${api.defaults.baseURL}/uploads/adminproducts/${product.productImages[0]}`,
-                  title: product.productName,
-                  description: product.productType,
-                  price: product.productPrice,
-                  discount: product.discount ? `${product.discount}%` : null,
-                }}
-                onAddToCart={handleAddToCart}
-              />
-            ))}
+    <div className="flex flex-col min-h-screen">
+      {" "}
+      {/* Make the page full height */}
+      <div className="flex-grow">
+        {" "}
+        {/* This pushes footer to bottom */}
+        <div className="container mx-auto p-6">
+          <div className="flex justify-center">
+            <HeroBanner text="SHOP NOW OUR EXCLUSIVE PRODUCTS" />
           </div>
-        )}
-      </div>
 
-      {/* Floating Cart Summary */}
-      {/* Floating Cart Summary */}
+          {loading ? (
+            <p>Loading products...</p>
+          ) : error ? (
+            <p>{error}</p>
+          ) : products.length === 0 ? (
+            <p className="text-center text-gray-600 text-lg">
+              No products added yet.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {products.map((product) => (
+                <ProductCard
+                  key={product._id}
+                  product={{
+                    id: product._id,
+                    icon: `${api.defaults.baseURL}/uploads/adminproducts/${product.productImages[0]}`,
+                    title: product.productName,
+                    description: product.productType,
+                    price: product.productPrice,
+                    discount: product.discount ? `${product.discount}%` : null,
+                  }}
+                  onAddToCart={handleAddToCart}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      {/* Cart Summary */}
       {cartItems.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-4 border-t border-gray-300 max-h-72 overflow-y-auto">
+        <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-4 border-t border-gray-300 max-h-72 overflow-y-auto z-50">
           <div className="flex items-center justify-between mb-4">
             <p className="text-lg font-bold">Cart Summary</p>
             <button
@@ -149,7 +159,6 @@ export default function OurProductsPage() {
           </table>
         </div>
       )}
-
       <AllFooter />
     </div>
   );

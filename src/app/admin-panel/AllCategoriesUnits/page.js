@@ -10,7 +10,10 @@ const AllCategoriesUnits = () => {
   const [newCategory, setNewCategory] = useState("");
   const [newUnit, setNewUnit] = useState({ name: "", abbreviation: "" });
   const [loading, setLoading] = useState(true);
-
+  const [categoryLoading, setCategoryLoading] = useState(false);
+  const [unitLoading, setUnitLoading] = useState(false);
+  const [deletingCategory, setDeletingCategory] = useState({});
+  const [deletingUnit, setDeletingUnit] = useState({});
   const fetchData = async () => {
     try {
       const token = localStorage.getItem("adminAuthToken");
@@ -33,6 +36,7 @@ const AllCategoriesUnits = () => {
 
   const addCategory = async () => {
     if (!newCategory.trim()) return toast.error("Enter category name");
+    setCategoryLoading(true);
     try {
       const token = localStorage.getItem("adminAuthToken");
       await api.post(
@@ -45,11 +49,14 @@ const AllCategoriesUnits = () => {
       fetchData();
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to add category");
+    } finally {
+      setCategoryLoading(false);
     }
   };
 
   const addUnit = async () => {
     if (!newUnit.name.trim()) return toast.error("Enter unit name");
+    setUnitLoading(true);
     try {
       const token = localStorage.getItem("adminAuthToken");
       await api.post("/api/category-units/unit", newUnit, {
@@ -60,10 +67,13 @@ const AllCategoriesUnits = () => {
       fetchData();
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to add unit");
+    } finally {
+      setUnitLoading(false);
     }
   };
 
   const deleteCategory = async (name) => {
+    setDeletingCategory((prev) => ({ ...prev, [name]: true }));
     try {
       const token = localStorage.getItem("adminAuthToken");
       await api.delete(`/api/category-units/category/${name}`, {
@@ -73,10 +83,13 @@ const AllCategoriesUnits = () => {
       fetchData();
     } catch (err) {
       toast.error("Failed to delete category");
+    } finally {
+      setDeletingCategory((prev) => ({ ...prev, [name]: false }));
     }
   };
 
   const deleteUnit = async (name) => {
+    setDeletingUnit((prev) => ({ ...prev, [name]: true }));
     try {
       const token = localStorage.getItem("adminAuthToken");
       await api.delete(`/api/category-units/unit/${name}`, {
@@ -86,6 +99,8 @@ const AllCategoriesUnits = () => {
       fetchData();
     } catch (err) {
       toast.error("Failed to delete unit");
+    } finally {
+      setDeletingUnit((prev) => ({ ...prev, [name]: false }));
     }
   };
 
@@ -116,27 +131,33 @@ const AllCategoriesUnits = () => {
               />
               <button
                 onClick={addCategory}
-                className="bg-green-500 text-white px-4 py-2 rounded"
+                disabled={categoryLoading}
+                className="bg-green-500 text-white px-4 py-2 rounded disabled:opacity-50"
               >
-                Add
+                {categoryLoading ? "Adding..." : "Add"}
               </button>
             </div>
-            <ul>
-              {categories.map((cat, idx) => (
-                <li
-                  key={idx}
-                  className="flex justify-between items-center border-b py-2"
-                >
-                  <span>{cat.name}</span>
-                  <button
-                    onClick={() => deleteCategory(cat.name)}
-                    className="text-red-500 hover:underline"
+            {!loading && categories.length === 0 ? (
+              <p className="text-gray-500 text-sm">No categories added.</p>
+            ) : (
+              <ul>
+                {categories.map((cat, idx) => (
+                  <li
+                    key={idx}
+                    className="flex justify-between items-center border-b py-2"
                   >
-                    Delete
-                  </button>
-                </li>
-              ))}
-            </ul>
+                    <span>{cat.name}</span>
+                    <button
+                      onClick={() => deleteCategory(cat.name)}
+                      disabled={deletingCategory[cat.name]}
+                      className="text-red-500 hover:underline disabled:opacity-50"
+                    >
+                      {deletingCategory[cat.name] ? "Deleting..." : "Delete"}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           {/* Units */}
@@ -163,29 +184,36 @@ const AllCategoriesUnits = () => {
               />
               <button
                 onClick={addUnit}
-                className="bg-green-500 text-white px-4 py-2 rounded"
+                disabled={unitLoading}
+                className="bg-green-500 text-white px-4 py-2 rounded disabled:opacity-50"
               >
-                Add
+                {unitLoading ? "Adding..." : "Add"}
               </button>
             </div>
-            <ul>
-              {units.map((unit, idx) => (
-                <li
-                  key={idx}
-                  className="flex justify-between items-center border-b py-2"
-                >
-                  <span>
-                    {unit.name} {unit.abbreviation && `(${unit.abbreviation})`}
-                  </span>
-                  <button
-                    onClick={() => deleteUnit(unit.name)}
-                    className="text-red-500 hover:underline"
+            {!loading && units.length === 0 ? (
+              <p className="text-gray-500 text-sm">No units added.</p>
+            ) : (
+              <ul>
+                {units.map((unit, idx) => (
+                  <li
+                    key={idx}
+                    className="flex justify-between items-center border-b py-2"
                   >
-                    Delete
-                  </button>
-                </li>
-              ))}
-            </ul>
+                    <span>
+                      {unit.name}{" "}
+                      {unit.abbreviation && `(${unit.abbreviation})`}
+                    </span>
+                    <button
+                      onClick={() => deleteUnit(unit.name)}
+                      disabled={deletingUnit[unit.name]}
+                      className="text-red-500 hover:underline disabled:opacity-50"
+                    >
+                      {deletingUnit[unit.name] ? "Deleting..." : "Delete"}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       )}

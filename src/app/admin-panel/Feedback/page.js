@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../../apiConfig/axiosConfig";
 import toast from "react-hot-toast";
+import Pagination from "../../components/Pagination"; // Adjust path based on your folder structure
 
 const FeedbackPage = () => {
   const [feedbackList, setFeedbackList] = useState([]);
@@ -125,25 +126,13 @@ const FeedbackPage = () => {
         </tbody>
       </table>
 
-      <div className="flex justify-between">
-        <button
-          disabled={page === 1}
-          onClick={() => setPage((prev) => prev - 1)}
-          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-        >
-          Prev
-        </button>
-        <span className="px-4 py-2">
-          Page {page} of {totalPages}
-        </span>
-        <button
-          disabled={page >= totalPages}
-          onClick={() => setPage((prev) => prev + 1)}
-          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-        >
-          Next
-        </button>
-      </div>
+      {feedbackList.length > 0 && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={(page) => setPage(page)}
+        />
+      )}
     </div>
   );
 };

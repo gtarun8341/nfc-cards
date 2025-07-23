@@ -37,52 +37,61 @@ const OurMoreProducts = ({
         </p>
       </div>
 
-      {/* Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {currentCards.map((card) => (
-          <div
-            key={card.id}
-            className="border rounded-lg shadow-md p-3 bg-white text-center"
-          >
-            <Image
-              src={card.icon}
-              alt={card.title}
-              width={400}
-              height={300}
-              className="w-full h-36 object-cover mb-3 rounded"
-            />
-            <h3 className="text-md font-semibold text-gray-800 mb-1">
-              {card.title}
-            </h3>
-            <p className="text-sm text-gray-600 mb-2">{card.description}</p>
-            <p className="text-md font-bold text-gray-900 mb-4">
-              ₹{card.price}
-            </p>
-            <button className="bg-black text-white py-2 px-4 rounded hover:bg-gray-800 transition">
-              Learn More
-            </button>
+      {/* If no products */}
+      {ourmoreproductsdata.length === 0 ? (
+        <p className="text-center text-gray-600 text-lg">
+          No products added yet.
+        </p>
+      ) : (
+        <>
+          {/* Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {currentCards.map((card) => (
+              <div
+                key={card.id}
+                className="border rounded-lg shadow-md p-3 bg-white text-center"
+              >
+                <Image
+                  src={card.icon}
+                  alt={card.title}
+                  width={400}
+                  height={300}
+                  className="w-full h-36 object-cover mb-3 rounded"
+                />
+                <h3 className="text-md font-semibold text-gray-800 mb-1">
+                  {card.title}
+                </h3>
+                <p className="text-sm text-gray-600 mb-2">{card.description}</p>
+                <p className="text-md font-bold text-gray-900 mb-4">
+                  ₹{card.price}
+                </p>
+                <button className="bg-black text-white py-2 px-4 rounded hover:bg-gray-800 transition">
+                  Learn More
+                </button>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {/* Pagination Arrows */}
-      {totalPages > 1 && (
-        <div className="flex justify-center mt-8 gap-4">
-          <button
-            onClick={prevPage}
-            disabled={page === 0}
-            className="bg-black hover:bg-gray-600 text-white w-8 h-8 flex items-center justify-center rounded-full disabled:opacity-50"
-          >
-            &larr;
-          </button>
-          <button
-            onClick={nextPage}
-            disabled={page === totalPages - 1}
-            className="bg-black hover:bg-gray-600 text-white w-8 h-8 flex items-center justify-center rounded-full disabled:opacity-50"
-          >
-            &rarr;
-          </button>
-        </div>
+          {/* Pagination Arrows */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-8 gap-4">
+              <button
+                onClick={prevPage}
+                disabled={page === 0}
+                className="bg-black hover:bg-gray-600 text-white w-8 h-8 flex items-center justify-center rounded-full disabled:opacity-50"
+              >
+                &larr;
+              </button>
+              <button
+                onClick={nextPage}
+                disabled={page === totalPages - 1}
+                className="bg-black hover:bg-gray-600 text-white w-8 h-8 flex items-center justify-center rounded-full disabled:opacity-50"
+              >
+                &rarr;
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

@@ -106,7 +106,13 @@ const PurchaseHistoryPage = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredPlans.length === 0 ? (
+          {loading ? (
+            <tr>
+              <td colSpan="5" className="py-3 px-4 text-center text-gray-500">
+                Loading plans...
+              </td>
+            </tr>
+          ) : filteredPlans.length === 0 ? (
             <tr>
               <td colSpan="5" className="py-3 px-4 text-center text-gray-500">
                 No plans found.
@@ -129,11 +135,13 @@ const PurchaseHistoryPage = () => {
                 </td>
                 <td className="py-3 px-4 border-b">
                   <button
-                    onClick={() => handleDownloadInvoice(plan._id)}
+                    onClick={() => handleDownloadInvoice(plan.trackingId)}
                     className="bg-blue-500 text-white py-1 px-3 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-200 transition-colors"
-                    disabled={downloading === plan._id}
+                    disabled={downloading === plan.trackingId}
                   >
-                    {downloading === plan._id ? "Downloading..." : "Download"}
+                    {downloading === plan.trackingId
+                      ? "Downloading..."
+                      : "Download"}
                   </button>
                 </td>
               </tr>

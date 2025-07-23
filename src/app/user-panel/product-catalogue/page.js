@@ -1,12 +1,13 @@
 "use client"; // Next.js Client Component
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import axios from "axios";
 import api from "../../apiConfig/axiosConfig"; // Ensure you have the right API config
 import { toast } from "react-hot-toast"; // ✅ Add toast
+import Pagination from "../../components/Pagination"; // Adjust path based on your folder structure
 
 const ProductCataloguePage = () => {
   const [catalogue, setCatalogue] = useState([]);
+  const [userDetailsAvailable, setUserDetailsAvailable] = useState(true);
   const [currentProduct, setCurrentProduct] = useState({
     name: "",
     type: "",
@@ -47,19 +48,36 @@ const ProductCataloguePage = () => {
   };
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      setCurrentPage(1); // Reset to first page on new search
-      fetchProducts();
-    }, 500); // Debounce for 500ms
+      setCurrentPage(1); // Let currentPage hook handle fetching
+    }, 500);
 
     return () => clearTimeout(delayDebounce);
   }, [searchQuery]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [currentPage]);
+
   // Handle form input changes
+  const MAX_IMAGE_SIZE_MB = 1;
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === "image") {
-      setCurrentProduct({ ...currentProduct, image: files[0] });
+
+    if (name === "image" && files?.[0]) {
+      const file = files[0];
+      const sizeMB = file.size / (1024 * 1024);
+
+      // Validate image size
+      if (sizeMB > MAX_IMAGE_SIZE_MB) {
+        toast.error("Image must be less than or equal to 1MB.");
+        setError("Image must be less than or equal to 1MB.");
+        return;
+      }
+
+      setCurrentProduct((prev) => ({ ...prev, image: file }));
     } else {
-      setCurrentProduct({ ...currentProduct, [name]: value });
+      setCurrentProduct((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -170,15 +188,22 @@ const ProductCataloguePage = () => {
       setUploadLimit(response.data.uploadLimit);
       setTotalPages(response.data.totalPages);
       setUserId(response.data.id);
+      setUserDetailsAvailable(true); // ✅ user details exist
     } catch (error) {
       console.error("Error fetching products:", error);
-      toast.error("Failed to load products");
+      if (
+        error.response?.status === 404 &&
+        error.response?.data?.message === "User details not found"
+      ) {
+        toast.error("Add user details to add products and discounts.");
+        setUserDetailsAvailable(false); // ❌ user details missing
+
+        // setErrorMessage("Add user details to add products and discounts.");
+      } else {
+        toast.error("Failed to load products.");
+      }
     }
   };
-
-  useEffect(() => {
-    fetchProducts();
-  }, [currentPage]);
 
   // Edit product
   const editProduct = (product) => {
@@ -369,7 +394,12 @@ const ProductCataloguePage = () => {
         <button
           type="button"
           onClick={addOrUpdateProduct}
-          className="mt-4 w-full bg-blue-600 text-white p-3 rounded-md hover:bg-blue-700 transition"
+          disabled={!userDetailsAvailable}
+          className={`mt-4 w-full p-3 rounded-md transition ${
+            userDetailsAvailable
+              ? "bg-blue-600 text-white hover:bg-blue-700"
+              : "bg-gray-400 text-white cursor-not-allowed"
+          }`}
         >
           {isEditing ? "Update Product" : "Add Product"}
         </button>
@@ -391,73 +421,67 @@ const ProductCataloguePage = () => {
             </tr>
           </thead>
           <tbody>
-            {catalogue.map((product) => (
-              <tr key={product._id} className="hover:bg-gray-100">
-                <td className="py-3 px-4 border-b">{product.productName}</td>
-                <td className="py-3 px-4 border-b">{product.productType}</td>
-                <td className="py-3 px-4 border-b">{product.productPrice}</td>
-                <td className="py-3 px-4 border-b">{product.hsnCode}</td>
-                <td className="py-3 px-4 border-b">{product.gst}</td>
-                <td className="py-3 px-4 border-b">{product.units}</td>
-                <td className="py-3 px-4 border-b">{product.category}</td>
-                <td className="py-3 px-4 border-b">
-                  {product.productImages &&
-                    product.productImages[0] &&
-                    (() => {
-                      const imageUrl = `${api.defaults.baseURL}/uploads/userDetails/${userId}/${product.productImages[0]}`;
-                      console.log("Image URL:", imageUrl); // Log the URL
-                      return (
-                        <Image
-                          src={imageUrl} // Use base URL for images
-                          alt={product.productName}
-                          width={500} // Set a reasonable default width
-                          height={500}
-                          layout="intrinsic"
-                          className="h-16 w-16 object-cover"
-                        />
-                      );
-                    })()}
-                </td>
-
-                <td className="py-3 px-4 border-b flex space-x-2">
-                  <button
-                    onClick={() => editProduct(product)}
-                    className="bg-yellow-500 text-white p-2 rounded-md hover:bg-yellow-600 transition duration-200"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => deleteProduct(product._id)}
-                    className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600 transition duration-200"
-                  >
-                    Delete
-                  </button>
+            {catalogue.length === 0 ? (
+              <tr>
+                <td colSpan={9} className="text-center py-6 text-gray-500">
+                  No products added yet. Add userDeatils form to add products
                 </td>
               </tr>
-            ))}
+            ) : (
+              catalogue.map((product) => (
+                <tr key={product._id} className="hover:bg-gray-100">
+                  <td className="py-3 px-4 border-b">{product.productName}</td>
+                  <td className="py-3 px-4 border-b">{product.productType}</td>
+                  <td className="py-3 px-4 border-b">{product.productPrice}</td>
+                  <td className="py-3 px-4 border-b">{product.hsnCode}</td>
+                  <td className="py-3 px-4 border-b">{product.gst}</td>
+                  <td className="py-3 px-4 border-b">{product.units}</td>
+                  <td className="py-3 px-4 border-b">{product.category}</td>
+                  <td className="py-3 px-4 border-b">
+                    {product.productImages &&
+                      product.productImages[0] &&
+                      (() => {
+                        const imageUrl = `${api.defaults.baseURL}/uploads/userDetails/${userId}/${product.productImages[0]}`;
+                        console.log("Image URL:", imageUrl); // Log the URL
+                        return (
+                          <Image
+                            src={imageUrl} // Use base URL for images
+                            alt={product.productName}
+                            width={500} // Set a reasonable default width
+                            height={500}
+                            layout="intrinsic"
+                            className="h-16 w-16 object-cover"
+                          />
+                        );
+                      })()}
+                  </td>
+
+                  <td className="py-3 px-4 border-b flex space-x-2">
+                    <button
+                      onClick={() => editProduct(product)}
+                      className="bg-yellow-500 text-white p-2 rounded-md hover:bg-yellow-600 transition duration-200"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => deleteProduct(product._id)}
+                      className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600 transition duration-200"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
-        <div className="flex justify-center mt-4 gap-2">
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="px-4 py-2 text-gray-700 font-semibold">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
+        {catalogue.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => setCurrentPage(page)}
+          />
+        )}
       </div>
     </div>
   );

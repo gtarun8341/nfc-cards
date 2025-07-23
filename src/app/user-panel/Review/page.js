@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import api from "../../apiConfig/axiosConfig";
 import * as XLSX from "xlsx";
 import { toast } from "react-hot-toast";
+import Pagination from "../../components/Pagination"; // Adjust path based on your folder structure
 
 const ReviewPage = () => {
   const [reviews, setReviews] = useState([]);
@@ -144,25 +145,13 @@ const ReviewPage = () => {
           </div>
 
           {/* Pagination Controls */}
-          <div className="mt-6 flex justify-center space-x-2">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-              className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-            >
-              Prev
-            </button>
-            <span className="px-4 py-2">
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
+          {reviews.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => setCurrentPage(page)}
+            />
+          )}
         </>
       )}
     </div>

@@ -13,7 +13,7 @@ const Pricing = ({ heading, description, pricingData, handlePayment }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {pricingData.map((plan) => (
             <div
-              key={plan.id}
+              key={plan._id} // Make sure this is the correct unique ID
               className="border rounded-2xl p-6 shadow-lg bg-white text-left transition-transform transform hover:scale-105 hover:shadow-xl"
             >
               <h3 className="text-2xl font-semibold text-black mb-2">
@@ -31,8 +31,8 @@ const Pricing = ({ heading, description, pricingData, handlePayment }) => {
               </button>
 
               <ul className="list-none space-y-2">
-                {plan.features.map((feature, index) => (
-                  <li key={index} className="flex items-start text-gray-700">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex items-start text-gray-700">
                     <svg
                       className="w-5 h-5 text-black mt-1 mr-2"
                       fill="currentColor"

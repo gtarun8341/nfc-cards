@@ -12,6 +12,7 @@ import AdditionalForm from "../../components/AdditionalForm";
 import { CheckCircle, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
 const UserFormPage = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     companyName: "",
     name: "",
@@ -90,6 +91,7 @@ const UserFormPage = () => {
           },
         };
         const response = await api.get(`/api/user-details/`, config);
+        console.log(response);
         // Ensure to map the response to your form structure
         const data = response.data;
         setFormData({
@@ -162,7 +164,7 @@ const UserFormPage = () => {
       } catch (error) {
         if (error.response && error.response.status === 404) {
           // Handle 404 error (User details not found)
-          toast.info("No user details found. Please fill in manually.");
+          toast("User details not found. Please fill in manually.");
 
           console.log("User details not found, skipping pre-fill.");
         } else {
@@ -202,8 +204,10 @@ const UserFormPage = () => {
   };
 
   const handleSubmit = async () => {
+    setIsSubmitting(true);
     console.log("Submit button clicked.");
     console.log("Current Form Data:", formData);
+
     if (!formData.id) {
       const stepFields = {
         0: [
@@ -250,10 +254,9 @@ const UserFormPage = () => {
           "phonePeNumber",
           "upiId",
           "accountType",
-          "usePaymentGateway",
           "qrImages",
         ],
-        4: ["products"], // Products will be validated separately
+        4: ["products"],
         5: ["galleryImages"],
         6: [
           "tagLine",
@@ -275,10 +278,9 @@ const UserFormPage = () => {
         ],
       };
 
-      // Store errors for each step
       let stepErrors = {};
+      let hasErrors = false;
 
-      // Loop through steps and collect missing fields per step
       Object.entries(stepFields).forEach(([step, fields]) => {
         stepErrors[step] = [];
 
@@ -288,30 +290,24 @@ const UserFormPage = () => {
             (Array.isArray(formData[field]) && formData[field].length === 0)
           ) {
             stepErrors[step].push(field);
+            hasErrors = true;
           }
         });
-        // Razorpay validation if payment gateway is enabled
-        if (formData.usePaymentGateway) {
+
+        // Razorpay Fields
+        if (step === "3" && formData.usePaymentGateway) {
           const razorpayErrors = [];
-
-          if (!formData.razorpayKeyId?.trim()) {
+          if (!formData.razorpayKeyId?.trim())
             razorpayErrors.push("razorpayKeyId");
-          }
-
-          if (!formData.razorpayKeySecret?.trim()) {
+          if (!formData.razorpayKeySecret?.trim())
             razorpayErrors.push("razorpayKeySecret");
-          }
 
           if (razorpayErrors.length > 0) {
-            setErrorMessages((prev) => ({
-              ...prev,
-              3: [...(prev[3] || []), ...razorpayErrors], // Add to Step 3 where bank details are
-            }));
-            return;
+            stepErrors[step] = [...(stepErrors[step] || []), ...razorpayErrors];
           }
         }
 
-        // Validate products (Step 4)
+        // Products
         if (step == 4 && formData.products) {
           formData.products.forEach((product, index) => {
             [
@@ -326,55 +322,59 @@ const UserFormPage = () => {
             ].forEach((field) => {
               if (!product[field]) {
                 stepErrors[step].push(`Product ${index + 1} - ${field}`);
+                hasErrors = true;
               }
             });
           });
         }
 
-        // Validate clients (Step 6)
+        // Clients
         if (step == 6 && formData.clientList) {
           formData.clientList.forEach((client, index) => {
             ["name", "logo"].forEach((field) => {
               if (!client[field]) {
                 stepErrors[step].push(`Client ${index + 1} - ${field}`);
+                hasErrors = true;
               }
             });
           });
         }
 
-        // Validate team members (Step 6)
+        // Team
         if (step == 6 && formData.team) {
-          formData.team.forEach((teamMember, index) => {
+          formData.team.forEach((member, index) => {
             ["name", "image"].forEach((field) => {
-              if (!teamMember[field]) {
+              if (!member[field]) {
                 stepErrors[step].push(`Team Member ${index + 1} - ${field}`);
+                hasErrors = true;
               }
             });
           });
         }
       });
 
-      // Store errors in state
       setErrorMessages(stepErrors);
 
-      // Prevent submission if any step has errors
-      if (Object.values(stepErrors).some((errors) => errors.length > 0)) {
+      if (hasErrors) {
+        setIsSubmitting(false);
+        const allErrors = Object.values(stepErrors).flat();
+        const errorPreview = allErrors.slice(0, 5).join(", ");
+        const errorMsg =
+          allErrors.length > 5
+            ? `${errorPreview}, and more...`
+            : errorPreview || "Please fill in all required fields.";
+        toast.error(`Validation error: ${errorMsg}`);
         return;
       }
-
-      // If there are missing fields, show an error message and prevent form submission
-      // if (missingFields.length > 0) {
-      //   setErrorMessages(["Please fill in the following fields: ", ...missingFields]);
-      //   return;
-      // }
     }
+
     const formDataForSubmit = new FormData();
+    console.log("everything is  formdata submit reached");
 
     Object.entries(formData).forEach(([key, value]) => {
       if (Array.isArray(value)) {
         if (key === "products") {
           value.forEach((product) => {
-            // Append product details as objects, NOT strings
             formDataForSubmit.append(
               "products[]",
               JSON.stringify({
@@ -384,11 +384,10 @@ const UserFormPage = () => {
                 hsnCode: product.hsnCode,
                 gst: product.gst,
                 units: product.units,
-                category: product.units, // <-- Add this
+                category: product.category, // corrected from product.units
               })
             );
 
-            // Append the image file only if it's a valid file (instanceof File)
             if (product.productImage && product.productImage instanceof File) {
               formDataForSubmit.append(
                 "productImages[]",
@@ -397,11 +396,7 @@ const UserFormPage = () => {
               );
             }
           });
-        } else if (
-          key === "galleryImages" ||
-          key === "documents" ||
-          key === "qrImages"
-        ) {
+        } else if (["galleryImages", "documents", "qrImages"].includes(key)) {
           value.forEach((file) => {
             if (file && file instanceof File) {
               formDataForSubmit.append(key, file, file.name);
@@ -410,7 +405,7 @@ const UserFormPage = () => {
         } else if (key === "awards" || key === "certifications") {
           value.forEach((file) => {
             if (file && file instanceof File) {
-              formDataForSubmit.append(key, file, file.name); // Append awards/certifications files
+              formDataForSubmit.append(key, file, file.name);
             }
           });
         } else if (key === "clientList") {
@@ -419,7 +414,7 @@ const UserFormPage = () => {
               "clientList[]",
               JSON.stringify({
                 clientName: client.name,
-                clientLogo: client.logo ? client.logo.name : "", // If a logo is provided, attach it
+                clientLogo: client.logo ? client.logo.name : "",
               })
             );
             if (client.logo && client.logo instanceof File) {
@@ -436,7 +431,7 @@ const UserFormPage = () => {
               "team[]",
               JSON.stringify({
                 memberName: member.name,
-                memberImage: member.image ? member.image.name : "", // Attach image if available
+                memberImage: member.image ? member.image.name : "",
               })
             );
             if (member.image && member.image instanceof File) {
@@ -448,9 +443,9 @@ const UserFormPage = () => {
             }
           });
         } else if (key === "youtubeVideos") {
-          value.forEach((video) =>
-            formDataForSubmit.append("youtubeVideos[]", video)
-          ); // Append YouTube URLs
+          value.forEach((video) => {
+            formDataForSubmit.append("youtubeVideos[]", video);
+          });
         }
       } else {
         formDataForSubmit.append(key, value);
@@ -469,35 +464,33 @@ const UserFormPage = () => {
 
       let response;
       if (formData.id) {
-        // If prefilled (data exists), update the user details
         response = await api.put(
           `/api/user-details/${formData.id}`,
           formDataForSubmit,
           config
         );
-        setSuccessMessage("Form updated successfully!");
         toast.success("Form updated successfully!");
-
-        console.log("Update Response:", response.data);
       } else {
-        // New submission (no prefilled data)
         response = await api.post(
           "/api/user-details/",
           formDataForSubmit,
           config
         );
-        setSuccessMessage("Form submitted successfully!");
         toast.success("Form submitted successfully!");
-
-        console.log("Response:", response.data);
       }
 
-      window.location.reload(); // Refresh the page
+      console.log("Response:", response.data);
+      setSuccessMessage("Form submitted successfully!");
+      window.location.reload();
     } catch (error) {
       console.error("Submission error:", error);
       toast.error("Error submitting the form");
-
-      setErrorMessages([...errorMessages, "Error submitting the form"]);
+      setErrorMessages((prev) => [
+        ...(Array.isArray(prev) ? prev : []),
+        "Error submitting the form",
+      ]);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -614,9 +607,12 @@ const UserFormPage = () => {
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+                className={`bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded ${
+                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={isSubmitting}
               >
-                Submit
+                {isSubmitting ? "Submitting..." : "Submit"}
               </button>
             )}
           </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import api from "../../apiConfig/axiosConfig";
 import * as XLSX from "xlsx";
 import toast from "react-hot-toast";
+import Pagination from "../../components/Pagination"; // Adjust path based on your folder structure
 
 const CustomerCompanyManagementPage = () => {
   const [companies, setCompanies] = useState([]);
@@ -15,6 +16,7 @@ const CustomerCompanyManagementPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
   // Fetch all company details when the component is mounted
   // useEffect(() => {
   const fetchCompanies = async () => {
@@ -203,68 +205,63 @@ const CustomerCompanyManagementPage = () => {
           />
 
           <div className="overflow-x-auto">
-            <table className="min-w-full table-auto">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="py-2 px-4 border">Name</th>
-                  <th className="py-2 px-4 border">Phone</th>
-                  <th className="py-2 px-4 border">Email</th>
-                  <th className="py-2 px-4 border">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredCompanies.map((company) => {
-                  const user = company.user || {}; // Get the user data
-                  return (
-                    <tr key={company._id} className="hover:bg-gray-100">
-                      <td className="py-2 px-4 border">{user.name || "N/A"}</td>
-                      <td className="py-2 px-4 border">
-                        {user.phone || "N/A"}
-                      </td>
-                      <td className="py-2 px-4 border">
-                        {user.email || "N/A"}
-                      </td>
-                      <td className="py-2 px-4 border flex gap-2">
-                        <button
-                          onClick={() => handleViewClick(company)}
-                          className="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600 transition"
-                        >
-                          View
-                        </button>
-                        <button
-                          onClick={() => handleDownloadExcel(company)}
-                          className="bg-green-500 text-white rounded px-4 py-2 hover:bg-green-600 transition"
-                        >
-                          Download
-                        </button>
-                      </td>
+            {loading ? (
+              <p className="p-4 text-gray-600">Loading companies...</p>
+            ) : filteredCompanies.length === 0 ? (
+              <p className="p-4 text-gray-600">No user details found.</p>
+            ) : (
+              <>
+                <table className="min-w-full table-auto">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="py-2 px-4 border">Name</th>
+                      <th className="py-2 px-4 border">Phone</th>
+                      <th className="py-2 px-4 border">Email</th>
+                      <th className="py-2 px-4 border">Actions</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            {totalPages > 1 && (
-              <div className="flex justify-center items-center mt-4 space-x-4">
-                <button
-                  disabled={page === 1}
-                  onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-                  className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-                >
-                  Previous
-                </button>
-                <span className="text-lg font-semibold">
-                  Page {page} of {totalPages}
-                </span>
-                <button
-                  disabled={page === totalPages}
-                  onClick={() =>
-                    setPage((prev) => Math.min(prev + 1, totalPages))
-                  }
-                  className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-                >
-                  Next
-                </button>
-              </div>
+                  </thead>
+                  <tbody>
+                    {filteredCompanies.map((company) => {
+                      const user = company.user || {};
+                      return (
+                        <tr key={company._id} className="hover:bg-gray-100">
+                          <td className="py-2 px-4 border">
+                            {user.name || "N/A"}
+                          </td>
+                          <td className="py-2 px-4 border">
+                            {user.phone || "N/A"}
+                          </td>
+                          <td className="py-2 px-4 border">
+                            {user.email || "N/A"}
+                          </td>
+                          <td className="py-2 px-4 border flex gap-2">
+                            <button
+                              onClick={() => handleViewClick(company)}
+                              className="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600 transition"
+                            >
+                              View
+                            </button>
+                            <button
+                              onClick={() => handleDownloadExcel(company)}
+                              className="bg-green-500 text-white rounded px-4 py-2 hover:bg-green-600 transition"
+                            >
+                              Download
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+
+                {filteredCompanies.length > 0 && (
+                  <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onPageChange={(page) => setPage(page)}
+                  />
+                )}
+              </>
             )}
           </div>
 

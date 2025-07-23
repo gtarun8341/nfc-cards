@@ -17,7 +17,10 @@ const StaffManagementPage = () => {
   });
   const [modalOpen, setModalOpen] = useState(false);
   const [editStaff, setEditStaff] = useState(null); // For editing staff
-
+  const [loading, setLoading] = useState(true);
+  const [adding, setAdding] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
   // Fetch staff on component mount
   useEffect(() => {
     fetchStaff();
@@ -25,6 +28,8 @@ const StaffManagementPage = () => {
   // Fetch all staff on component mount
   const fetchStaff = async () => {
     try {
+      setLoading(true);
+
       const token = localStorage.getItem("adminAuthToken"); // Assuming token is stored here
       const config = {
         headers: {
@@ -36,6 +41,8 @@ const StaffManagementPage = () => {
     } catch (error) {
       console.error("Error fetching staff:", error);
       toast.error("Failed to fetch staff");
+    } finally {
+      setLoading(false);
     }
   };
   // Handle input changes
@@ -49,17 +56,16 @@ const StaffManagementPage = () => {
     if (Object.values(newStaff).some((field) => !field.trim())) return;
 
     try {
-      const token = localStorage.getItem("adminAuthToken"); // Assuming token is stored here
+      setAdding(true);
+      const token = localStorage.getItem("adminAuthToken");
       const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       };
       const { data } = await api.post(
         "/api/staffRoutes/staff",
         newStaff,
         config
-      ); // Send POST request to add staff
+      );
       setStaff([...staff, data.staff]);
       setNewStaff({
         name: "",
@@ -74,6 +80,8 @@ const StaffManagementPage = () => {
     } catch (error) {
       console.error("Error adding staff:", error);
       toast.error("Failed to add staff");
+    } finally {
+      setAdding(false);
     }
   };
 
@@ -94,17 +102,16 @@ const StaffManagementPage = () => {
   // Update staff
   const handleUpdate = async () => {
     try {
+      setUpdating(true);
       const token = localStorage.getItem("adminAuthToken");
       const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       };
       await api.put(
         `/api/staffRoutes/staff/${editStaff.staffId}`,
         newStaff,
         config
-      ); // Update staff data
+      );
       setStaff(
         staff.map((s) =>
           s.staffId === editStaff.staffId ? { ...s, ...newStaff } : s
@@ -115,26 +122,30 @@ const StaffManagementPage = () => {
     } catch (error) {
       console.error("Error updating staff:", error);
       toast.error("Failed to update staff");
+    } finally {
+      setUpdating(false);
     }
   };
 
   // Delete staff
   const handleDelete = async (staffId) => {
     try {
+      setDeletingId(staffId);
       const token = localStorage.getItem("adminAuthToken");
       const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       };
-      await api.delete(`/api/staffRoutes/staff/${staffId}`, config); // Delete staff
+      await api.delete(`/api/staffRoutes/staff/${staffId}`, config);
       setStaff(staff.filter((s) => s.staffId !== staffId));
       toast.success("Staff deleted successfully");
     } catch (error) {
       console.error("Error deleting staff:", error);
       toast.error("Failed to delete staff");
+    } finally {
+      setDeletingId(null);
     }
   };
+
   const handleChangePassword = async (staffId) => {
     try {
       const token = localStorage.getItem("adminAuthToken");
@@ -194,73 +205,89 @@ const StaffManagementPage = () => {
       {/* Staff Table */}
       <div className="overflow-x-auto">
         <div className="min-w-full table-auto bg-white border border-gray-200 mb-6">
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border-collapse">
-              <thead>
-                <tr>
-                  <th className="px-6 py-3 border-b text-left">Name</th>
-                  <th className="px-6 py-3 border-b text-left">
-                    Mobile Number
-                  </th>
-                  <th className="px-6 py-3 border-b text-left">City</th>
-                  <th className="px-6 py-3 border-b text-left">Pincode</th>
-                  <th className="px-6 py-3 border-b text-left">State</th>
-                  <th className="px-6 py-3 border-b text-left">Staff ID</th>
-                  <th className="px-6 py-3 border-b text-left">Password</th>
-                  <th className="px-6 py-3 border-b text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {staff.map((s) => (
-                  <tr key={s.staffId} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 border-b">{s.name}</td>
-                    <td className="px-6 py-4 border-b">{s.mobileNumber}</td>
-                    <td className="px-6 py-4 border-b">{s.city}</td>
-                    <td className="px-6 py-4 border-b">{s.pincode}</td>
-                    <td className="px-6 py-4 border-b">{s.state}</td>
-                    <td className="px-6 py-4 border-b flex items-center justify-center">
-                      {s.staffId}
-                      <button
-                        onClick={() => handleCopy(s.staffId)}
-                        className="ml-2 text-blue-500"
-                      >
-                        <FiCopy />
-                      </button>
-                    </td>
-                    <td className="px-6 py-4 border-b flex items-center justify-center">
-                      {s.password}
-                      <button
-                        onClick={() => handleCopy(s.password)}
-                        className="ml-2 text-blue-500"
-                      >
-                        <FiCopy />
-                      </button>
-                    </td>
-                    <td className="px-6 py-4 border-b flex gap-2 justify-center">
-                      <button
-                        onClick={() => handleEdit(s)}
-                        className="text-yellow-500 hover:text-yellow-600"
-                      >
-                        <FiEdit />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(s.staffId)}
-                        className="text-red-500 hover:text-red-600"
-                      >
-                        <FiTrash2 />
-                      </button>
-                      <button
-                        onClick={() => handleChangePassword(s.staffId)}
-                        className="text-blue-500 hover:text-blue-600"
-                      >
-                        <FiKey />
-                      </button>
-                    </td>
+          {loading ? (
+            <p className="p-4">Loading staff...</p>
+          ) : staff.length === 0 ? (
+            <p className="p-4">No staff added.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-white border-collapse">
+                <thead>
+                  <tr>
+                    <th className="px-6 py-3 border-b text-left">Name</th>
+                    <th className="px-6 py-3 border-b text-left">
+                      Mobile Number
+                    </th>
+                    <th className="px-6 py-3 border-b text-left">City</th>
+                    <th className="px-6 py-3 border-b text-left">Pincode</th>
+                    <th className="px-6 py-3 border-b text-left">State</th>
+                    <th className="px-6 py-3 border-b text-left">Staff ID</th>
+                    <th className="px-6 py-3 border-b text-left">Password</th>
+                    <th className="px-6 py-3 border-b text-left">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {staff.map((s) => (
+                    <tr key={s.staffId} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 border-b">{s.name}</td>
+                      <td className="px-6 py-4 border-b">{s.mobileNumber}</td>
+                      <td className="px-6 py-4 border-b">{s.city}</td>
+                      <td className="px-6 py-4 border-b">{s.pincode}</td>
+                      <td className="px-6 py-4 border-b">{s.state}</td>
+                      <td className="px-6 py-4 border-b flex items-center justify-center">
+                        {s.staffId}
+                        <button
+                          onClick={() => handleCopy(s.staffId)}
+                          className="ml-2 text-blue-500"
+                        >
+                          <FiCopy />
+                        </button>
+                      </td>
+                      <td className="px-6 py-4 border-b flex items-center justify-center">
+                        {s.password}
+                        <button
+                          onClick={() => handleCopy(s.password)}
+                          className="ml-2 text-blue-500"
+                        >
+                          <FiCopy />
+                        </button>
+                      </td>
+                      <td className="px-6 py-4 border-b flex gap-2 justify-center">
+                        <button
+                          onClick={() => handleEdit(s)}
+                          className="text-yellow-500 hover:text-yellow-600"
+                        >
+                          <FiEdit />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(s.staffId)}
+                          disabled={deletingId === s.staffId}
+                          className={`${
+                            deletingId === s.staffId
+                              ? "text-gray-400 cursor-not-allowed"
+                              : "text-red-500 hover:text-red-600"
+                          }`}
+                        >
+                          {deletingId === s.staffId ? (
+                            "Deleting..."
+                          ) : (
+                            <FiTrash2 />
+                          )}
+                        </button>
+
+                        <button
+                          onClick={() => handleChangePassword(s.staffId)}
+                          className="text-blue-500 hover:text-blue-600"
+                        >
+                          <FiKey />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
 
@@ -329,9 +356,20 @@ const StaffManagementPage = () => {
                 </button>
                 <button
                   onClick={editStaff ? handleUpdate : addStaff}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                  disabled={adding || updating}
+                  className={`px-4 py-2 rounded-md text-white ${
+                    adding || updating
+                      ? "bg-blue-300 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-600"
+                  }`}
                 >
-                  {editStaff ? "Update Staff" : "Add Staff"}
+                  {editStaff
+                    ? updating
+                      ? "Updating..."
+                      : "Update Staff"
+                    : adding
+                    ? "Adding..."
+                    : "Add Staff"}
                 </button>
               </div>
             </div>
