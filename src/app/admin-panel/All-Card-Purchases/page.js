@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../../apiConfig/axiosConfig";
 import toast from "react-hot-toast";
+import Pagination from "../../components/Pagination"; // Adjust path based on your folder structure
 
 const AllCardPurchases = () => {
   const [purchases, setPurchases] = useState([]);

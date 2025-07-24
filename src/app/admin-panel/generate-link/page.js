@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import api from "../../apiConfig/axiosConfig";
 import toast from "react-hot-toast";
+import Pagination from "../../components/Pagination"; // Adjust path based on your folder structure
 
 const GenerateLinkPage = () => {
   const [link, setLink] = useState("");

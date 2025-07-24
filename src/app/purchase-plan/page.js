@@ -132,7 +132,7 @@ const PurchasePlan = () => {
           <p className="text-center mt-10 text-gray-500">Loading plans...</p>
         ) : pricingData.length === 0 ? (
           <p className="text-center text-lg text-gray-700 my-20">
-            Currently, we don't have any plans available. <br />
+            Currently, we don&apos;t have any plans available. <br />
             Please contact the admin to get access to website features.
           </p>
         ) : (
