@@ -6,6 +6,7 @@ const nextConfig = {
       "photos.app.goo.gl", // Add this line
       "lh3.googleusercontent.com", // Also common for Google Drive thumbnails
       "via.placeholder.com",
+      "drive.google.com",
     ],
     remotePatterns: [
       {

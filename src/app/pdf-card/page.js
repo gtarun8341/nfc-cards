@@ -1,6 +1,7 @@
 // src/app/nfc-card/page.js
 "use client"; // Next.js Client Component
-
+import { useEffect, useState } from "react";
+import api from "../apiConfig/axiosConfig";
 import Hero from "../components/Hero-pdfcard"; // Adjust the import path as necessary
 import AllCards from "../components/AllCards"; // Import the AllCards component
 import Pricing from "../components/Pricing"; // Import the Pricing component
@@ -24,15 +25,6 @@ import AdditionalServices from "../components/AdditionalServices";
 import OurMoreProducts from "../components/OurMoreProducts";
 import DifferentTypeCards from "../components/DifferentTypeCards";
 
-const differenttypecardsimages = [
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-];
 const cardsData = [
   {
     id: 1,
@@ -77,26 +69,7 @@ const demoVideos = [
   "https://www.youtube.com/embed/VIDEO_ID_3",
   // Add more video links as needed
 ];
-const HowItWorkscardsData = [
-  {
-    id: 1,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 1",
-    description: "Description for Card 1.",
-  },
-  {
-    id: 2,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 2",
-    description: "Description for Card 2.",
-  },
-  {
-    id: 3,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 3",
-    description: "Description for Card 3.",
-  },
-];
+
 const benefitsData = [
   {
     id: 1,
@@ -136,62 +109,7 @@ const benefitsData = [
   },
   // Add more benefits as needed
 ];
-const benficalFor = [
-  {
-    id: 1,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 1",
-    description: "Description for Card 1.",
-  },
-  {
-    id: 2,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 2",
-    description: "Description for Card 2.",
-  },
-  {
-    id: 3,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 3",
-    description: "Description for Card 3.",
-  },
-  {
-    id: 4,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 4",
-    description: "Description for Card 4.",
-  },
-  {
-    id: 5,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 5",
-    description: "Description for Card 5.",
-  },
-  {
-    id: 6,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-  },
-  {
-    id: 7,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-  },
-  {
-    id: 8,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-  },
-  {
-    id: 9,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-  },
-];
+
 const statsData = [
   { count: "12M+", label: "Products Sold" },
   { count: "500K+", label: "Happy Customers" },
@@ -235,50 +153,7 @@ const testimonialData = [
   },
   // Add more...
 ];
-const sampleImages = [
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  // Add more images as needed
-];
-const bestSellerImages = [
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-];
-const stories = [
-  {
-    image: "/images/story1.jpg",
-    title: "Achieved Big Milestone",
-    description: "We helped this client reach 1M users.",
-    date: "2024-06-20", // must be in YYYY-MM-DD format
-  },
-  {
-    image: "/images/story2.jpg",
-    title: "Another Success",
-    description: "Our platform boosted their engagement by 300%.",
-    date: "2024-05-12",
-  },
-  {
-    image: "/images/story2.jpg",
-    title: "Another Success",
-    description: "Our platform boosted their engagement by 300%.",
-    date: "2024-05-12",
-  },
-  // Add more stories if needed
-];
+
 const pricingData = [
   {
     id: 1,
@@ -522,6 +397,63 @@ const ourmoreproductsdata = [
 // <OtherServices services={servicesData} />;
 
 export default function PDFPage() {
+  const [differenttypecardsimages, setDifferentTypeCardsImages] = useState([]);
+  const [HowItWorkscardsData, setHowCardsWorkImages] = useState([]);
+  const [benficalFor, setBeneficialForImages] = useState([]);
+  const [sampleImages, setSampleCardsImages] = useState([]);
+  const [bestSellerImages, setOurBestsellersImages] = useState([]);
+  const [stories, setSuccessStoriesImages] = useState([]);
+
+  const fetchMedia = async () => {
+    try {
+      const { data } = await api.get("/api/landing", {
+        params: { page: "NfcCardTemplate" },
+      });
+      // console.log(data);
+      data.forEach((item) => {
+        const images = item.media
+          ?.filter((m) => m.mediaType === "image")
+          ?.map((m) => convertDriveLinkToDirect(m.driveLink)); // ✅ CONVERT HERE
+
+        switch (item.section) {
+          case "Different Type Of Cards":
+            setDifferentTypeCardsImages(images);
+            break;
+          case "How Cards Work":
+            setHowCardsWorkImages(images);
+            break;
+          case "Beneficial For":
+            setBeneficialForImages(images);
+            break;
+          case "Sample Cards":
+            setSampleCardsImages(images);
+            break;
+          case "Our Bestsellers":
+            setOurBestsellersImages(images);
+            break;
+          case "Success Stories":
+            setSuccessStoriesImages(images);
+            break;
+          default:
+            break;
+        }
+      });
+    } catch (err) {
+      console.error("Failed to fetch media", err);
+    }
+  };
+  const convertDriveLinkToDirect = (link) => {
+    const match = link.match(/\/d\/([^/]+)\//);
+    if (match && match[1]) {
+      const fileId = match[1];
+      return `https://drive.google.com/uc?export=view&id=${fileId}`;
+    }
+    return link;
+  };
+
+  useEffect(() => {
+    fetchMedia();
+  }, []);
   return (
     <div className="bg-white">
       <Hero />

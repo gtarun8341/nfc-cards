@@ -419,9 +419,9 @@ const ProductCataloguePage = () => {
         </table>
         {catalogue.length > 0 && (
           <Pagination
-            currentPage={page}
+            currentPage={currentPage}
             totalPages={totalPages}
-            onPageChange={(page) => setPage(page)}
+            onPageChange={(page) => setCurrentPage(page)}
           />
         )}
       </div>

@@ -45,7 +45,7 @@ function PurchaseContent({ router }) {
         const isAlreadyParsed = data.startsWith("{") && data.endsWith("}");
         const decodedData = isAlreadyParsed ? data : decodeURIComponent(data);
         const parsedData = JSON.parse(decodedData);
-        console.log(parsedData);
+        console.log(parsedData, "from");
         if (parsedData.products && parsedData.userId) {
           setPurchaseData(parsedData.products);
           setUserData((prevState) => ({

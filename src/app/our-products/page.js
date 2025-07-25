@@ -20,6 +20,7 @@ export default function OurProductsPage() {
     const fetchProducts = async () => {
       try {
         const response = await api.get("/api/addAdminProduct/all-products"); // Fetch products from the server
+        console.log(response.data.products);
         setProducts(response.data.products);
         setAdminId(response.data.adminId); // Set adminId
       } catch (error) {
@@ -64,6 +65,8 @@ export default function OurProductsPage() {
         quantity: item.quantity, // Quantity in the cart
         hsnCode: item.product.hsnCode,
         gst: item.product.gst,
+        units: item.product.units,
+        category: item.product.category,
       })),
     };
     const encodedData = encodeURIComponent(JSON.stringify(purchaseData));

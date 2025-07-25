@@ -128,16 +128,7 @@ const PurchasePlan = () => {
           ⚠️ This is a test mode. No real money will be deducted.
         </p>
 
-        {loading ? (
-          <p className="text-center mt-10 text-gray-500">Loading plans...</p>
-        ) : pricingData.length === 0 ? (
-          <p className="text-center text-lg text-gray-700 my-20">
-            Currently, we don&apos;t have any plans available. <br />
-            Please contact the admin to get access to website features.
-          </p>
-        ) : (
-          <Pricing pricingData={pricingData} handlePayment={handlePayment} />
-        )}
+        <Pricing handlePayment={handlePayment} isAuthenticated={true} />
       </div>
 
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
