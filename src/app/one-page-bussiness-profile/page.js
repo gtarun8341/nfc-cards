@@ -263,7 +263,7 @@ const additionalservicesData = [
   },
 ];
 
-export default function onepagebussinessprofile() {
+export default function Onepagebussinessprofile() {
   const [differenttypecardsimages, setDifferentTypeCardsImages] = useState([]);
   const [HowItWorkscardsData, setHowCardsWorkImages] = useState([]);
   const [benficalFor, setBeneficialForImages] = useState([]);

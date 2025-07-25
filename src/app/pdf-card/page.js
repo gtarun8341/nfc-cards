@@ -122,97 +122,7 @@ const deliverySteps = [
   { id: 3, image: "/images/step3.png", text: "Dispatched Swiftly" },
   { id: 4, image: "/images/step4.png", text: "Delivered to Your Doorstep" },
 ];
-const testimonialData = [
-  {
-    icon: "https://via.placeholder.com/50",
-    name: "John Doe",
-    designation: "Web Developer",
-    description:
-      "The best NFC business card I’ve used!  Looks great and brings visitors to my website right away.",
-  },
-  {
-    icon: "https://via.placeholder.com/50",
-    name: "Jane Smith",
-    designation: "Product Manager",
-    description:
-      "Impressed with the quality and digital features. It's a game-changer for professional networking.",
-  },
-  {
-    icon: "https://via.placeholder.com/50",
-    name: "Jane Smith",
-    designation: "Product Manager",
-    description:
-      "Impressed with the quality and digital features. It's a game-changer for professional networking.",
-  },
-  {
-    icon: "https://via.placeholder.com/50",
-    name: "Jane Smith",
-    designation: "Product Manager",
-    description:
-      "Impressed with the quality and digital features. It's a game-changer for professional networking.",
-  },
-  // Add more...
-];
 
-const pricingData = [
-  {
-    id: 1,
-    title: "Starter",
-    price: 499,
-
-    features: [
-      "No. of Users Visited",
-      "Physical NFC Card",
-      "Unlimited Sharing",
-      "Click To Call",
-      "Click To WhatsApp",
-      "Click To Email",
-      "Website Link",
-    ],
-  },
-  {
-    id: 2,
-    title: "Pro",
-    price: 999,
-    features: [
-      "No. of Users Visited",
-      "Physical NFC Card",
-      "Unlimited Sharing",
-      "Click To Call",
-      "Click To WhatsApp",
-      "Click To Email",
-      "Website Link",
-    ],
-  },
-  {
-    id: 3,
-    title: "Pro",
-    price: 999,
-    features: [
-      "No. of Users Visited",
-      "Physical NFC Card",
-      "Unlimited Sharing",
-      "Click To Call",
-      "Click To WhatsApp",
-      "Click To Email",
-      "Website Link",
-    ],
-  },
-  {
-    id: 4,
-    title: "Pro",
-    price: 999,
-    features: [
-      "No. of Users Visited",
-      "Physical NFC Card",
-      "Unlimited Sharing",
-      "Click To Call",
-      "Click To WhatsApp",
-      "Click To Email",
-      "Website Link",
-    ],
-  },
-];
 const blogData = [
   {
     id: 1,
@@ -353,49 +263,6 @@ const additionalservicesData = [
   },
 ];
 
-const ourmoreproductsdata = [
-  {
-    id: 1,
-    icon: "https://via.placeholder.com/150",
-    title: "Product 1",
-    description: "Fast, secure, and scalable hosting.",
-    price: "$10.00",
-  },
-  {
-    id: 2,
-    icon: "https://via.placeholder.com/150",
-    title: "Product 2",
-    description: "Fast, secure, and scalable hosting.",
-    price: "$15.00",
-  },
-  {
-    id: 3,
-    icon: "https://via.placeholder.com/150",
-    title: "Product 3",
-    description: "Fast, secure, and scalable hosting.",
-    price: "$20.00",
-  },
-  // Add more products as needed
-];
-
-// const servicesData = [
-//   {
-//     image: "https://via.placeholder.com/400x250",
-//     title: "Service 1",
-//     description: "Description for Service 1.",
-//     link: "#",
-//   },
-//   {
-//     image: "https://via.placeholder.com/300x200",
-//     title: "Service 2",
-//     description: "Description for Service 2.",
-//     link: "#",
-//   },
-//   // Add more services as needed
-// ];
-
-// <OtherServices services={servicesData} />;
-
 export default function PDFPage() {
   const [differenttypecardsimages, setDifferentTypeCardsImages] = useState([]);
   const [HowItWorkscardsData, setHowCardsWorkImages] = useState([]);
@@ -460,7 +327,7 @@ export default function PDFPage() {
       <FeaturesCard
         headingTitle="Features Of Digital Visiting Cards"
         headingDescription="More than just a business card – a complete digital identity solution with features that keep you connected."
-        cardsData={cardsData}
+        cardsData={differenttypecardsimages}
       />
       <SeeHowItWorks
         title="See How Digital Visiting Cards Work"
@@ -483,7 +350,6 @@ export default function PDFPage() {
       <Testimonials
         heading="Testimonials"
         description="Our technology serves professionals across all industries looking to make meaningful connections."
-        testimonials={testimonialData}
       />
       <Samples
         heading="Sample Digital Visiting Cards"
@@ -505,7 +371,6 @@ export default function PDFPage() {
       <Pricing
         heading="Subscription Plan"
         description="Select the perfect package for your networking needs, from individual cards to enterprise solutions."
-        pricingData={pricingData}
       />
       <BlogsSection
         headingTitle="Blogs Section"
@@ -525,7 +390,6 @@ export default function PDFPage() {
       <OurMoreProducts
         headingTitle="Our More Products"
         headingDescription="Select the perfect package for your networking needs, from individual cards to enterprise solutions."
-        ourmoreproductsdata={ourmoreproductsdata}
       />
 
       <AllFooter />

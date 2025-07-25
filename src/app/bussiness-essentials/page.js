@@ -294,7 +294,7 @@ const additionalservicesData = [
   },
 ];
 
-export default function businessessentials() {
+export default function BusinessEssentials() {
   const [differenttypecardsimages, setDifferentTypeCardsImages] = useState([]);
   const [HowItWorkscardsData, setHowCardsWorkImages] = useState([]);
   const [benficalFor, setBeneficialForImages] = useState([]);
