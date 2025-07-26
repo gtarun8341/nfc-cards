@@ -124,62 +124,6 @@ const deliverySteps = [
   { id: 4, image: "/images/step4.png", text: "Delivered to Your Doorstep" },
 ];
 
-const blogData = [
-  {
-    id: 1,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 1",
-    description: "Description for Card 1.",
-  },
-  {
-    id: 2,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 2",
-    description: "Description for Card 2.",
-  },
-  {
-    id: 3,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 3",
-    description: "Description for Card 3.",
-  },
-  {
-    id: 4,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 4",
-    description: "Description for Card 4.",
-  },
-  {
-    id: 5,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 5",
-    description: "Description for Card 5.",
-  },
-  {
-    id: 6,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-  },
-  {
-    id: 7,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-  },
-  {
-    id: 8,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-  },
-  {
-    id: 9,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-  },
-];
 const faqsData = [
   {
     question: "What is an NFC card?",
@@ -197,71 +141,6 @@ const faqsData = [
       "NFC cards provide quick and easy access to information, making them ideal for business cards, payments, and more.",
   },
   // Add more questions and answers as needed
-];
-const additionalservicesData = [
-  {
-    id: 1,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 1",
-    description: "Description for Card 1.",
-    link: "/services/ai",
-  },
-  {
-    id: 2,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 2",
-    description: "Description for Card 2.",
-    link: "/services/ai",
-  },
-  {
-    id: 3,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 3",
-    description: "Description for Card 3.",
-    link: "/services/ai",
-  },
-  {
-    id: 4,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 4",
-    description: "Description for Card 4.",
-    link: "/services/ai",
-  },
-  {
-    id: 5,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 5",
-    description: "Description for Card 5.",
-    link: "/services/ai",
-  },
-  {
-    id: 6,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-    link: "/services/ai",
-  },
-  {
-    id: 7,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-    link: "/services/ai",
-  },
-  {
-    id: 8,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-    link: "/services/ai",
-  },
-  {
-    id: 9,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-    link: "/services/ai",
-  },
 ];
 
 export default function NFCPage() {
@@ -388,7 +267,6 @@ export default function NFCPage() {
       <BlogsSection
         headingTitle="Blogs Section"
         headingDescription="Keep abreast with the most recent developments, patterns, and advice on NFC business cards with online profiles in Mumbai and elsewhere. Our site offers something for everyone, regardless of whether you're a corporate professional, freelancer, or small business owner."
-        blogData={blogData}
       />
       <FrequentlyAskedQuestions
         title="Frequently Asked Questions"
@@ -398,7 +276,6 @@ export default function NFCPage() {
       <AdditionalServices
         headingTitle="Our Additional Services"
         headingDescription="Select the perfect package for your networking needs, from individual cards to enterprise solutions."
-        additionalservicesData={additionalservicesData}
       />
       <OurMoreProducts
         headingTitle="Our More Products"

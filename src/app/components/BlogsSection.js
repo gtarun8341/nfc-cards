@@ -1,10 +1,28 @@
 "use client";
-import { useState } from "react";
-import Image from "next/image";
 
-const BlogsSection = ({ headingTitle, headingDescription, blogData }) => {
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import api from "../apiConfig/axiosConfig"; // Adjust path if needed
+
+const BlogsSection = ({ headingTitle, headingDescription }) => {
   const CARDS_PER_PAGE = 3;
+
+  const [blogData, setBlogData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
+
+  // Fetch blogs from backend
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const res = await api.get("/api/blogRoutes");
+        setBlogData(res.data);
+      } catch (err) {
+        console.error("Failed to fetch blogs", err);
+      }
+    };
+    fetchBlogs();
+  }, []);
 
   const totalPages = Math.ceil(blogData.length / CARDS_PER_PAGE);
   const startIndex = currentPage * CARDS_PER_PAGE;
@@ -26,11 +44,11 @@ const BlogsSection = ({ headingTitle, headingDescription, blogData }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {currentCards.map((card) => (
           <div
-            key={card.id}
-            className="border rounded-lg shadow-lg bg-[#F1F1F1] overflow-hidden"
+            key={card._id || card.id}
+            className="relative border rounded-lg shadow-lg bg-[#F1F1F1] overflow-hidden"
           >
             <Image
-              src={card.icon}
+              src={`${api.defaults.baseURL}/uploads/${card.previewImage}`}
               alt={card.title}
               width={500}
               height={300}
@@ -40,8 +58,14 @@ const BlogsSection = ({ headingTitle, headingDescription, blogData }) => {
               <h3 className="text-lg font-semibold text-gray-800 mb-2 text-center">
                 {card.title}
               </h3>
-              <p className="text-gray-600 text-center">{card.description}</p>
+              <p className="text-gray-600 text-center line-clamp-3">
+                {card.description}
+              </p>
             </div>
+            <Link
+              href={`/blogs/${card.slug}`}
+              className="absolute inset-0 z-10"
+            />
           </div>
         ))}
       </div>

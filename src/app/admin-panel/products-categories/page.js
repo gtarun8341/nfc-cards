@@ -32,7 +32,7 @@ const ProductsCategoriesPage = () => {
         )}&productType=${selectedType}&discount=${selectedDiscount}`,
         config
       );
-
+      console.log(response.data.data);
       setProducts(response.data.data);
       setTotalPages(response.data.totalPages);
     } catch (err) {
@@ -71,11 +71,14 @@ const ProductsCategoriesPage = () => {
       const productData = user.products.map((product) => ({
         "Product Name": product.productName,
         "Price (₹)": product.productPrice,
+        "HSN Code": product.hsnCode,
+        GST: product.gst,
         Type: product.productType,
         Units: product.units,
         Category: product.category,
         "Sold Count": product.soldCount,
         Discount: product.discount > 0 ? `${product.discount}%` : "No Discount",
+        isDeleted: product.isDeleted,
       }));
 
       const worksheet = XLSX.utils.aoa_to_sheet(userInfo);
@@ -153,11 +156,14 @@ const ProductsCategoriesPage = () => {
                 <tr>
                   <th className="px-4 py-2 text-left border">Product Name</th>
                   <th className="px-4 py-2 text-left border">Price</th>
+                  <th className="px-4 py-2 text-left border">HSN Code</th>
+                  <th className="px-4 py-2 text-left border">GST</th>
                   <th className="px-4 py-2 text-left border">Type</th>
                   <th className="px-4 py-2 text-left border">UNITS</th>
                   <th className="px-4 py-2 text-left border">Category</th>
                   <th className="px-4 py-2 text-left border">Sold Count</th>
                   <th className="px-4 py-2 text-left border">Discount</th>
+                  <th className="px-4 py-2 text-left border">Is deleted</th>
                 </tr>
               </thead>
               <tbody>
@@ -167,6 +173,8 @@ const ProductsCategoriesPage = () => {
                     <td className="px-4 py-2 border">
                       ₹{product.productPrice}
                     </td>
+                    <td className="px-4 py-2 border">{product.hsnCode}</td>
+                    <td className="px-4 py-2 border">{product.gst}</td>
                     <td className="px-4 py-2 border">{product.productType}</td>
                     <td className="px-4 py-2 border">{product.units}</td>
                     <td className="px-4 py-2 border">{product.category}</td>
@@ -176,6 +184,9 @@ const ProductsCategoriesPage = () => {
                         ? `${product.discount}%`
                         : "No Discount"}
                     </td>
+                    <td className="px-4 py-2 border">
+                      {product.isDeleted ? "Yes" : "No"}
+                    </td>{" "}
                   </tr>
                 ))}
               </tbody>

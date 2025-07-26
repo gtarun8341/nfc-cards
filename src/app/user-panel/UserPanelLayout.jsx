@@ -218,12 +218,12 @@ const UserPanelLayout = ({ children }) => {
       icon: ClipboardDocumentIcon,
       onClick: () => setActiveForm("Review"),
     },
-    {
-      name: "Offer / Discounts / Events",
-      path: "/user-panel/offer-discounts-events",
-      icon: GiftIcon,
-      onClick: () => setActiveForm("offer-discounts-events"),
-    },
+    // {
+    //   name: "Offer / Discounts / Events",
+    //   path: "/user-panel/offer-discounts-events",
+    //   icon: GiftIcon,
+    //   onClick: () => setActiveForm("offer-discounts-events"),
+    // },
   ];
   if (userDetailsExist) {
     const listingSubmenu = [];

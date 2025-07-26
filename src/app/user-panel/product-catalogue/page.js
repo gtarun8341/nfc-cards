@@ -17,6 +17,7 @@ const ProductCataloguePage = () => {
     gst: "",
     units: "",
     category: "", // <-- Add this
+    discount: "",
   });
   const [uploadedCount, setUploadedCount] = useState(0);
   const [uploadLimit, setUploadLimit] = useState(0);
@@ -125,6 +126,7 @@ const ProductCataloguePage = () => {
     formData.append("gst", currentProduct.gst);
     formData.append("units", currentProduct.units);
     formData.append("category", currentProduct.category);
+    formData.append("discount", currentProduct.discount);
 
     if (currentProduct.image) {
       formData.append("productImages[]", currentProduct.image); // Append image file if available
@@ -216,6 +218,7 @@ const ProductCataloguePage = () => {
       gst: product.gst,
       units: product.units,
       category: product.category,
+      discount: product.discount,
       currentImage: product.productImages?.[0] || null,
     });
 
@@ -255,6 +258,7 @@ const ProductCataloguePage = () => {
       gst: "",
       units: "",
       category: "",
+      discount: "",
     });
     setIsEditing(false);
     setEditProductId(null);
@@ -349,6 +353,15 @@ const ProductCataloguePage = () => {
           />
           <input
             type="text"
+            name="discount"
+            placeholder="Discount"
+            value={currentProduct.discount}
+            onChange={handleChange}
+            className="border border-gray-300 p-3 rounded-md"
+            required
+          />
+          <input
+            type="text"
             name="price"
             placeholder="Product Price"
             value={currentProduct.price}
@@ -414,6 +427,7 @@ const ProductCataloguePage = () => {
               <th className="py-3 px-4 border-b">Price</th>
               <th className="py-3 px-4 border-b">HSN Code</th>
               <th className="py-3 px-4 border-b">GST</th>
+              <th className="py-3 px-4 border-b">Discount</th>
               <th className="py-3 px-4 border-b">UNITS</th>
               <th className="py-3 px-4 border-b">CATEGORY</th>
               <th className="py-3 px-4 border-b">Image</th>
@@ -435,6 +449,7 @@ const ProductCataloguePage = () => {
                   <td className="py-3 px-4 border-b">{product.productPrice}</td>
                   <td className="py-3 px-4 border-b">{product.hsnCode}</td>
                   <td className="py-3 px-4 border-b">{product.gst}</td>
+                  <td className="py-3 px-4 border-b">{product.discount}</td>
                   <td className="py-3 px-4 border-b">{product.units}</td>
                   <td className="py-3 px-4 border-b">{product.category}</td>
                   <td className="py-3 px-4 border-b">

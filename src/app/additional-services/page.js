@@ -77,7 +77,7 @@ export default function AdditionalServices() {
       link: "https://www.shiveninfotech.com/other-digital-services-in-navi-mumbai/",
     },
   ];
-  const blogData = [
+  const galaryData = [
     {
       id: 1,
       icon: "https://via.placeholder.com/100",
@@ -170,12 +170,11 @@ export default function AdditionalServices() {
       <GalarySection
         headingTitle="Sliders"
         headingDescription="More than just a business card – a complete digital identity solution with features that keep you connected."
-        blogData={blogData}
+        blogData={galaryData}
       />
       <BlogsSection
         headingTitle="Blogs Section"
         headingDescription="Keep abreast with the most recent developments, patterns, and advice on NFC business cards with online profiles in Mumbai and elsewhere. Our site offers something for everyone, regardless of whether you're a corporate professional, freelancer, or small business owner."
-        blogData={blogData}
       />
       <FrequentlyAskedQuestions
         title="Frequently Asked Questions"

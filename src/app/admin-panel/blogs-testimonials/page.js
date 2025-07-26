@@ -5,7 +5,7 @@ import api from "../../apiConfig/axiosConfig";
 import AddEditBlog from "./AddEditBlog";
 import ViewBlog from "./ViewBlog";
 import Image from "next/image";
-
+import toast from "react-hot-toast";
 const AdminPanel = () => {
   const [blogs, setBlogs] = useState([]);
   const [selectedBlog, setSelectedBlog] = useState(null);
@@ -18,6 +18,7 @@ const AdminPanel = () => {
       console.log(response.data);
       setBlogs(response.data);
     } catch (error) {
+      toast.error("Error fetching blogs");
       console.error("Error fetching blogs:", error);
     }
   };
@@ -33,14 +34,14 @@ const AdminPanel = () => {
     try {
       const response = await api.delete(`/api/blogRoutes/${id}`, config);
       if (response.status === 200) {
-        alert("Blog deleted successfully!");
+        toast.success("Blog deleted successfully!");
         setBlogs(blogs.filter((blog) => blog._id !== id)); // Remove deleted blog from the list
       } else {
-        alert("Failed to delete blog.");
+        toast.error("Failed to delete blog.");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("An error occurred.");
+      toast.error("An error occurred. Please try again");
     }
   };
 

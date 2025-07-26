@@ -1,6 +1,7 @@
 // src/app/nfc-card/page.js
 "use client"; // Next.js Client Component
-
+import { useEffect, useState } from "react";
+import api from "./apiConfig/axiosConfig";
 import Hero from "./components/Hero"; // Adjust the import path as necessary
 import AllCards from "./components/AllCards"; // Import the AllCards component
 import Pricing from "./components/Pricing"; // Import the Pricing component
@@ -24,15 +25,6 @@ import AdditionalServices from "./components/AdditionalServices";
 import OurMoreProducts from "./components/OurMoreProducts";
 import DifferentTypeCards from "./components/DifferentTypeCards";
 
-const differenttypecardsimages = [
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-];
 const cardsData = [
   {
     id: 1,
@@ -77,26 +69,7 @@ const demoVideos = [
   "https://www.youtube.com/embed/VIDEO_ID_3",
   // Add more video links as needed
 ];
-const HowItWorkscardsData = [
-  {
-    id: 1,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 1",
-    description: "Description for Card 1.",
-  },
-  {
-    id: 2,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 2",
-    description: "Description for Card 2.",
-  },
-  {
-    id: 3,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 3",
-    description: "Description for Card 3.",
-  },
-];
+
 const benefitsData = [
   {
     id: 1,
@@ -136,62 +109,7 @@ const benefitsData = [
   },
   // Add more benefits as needed
 ];
-const benficalFor = [
-  {
-    id: 1,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 1",
-    description: "Description for Card 1.",
-  },
-  {
-    id: 2,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 2",
-    description: "Description for Card 2.",
-  },
-  {
-    id: 3,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 3",
-    description: "Description for Card 3.",
-  },
-  {
-    id: 4,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 4",
-    description: "Description for Card 4.",
-  },
-  {
-    id: 5,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 5",
-    description: "Description for Card 5.",
-  },
-  {
-    id: 6,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-  },
-  {
-    id: 7,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-  },
-  {
-    id: 8,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-  },
-  {
-    id: 9,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-  },
-];
+
 const statsData = [
   { count: "12M+", label: "Products Sold" },
   { count: "500K+", label: "Happy Customers" },
@@ -204,196 +122,7 @@ const deliverySteps = [
   { id: 3, image: "/images/step3.png", text: "Dispatched Swiftly" },
   { id: 4, image: "/images/step4.png", text: "Delivered to Your Doorstep" },
 ];
-const testimonialData = [
-  {
-    icon: "https://via.placeholder.com/50",
-    name: "John Doe",
-    designation: "Web Developer",
-    description:
-      "The best NFC business card I’ve used!  Looks great and brings visitors to my website right away.",
-  },
-  {
-    icon: "https://via.placeholder.com/50",
-    name: "Jane Smith",
-    designation: "Product Manager",
-    description:
-      "Impressed with the quality and digital features. It's a game-changer for professional networking.",
-  },
-  {
-    icon: "https://via.placeholder.com/50",
-    name: "Jane Smith",
-    designation: "Product Manager",
-    description:
-      "Impressed with the quality and digital features. It's a game-changer for professional networking.",
-  },
-  {
-    icon: "https://via.placeholder.com/50",
-    name: "Jane Smith",
-    designation: "Product Manager",
-    description:
-      "Impressed with the quality and digital features. It's a game-changer for professional networking.",
-  },
-  // Add more...
-];
-const sampleImages = [
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  // Add more images as needed
-];
-const bestSellerImages = [
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-  "https://via.placeholder.com/300x200",
-];
-const stories = [
-  {
-    image: "/images/story1.jpg",
-    title: "Achieved Big Milestone",
-    description: "We helped this client reach 1M users.",
-    date: "2024-06-20", // must be in YYYY-MM-DD format
-  },
-  {
-    image: "/images/story2.jpg",
-    title: "Another Success",
-    description: "Our platform boosted their engagement by 300%.",
-    date: "2024-05-12",
-  },
-  {
-    image: "/images/story2.jpg",
-    title: "Another Success",
-    description: "Our platform boosted their engagement by 300%.",
-    date: "2024-05-12",
-  },
-  // Add more stories if needed
-];
-const pricingData = [
-  {
-    id: 1,
-    title: "Starter",
-    price: 499,
 
-    features: [
-      "No. of Users Visited",
-      "Physical NFC Card",
-      "Unlimited Sharing",
-      "Click To Call",
-      "Click To WhatsApp",
-      "Click To Email",
-      "Website Link",
-    ],
-  },
-  {
-    id: 2,
-    title: "Pro",
-    price: 999,
-    features: [
-      "No. of Users Visited",
-      "Physical NFC Card",
-      "Unlimited Sharing",
-      "Click To Call",
-      "Click To WhatsApp",
-      "Click To Email",
-      "Website Link",
-    ],
-  },
-  {
-    id: 3,
-    title: "Pro",
-    price: 999,
-    features: [
-      "No. of Users Visited",
-      "Physical NFC Card",
-      "Unlimited Sharing",
-      "Click To Call",
-      "Click To WhatsApp",
-      "Click To Email",
-      "Website Link",
-    ],
-  },
-  {
-    id: 4,
-    title: "Pro",
-    price: 999,
-    features: [
-      "No. of Users Visited",
-      "Physical NFC Card",
-      "Unlimited Sharing",
-      "Click To Call",
-      "Click To WhatsApp",
-      "Click To Email",
-      "Website Link",
-    ],
-  },
-];
-const blogData = [
-  {
-    id: 1,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 1",
-    description: "Description for Card 1.",
-  },
-  {
-    id: 2,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 2",
-    description: "Description for Card 2.",
-  },
-  {
-    id: 3,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 3",
-    description: "Description for Card 3.",
-  },
-  {
-    id: 4,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 4",
-    description: "Description for Card 4.",
-  },
-  {
-    id: 5,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 5",
-    description: "Description for Card 5.",
-  },
-  {
-    id: 6,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-  },
-  {
-    id: 7,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-  },
-  {
-    id: 8,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-  },
-  {
-    id: 9,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-  },
-];
 const faqsData = [
   {
     question: "What is an NFC card?",
@@ -412,116 +141,65 @@ const faqsData = [
   },
   // Add more questions and answers as needed
 ];
-const additionalservicesData = [
-  {
-    id: 1,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 1",
-    description: "Description for Card 1.",
-    link: "/services/ai",
-  },
-  {
-    id: 2,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 2",
-    description: "Description for Card 2.",
-    link: "/services/ai",
-  },
-  {
-    id: 3,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 3",
-    description: "Description for Card 3.",
-    link: "/services/ai",
-  },
-  {
-    id: 4,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 4",
-    description: "Description for Card 4.",
-    link: "/services/ai",
-  },
-  {
-    id: 5,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 5",
-    description: "Description for Card 5.",
-    link: "/services/ai",
-  },
-  {
-    id: 6,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-    link: "/services/ai",
-  },
-  {
-    id: 7,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-    link: "/services/ai",
-  },
-  {
-    id: 8,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-    link: "/services/ai",
-  },
-  {
-    id: 9,
-    icon: "https://via.placeholder.com/100",
-    title: "Card 6",
-    description: "Description for Card 6.",
-    link: "/services/ai",
-  },
-];
-
-const ourmoreproductsdata = [
-  {
-    id: 1,
-    icon: "https://via.placeholder.com/150",
-    title: "Product 1",
-    description: "Fast, secure, and scalable hosting.",
-    price: "$10.00",
-  },
-  {
-    id: 2,
-    icon: "https://via.placeholder.com/150",
-    title: "Product 2",
-    description: "Fast, secure, and scalable hosting.",
-    price: "$15.00",
-  },
-  {
-    id: 3,
-    icon: "https://via.placeholder.com/150",
-    title: "Product 3",
-    description: "Fast, secure, and scalable hosting.",
-    price: "$20.00",
-  },
-  // Add more products as needed
-];
-
-// const servicesData = [
-//   {
-//     image: "https://via.placeholder.com/400x250",
-//     title: "Service 1",
-//     description: "Description for Service 1.",
-//     link: "#",
-//   },
-//   {
-//     image: "https://via.placeholder.com/300x200",
-//     title: "Service 2",
-//     description: "Description for Service 2.",
-//     link: "#",
-//   },
-//   // Add more services as needed
-// ];
-
-// <OtherServices services={servicesData} />;
 
 export default function NFCPage() {
+  const [differenttypecardsimages, setDifferentTypeCardsImages] = useState([]);
+  const [HowItWorkscardsData, setHowCardsWorkImages] = useState([]);
+  const [benficalFor, setBeneficialForImages] = useState([]);
+  const [sampleImages, setSampleCardsImages] = useState([]);
+  const [bestSellerImages, setOurBestsellersImages] = useState([]);
+  const [stories, setSuccessStoriesImages] = useState([]);
+
+  const fetchMedia = async () => {
+    try {
+      const { data } = await api.get("/api/landing", {
+        params: { page: "HomePage" },
+      });
+      // console.log(data);
+      data.forEach((item) => {
+        const images = item.media
+          ?.filter((m) => m.mediaType === "image")
+          ?.map((m) => convertDriveLinkToDirect(m.driveLink)); // ✅ CONVERT HERE
+
+        switch (item.section) {
+          case "Different Type Of Cards":
+            setDifferentTypeCardsImages(images);
+            break;
+          case "How Cards Work":
+            setHowCardsWorkImages(images);
+            break;
+          case "Beneficial For":
+            setBeneficialForImages(images);
+            break;
+          case "Sample Cards":
+            setSampleCardsImages(images);
+            break;
+          case "Our Bestsellers":
+            setOurBestsellersImages(images);
+            break;
+          case "Success Stories":
+            setSuccessStoriesImages(images);
+            break;
+          default:
+            break;
+        }
+      });
+    } catch (err) {
+      console.error("Failed to fetch media", err);
+    }
+  };
+  const convertDriveLinkToDirect = (link) => {
+    const match = link.match(/\/d\/([^/]+)\//);
+    if (match && match[1]) {
+      const fileId = match[1];
+      return `https://drive.google.com/uc?export=view&id=${fileId}`;
+    }
+    return link;
+  };
+
+  useEffect(() => {
+    fetchMedia();
+  }, []);
   return (
     <div className="bg-white">
       <Hero />
@@ -562,7 +240,6 @@ export default function NFCPage() {
       <Testimonials
         heading="Testimonials"
         description="Our technology serves professionals across all industries looking to make meaningful connections."
-        testimonials={testimonialData}
       />
       <Samples
         heading="Sample Mini Websites"
@@ -584,12 +261,10 @@ export default function NFCPage() {
       <Pricing
         heading="Subscription Plan"
         description="Select the perfect package for your networking needs, from individual cards to enterprise solutions."
-        pricingData={pricingData}
       />
       <BlogsSection
         headingTitle="Blogs Section"
         headingDescription="Keep abreast with the most recent developments, patterns, and advice on NFC business cards with online profiles in Mumbai and elsewhere. Our site offers something for everyone, regardless of whether you're a corporate professional, freelancer, or small business owner."
-        blogData={blogData}
       />
       <FrequentlyAskedQuestions
         title="Frequently Asked Questions"
@@ -599,12 +274,10 @@ export default function NFCPage() {
       <AdditionalServices
         headingTitle="Our Additional Services"
         headingDescription="Select the perfect package for your networking needs, from individual cards to enterprise solutions."
-        additionalservicesData={additionalservicesData}
       />
       <OurMoreProducts
         headingTitle="Our More Products"
         headingDescription="Select the perfect package for your networking needs, from individual cards to enterprise solutions."
-        ourmoreproductsdata={ourmoreproductsdata}
       />
 
       <AllFooter />

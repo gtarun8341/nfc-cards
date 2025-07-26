@@ -5,6 +5,7 @@ import { Dialog } from "@headlessui/react";
 import { FaEdit, FaTrash, FaArrowUp, FaArrowDown } from "react-icons/fa";
 import api from "../../apiConfig/axiosConfig";
 import Image from "next/image";
+import toast from "react-hot-toast";
 
 const AddEditBlog = ({ setIsAddingOrEditing, blog, onBlogSave }) => {
   const [form, setForm] = useState({ slug: "", title: "", content: [] });
@@ -77,7 +78,9 @@ const AddEditBlog = ({ setIsAddingOrEditing, blog, onBlogSave }) => {
         : await api.post("/api/blogRoutes/", formData, config);
 
       if (response.status === 200) {
-        alert(blog ? "Blog updated successfully!" : "Blog added successfully!");
+        toast.success(
+          blog ? "Blog updated successfully!" : "Blog added successfully!"
+        );
         setIsAddingOrEditing(false);
         onBlogSave();
       }
@@ -86,7 +89,7 @@ const AddEditBlog = ({ setIsAddingOrEditing, blog, onBlogSave }) => {
         "Error submitting blog:",
         error.response?.data || error.message
       );
-      alert("An error occurred while saving the blog.");
+      toast.error("An error occurred while saving the blog.");
     }
   };
 
