@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import api from "../../../apiConfig/axiosConfig";
+import api from "../apiConfig/axiosConfig";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
