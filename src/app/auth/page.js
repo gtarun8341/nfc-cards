@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import api from "../apiConfig/axiosConfig";
 import AllFooter from "../components/AllFooter";
@@ -13,6 +13,7 @@ export default function AuthPage() {
   const [phone, setPhone] = useState(""); // New state for phone number
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false); // NEW
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -58,8 +59,7 @@ export default function AuthPage() {
           document.cookie = `authToken=${response.data.token}; path=/`;
           localStorage.setItem("authToken", response.data.token);
           toast.success("Logged in Successfully");
-
-          router.push("/user-panel/Dashboard");
+          setSuccess(true); // <----- SET SUCCESS!
         } else if (response.data.message?.includes("expired")) {
           // ⚠️ FIX: Remove quotes around the toast message
           toast.success(response.data.message);
@@ -86,6 +86,12 @@ export default function AuthPage() {
       setLoading(false); // stop loading in all cases
     }
   };
+
+  useEffect(() => {
+    if (success) {
+      router.replace("/user-panel/Dashboard"); // Use replace so user cannot go back
+    }
+  }, [success, router]);
 
   const toggleForm = () => {
     setIsRegister(!isRegister);

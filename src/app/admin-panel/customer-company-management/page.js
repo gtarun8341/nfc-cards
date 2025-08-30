@@ -28,7 +28,7 @@ const CustomerCompanyManagementPage = () => {
         },
       };
       const response = await api.get(
-        `/api/user-details/admin/users?page=${page}&limit=10&search=${encodeURIComponent(
+        `/api/users/admin/users?page=${page}&limit=10&search=${encodeURIComponent(
           searchQuery
         )}`,
         config
@@ -70,6 +70,8 @@ const CustomerCompanyManagementPage = () => {
   const handleDownloadExcel = (selectedCompany) => {
     const user = selectedCompany.user || {};
     try {
+      console.log("User Information:", user);
+      console.log("Company Information:", selectedCompany);
       // Prepare data for the Excel sheet
       const companyDetails = [
         ["User Information"],
@@ -78,17 +80,17 @@ const CustomerCompanyManagementPage = () => {
         ["Email", user.email || "N/A"],
         [],
         ["Company Details"],
-        ["Name", selectedCompany.name || "N/A"],
-        ["Designation", selectedCompany.designation || "N/A"],
-        ["Company Name", selectedCompany.companyName || "N/A"],
-        ["Contact 1", selectedCompany.contact1 || "N/A"],
-        ["Contact 2", selectedCompany.contact2 || "N/A"],
-        ["WhatsApp 1", selectedCompany.whatsapp1 || "N/A"],
-        ["WhatsApp 2", selectedCompany.whatsapp2 || "N/A"],
-        ["Email", selectedCompany.email || "N/A"],
-        ["Website", selectedCompany.website || "N/A"],
-        ["Google Map Link", selectedCompany.googleMap || "N/A"],
-        ["Address", selectedCompany.address || "N/A"],
+        ["Name", selectedCompany.companyDetails.name || "N/A"],
+        ["Designation", selectedCompany.companyDetails.designation || "N/A"],
+        ["Company Name", selectedCompany.companyDetails.companyName || "N/A"],
+        ["Contact 1", selectedCompany.companyDetails.contact1 || "N/A"],
+        ["Contact 2", selectedCompany.companyDetails.contact2 || "N/A"],
+        ["WhatsApp 1", selectedCompany.companyDetails.whatsapp1 || "N/A"],
+        ["WhatsApp 2", selectedCompany.companyDetails.whatsapp2 || "N/A"],
+        ["Email", selectedCompany.companyDetails.email || "N/A"],
+        ["Website", selectedCompany.companyDetails.website || "N/A"],
+        ["Google Map Link", selectedCompany.companyDetails.googleMap || "N/A"],
+        ["Address", selectedCompany.companyDetails.address || "N/A"],
         [],
         ["About Company"],
         [
@@ -155,7 +157,7 @@ const CustomerCompanyManagementPage = () => {
       companyDetails.push([], ["Gallery"]);
       if (
         selectedCompany.galleryImages &&
-        selectedCompany.galleryImages.length > 0
+        selectedCompany.galleryImages.images.length > 0
       ) {
         companyDetails.push(["Gallery Images Available"]);
       } else {
@@ -281,43 +283,52 @@ const CustomerCompanyManagementPage = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <strong>Name:</strong> {selectedCompany.name}
+                    <strong>Name:</strong> {selectedCompany.companyDetails.name}
                   </div>
                   <div>
-                    <strong>Designation:</strong> {selectedCompany.designation}
+                    <strong>Designation:</strong>{" "}
+                    {selectedCompany.companyDetails.designation}
                   </div>
                   <div>
-                    <strong>Company Name:</strong> {selectedCompany.companyName}
+                    <strong>Company Name:</strong>{" "}
+                    {selectedCompany.companyDetails.companyName}
                   </div>
                   <div>
-                    <strong>Contact 1:</strong> {selectedCompany.contact1}
+                    <strong>Contact 1:</strong>{" "}
+                    {selectedCompany.companyDetails.contact1}
                   </div>
                   <div>
-                    <strong>Contact 2:</strong> {selectedCompany.contact2}
+                    <strong>Contact 2:</strong>{" "}
+                    {selectedCompany.companyDetails.contact2}
                   </div>
                   <div>
-                    <strong>WhatsApp 1:</strong> {selectedCompany.whatsapp1}
+                    <strong>WhatsApp 1:</strong>{" "}
+                    {selectedCompany.companyDetails.whatsapp1}
                   </div>
                   <div>
-                    <strong>WhatsApp 2:</strong> {selectedCompany.whatsapp2}
+                    <strong>WhatsApp 2:</strong>{" "}
+                    {selectedCompany.companyDetails.whatsapp2}
                   </div>
                   <div>
-                    <strong>Email:</strong> {selectedCompany.email}
+                    <strong>Email:</strong>{" "}
+                    {selectedCompany.companyDetails.email}
                   </div>
                   <div>
-                    <strong>Website:</strong> {selectedCompany.website}
+                    <strong>Website:</strong>{" "}
+                    {selectedCompany.companyDetails.website}
                   </div>
                   <div>
                     <strong>Google Map Link:</strong>{" "}
-                    {selectedCompany.googleMap}
+                    {selectedCompany.companyDetails.googleMap}
                   </div>
                   <div>
-                    <strong>Address:</strong> {selectedCompany.address}
+                    <strong>Address:</strong>{" "}
+                    {selectedCompany.companyDetails.address}
                   </div>
                   <div>
                     <strong>Logo:</strong>
                     <Image
-                      src={`${api.defaults.baseURL}/uploads/userDetails/${selectedCompany.userId}/${selectedCompany.logo}`}
+                      src={`${api.defaults.baseURL}/uploads/companyDetails/${selectedCompany.companyDetails.userId}/${selectedCompany.companyDetails.logo}`}
                       alt="Company Logo"
                       width={150}
                       height={150}
@@ -350,7 +361,7 @@ const CustomerCompanyManagementPage = () => {
                           (doc, index) => (
                             <a
                               key={index}
-                              href={`${api.defaults.baseURL}/uploads/userDetails/${selectedCompany.userId}/${doc}`}
+                              href={`${api.defaults.baseURL}/uploads/aboutCompany/${selectedCompany.aboutCompany.userId}/${doc}`}
                               download
                               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
                             >
@@ -393,7 +404,7 @@ const CustomerCompanyManagementPage = () => {
                   {selectedCompany.bankDetails.qrImages.map((image, index) => (
                     <Image
                       key={index}
-                      src={`${api.defaults.baseURL}/uploads/userDetails/${selectedCompany.userId}/${image}`}
+                      src={`${api.defaults.baseURL}/uploads/bankDetails/${selectedCompany.bankDetails.userId}/${image}`}
                       alt={`Gallery Image ${index + 1}`}
                       width={100}
                       height={100}
@@ -414,15 +425,22 @@ const CustomerCompanyManagementPage = () => {
                       <div>UNITS: {product.units}</div>
                       <div>
                         Image:{" "}
-                        <Image
-                          key={index}
-                          src={`${api.defaults.baseURL}/uploads/userDetails/${selectedCompany.userId}/${product.productImages}`}
-                          alt={`Gallery Image ${index + 1}`}
-                          width={100}
-                          height={100}
-                          className="object-cover"
-                        />
+                        {(() => {
+                          const imageUrl = `${api.defaults.baseURL}/uploads/products/${product.userId}/${product.productImages}`;
+                          console.log("Image URL:", imageUrl);
+                          return (
+                            <Image
+                              key={index}
+                              src={imageUrl}
+                              alt={`Gallery Image ${index + 1}`}
+                              width={100}
+                              height={100}
+                              className="object-cover"
+                            />
+                          );
+                        })()}
                       </div>
+
                       <div>Discount: {product.discount || "N/A"}</div>
                     </div>
                   ))}
@@ -431,16 +449,17 @@ const CustomerCompanyManagementPage = () => {
                 <div className="mt-8 space-y-4">
                   <h4 className="text-lg font-semibold">Gallery:</h4>
                   <div className="flex space-x-4">
-                    {selectedCompany.galleryImages.map((image, index) => (
-                      <Image
-                        key={index}
-                        src={`${api.defaults.baseURL}/uploads/userDetails/${selectedCompany.userId}/${image}`}
-                        alt={`Gallery Image ${index + 1}`}
-                        width={100}
-                        height={100}
-                        className="object-cover"
-                      />
-                    ))}
+                    {selectedCompany.galleryImages?.images?.map(
+                      (image, index) => (
+                        <Image
+                          key={index}
+                          src={`${api.defaults.baseURL}/uploads/gallery/${selectedCompany.galleryImages.userId}/${image}`}
+                          alt={`Gallery image ${index + 1}`}
+                          width={100}
+                          height={100}
+                        />
+                      )
+                    )}
                   </div>
                 </div>
               </div>

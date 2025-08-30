@@ -2,16 +2,21 @@
 import { useEffect, useState } from "react";
 import api from "../../apiConfig/axiosConfig";
 import toast from "react-hot-toast";
+
 const LandingMediaAdmin = () => {
   const [form, setForm] = useState({
     page: "",
     section: "",
     mediaType: "image",
-    mediaList: [{ title: "", driveLink: "" }],
+    mediaFiles: [{ title: "", file: null }],
   });
 
   const [mediaList, setMediaList] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // for fetching media
+  const [uploading, setUploading] = useState(false); // for uploading media
+  const [editing, setEditing] = useState(false); // for editing media
+  const [deleting, setDeleting] = useState(false); // for deleting media
+
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editLink, setEditLink] = useState("");
@@ -40,33 +45,31 @@ const LandingMediaAdmin = () => {
   const handleAddField = () => {
     setForm((prev) => ({
       ...prev,
-      mediaList: [...prev.mediaList, { title: "", driveLink: "" }],
+      mediaFiles: [...prev.mediaFiles, { title: "", file: null }],
     }));
   };
 
+  const handleFileChange = (index, file) => {
+    const updated = [...form.mediaFiles];
+    updated[index].file = file;
+    setForm((prev) => ({ ...prev, mediaFiles: updated }));
+  };
+
   const handleChangeField = (index, field, value) => {
-    const updated = [...form.mediaList];
+    const updated = [...form.mediaFiles];
     updated[index][field] = value;
-    setForm((prev) => ({ ...prev, mediaList: updated }));
+    setForm((prev) => ({ ...prev, mediaFiles: updated }));
   };
 
   const fetchMedia = async () => {
     try {
-      const token = localStorage.getItem("adminAuthToken"); // Get the token
+      const token = localStorage.getItem("adminAuthToken");
       const config = {
-        headers: {
-          Authorization: `Bearer ${token}`, // Attach the token
-        },
+        headers: { Authorization: `Bearer ${token}` },
+        params: { page: form.page, section: form.section },
       };
       setLoading(true);
-      const { data } = await api.get(
-        "/api/landing",
-        {
-          params: { page: form.page },
-        },
-        config
-      );
-      console.log(data);
+      const { data } = await api.get("/api/landing", config);
       setMediaList(data);
     } catch (err) {
       console.error(err);
@@ -78,62 +81,68 @@ const LandingMediaAdmin = () => {
 
   const handleSubmit = async () => {
     try {
-      const token = localStorage.getItem("adminAuthToken"); // Get the token
+      setUploading(true);
+      const token = localStorage.getItem("adminAuthToken");
       const config = {
         headers: {
-          Authorization: `Bearer ${token}`, // Attach the token
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
       };
-      const mediaListPayload = form.mediaList.map((item) => ({
-        mediaType: form.mediaType,
-        title: item.title,
-        driveLink: item.driveLink,
-      }));
 
-      await api.post(
-        "/api/landing/upload",
-        {
-          page: form.page,
-          section: form.section,
-          mediaList: mediaListPayload,
-        },
-        config
-      );
+      const formData = new FormData();
+      formData.append("page", form.page);
+      formData.append("section", form.section);
+      formData.append("mediaType", form.mediaType);
 
+      form.mediaFiles.forEach(({ title, file }, i) => {
+        if (!file) throw new Error(`File missing in media item ${i + 1}`);
+        formData.append("file", file);
+        formData.append("title", title || "");
+      });
+
+      await api.post("/api/landing/upload", formData, config);
       toast.success("Media uploaded successfully");
       fetchMedia();
+
       setForm({
         page: "",
         section: "",
         mediaType: "image",
-        mediaList: [{ title: "", driveLink: "" }],
+        mediaFiles: [{ title: "", file: null }],
       });
     } catch (e) {
-      toast.error("Upload failed");
+      console.error(e);
+      toast.error(e.message || "Upload failed");
+    } finally {
+      setUploading(false);
     }
   };
+
   const handleUpdate = async () => {
     if (!editingGroupId || editingIndex === null) return;
     try {
-      const token = localStorage.getItem("adminAuthToken"); // Get the token
+      setEditing(true);
+      const token = localStorage.getItem("adminAuthToken");
       const config = {
         headers: {
-          Authorization: `Bearer ${token}`, // Attach the token
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       };
+
       await api.patch(
         `/api/landing/edit/${editingGroupId}/${editingIndex}`,
         {
           title: editTitle,
-          driveLink: editLink,
           mediaType:
             mediaList.find((g) => g._id === editingGroupId)?.media[editingIndex]
               ?.mediaType || "image",
         },
         config
       );
-      toast.success("Media updated");
 
+      toast.success("Media updated");
       setIsEditing(false);
       setEditingGroupId(null);
       setEditingIndex(null);
@@ -141,28 +150,30 @@ const LandingMediaAdmin = () => {
     } catch (e) {
       console.error("Update failed:", e);
       toast.error("Failed to update media");
+    } finally {
+      setEditing(false);
     }
   };
+
   const handleDelete = async (groupId, mediaIndex) => {
     try {
-      const token = localStorage.getItem("adminAuthToken"); // Get the token
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`, // Attach the token
-        },
-      };
+      setDeleting(true);
+      const token = localStorage.getItem("adminAuthToken");
+      const config = { headers: { Authorization: `Bearer ${token}` } };
       await api.delete(`/api/landing/delete/${groupId}/${mediaIndex}`, config);
       toast.success("Media deleted successfully");
       fetchMedia();
     } catch (error) {
       console.error("Delete failed:", error);
       toast.error("Failed to delete media");
+    } finally {
+      setDeleting(false);
     }
   };
 
   useEffect(() => {
-    if (form.page) fetchMedia();
-  }, [form.page]);
+    if (form.page && form.section) fetchMedia();
+  }, [form.page, form.section]);
 
   return (
     <div className="p-4">
@@ -172,11 +183,7 @@ const LandingMediaAdmin = () => {
         <select
           value={form.page}
           onChange={(e) =>
-            setForm({
-              ...form,
-              page: e.target.value,
-              section: "", // reset section when page changes
-            })
+            setForm({ ...form, page: e.target.value, section: "" })
           }
           className="border p-2 rounded"
         >
@@ -191,7 +198,9 @@ const LandingMediaAdmin = () => {
         {form.page && (
           <select
             value={form.section}
-            onChange={(e) => setForm({ ...form, section: e.target.value })}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, section: e.target.value }))
+            }
             className="border p-2 rounded"
           >
             <option value="">Select Section</option>
@@ -205,7 +214,9 @@ const LandingMediaAdmin = () => {
 
         <select
           value={form.mediaType}
-          onChange={(e) => setForm({ ...form, mediaType: e.target.value })}
+          onChange={(e) =>
+            setForm((prev) => ({ ...prev, mediaType: e.target.value }))
+          }
           className="border p-2 rounded"
         >
           <option value="image">Image</option>
@@ -215,7 +226,7 @@ const LandingMediaAdmin = () => {
 
       {form.page && form.section && (
         <>
-          {form.mediaList.map((item, idx) => (
+          {form.mediaFiles.map((item, idx) => (
             <div key={idx} className="grid md:grid-cols-2 gap-2 mb-2">
               <input
                 type="text"
@@ -227,12 +238,9 @@ const LandingMediaAdmin = () => {
                 className="border p-2 rounded"
               />
               <input
-                type="text"
-                placeholder="Google Drive Link"
-                value={item.driveLink}
-                onChange={(e) =>
-                  handleChangeField(idx, "driveLink", e.target.value)
-                }
+                type="file"
+                accept={form.mediaType === "image" ? "image/*" : "video/*"}
+                onChange={(e) => handleFileChange(idx, e.target.files[0])}
                 className="border p-2 rounded"
               />
             </div>
@@ -250,22 +258,24 @@ const LandingMediaAdmin = () => {
       <button
         onClick={handleSubmit}
         disabled={
+          uploading ||
           !form.page ||
           !form.section ||
-          form.mediaList.some((item) => !item.driveLink.trim())
+          form.mediaFiles.some((item) => !item.file)
         }
         className={`${
+          uploading ||
           !form.page ||
           !form.section ||
-          form.mediaList.some((item) => !item.driveLink.trim())
+          form.mediaFiles.some((item) => !item.file)
             ? "bg-gray-400 cursor-not-allowed"
             : "bg-green-600 hover:bg-green-700"
         } text-white px-4 py-2 rounded mb-8 transition`}
       >
-        Upload
+        {uploading ? "Uploading..." : "Upload"}
       </button>
 
-      {loading && <p className="text-center text-gray-500">Loading...</p>}
+      {loading && <p className="text-center text-gray-500">Loading data...</p>}
 
       {!loading &&
         mediaList.map((group) => (
@@ -273,19 +283,22 @@ const LandingMediaAdmin = () => {
             <h4 className="font-bold mb-2">
               {group.page} - {group.section}
             </h4>
+
             <table className="w-full text-sm text-left border mt-2 bg-white rounded overflow-hidden">
               <thead className="bg-gray-100 border-b">
                 <tr>
                   <th className="px-4 py-2">Title</th>
                   <th className="px-4 py-2">Type</th>
-                  <th className="px-4 py-2">Drive Link</th>
+                  <th className="px-4 py-2">Media</th>
                   <th className="px-4 py-2 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {group.media.map((item, index) => (
                   <tr key={index} className="border-b hover:bg-gray-50">
-                    {editingGroupId === group._id && editingIndex === index ? (
+                    {isEditing &&
+                    editingGroupId === group._id &&
+                    editingIndex === index ? (
                       <>
                         <td className="px-4 py-2">
                           <input
@@ -303,17 +316,21 @@ const LandingMediaAdmin = () => {
                           <input
                             type="text"
                             value={editLink}
-                            onChange={(e) => setEditLink(e.target.value)}
+                            disabled
                             className="w-full border px-2 py-1 rounded"
                           />
+                          <small className="text-gray-500 block mt-1 text-xs">
+                            To change media, please delete and re-upload.
+                          </small>
                         </td>
                         <td className="px-4 py-2 text-right">
                           <div className="flex justify-end gap-2">
                             <button
                               onClick={handleUpdate}
-                              className="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700"
+                              disabled={editing}
+                              className="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700 disabled:opacity-50"
                             >
-                              Save
+                              {editing ? "Saving..." : "Save"}
                             </button>
                             <button
                               onClick={() => {
@@ -323,7 +340,8 @@ const LandingMediaAdmin = () => {
                                 setEditTitle("");
                                 setEditLink("");
                               }}
-                              className="bg-gray-300 text-gray-800 px-3 py-1 rounded text-xs hover:bg-gray-400"
+                              disabled={editing}
+                              className="bg-gray-300 text-gray-800 px-3 py-1 rounded text-xs hover:bg-gray-400 disabled:opacity-50"
                             >
                               Cancel
                             </button>
@@ -339,34 +357,43 @@ const LandingMediaAdmin = () => {
                           {item.mediaType}
                         </td>
                         <td className="px-4 py-2">
-                          <a
-                            href={item.driveLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 underline break-all"
-                          >
-                            View
-                          </a>
+                          {item.mediaType === "image" ? (
+                            <img
+                              src={item.cloudinaryUrl}
+                              alt={item.title || "Media"}
+                              className="w-32 h-auto rounded shadow"
+                            />
+                          ) : (
+                            <video width="320" height="240" controls>
+                              <source
+                                src={item.cloudinaryUrl}
+                                type="video/mp4"
+                              />
+                              Your browser does not support the video tag.
+                            </video>
+                          )}
                         </td>
                         <td className="px-4 py-2 text-right">
                           <div className="flex justify-end gap-2">
                             <button
                               onClick={() => {
                                 setEditTitle(item.title || "");
-                                setEditLink(item.driveLink);
+                                setEditLink(item.cloudinaryUrl);
                                 setEditingGroupId(group._id);
                                 setEditingIndex(index);
                                 setIsEditing(true);
                               }}
                               className="text-yellow-600 text-sm hover:underline"
+                              disabled={deleting}
                             >
                               Edit
                             </button>
                             <button
                               onClick={() => handleDelete(group._id, index)}
-                              className="text-red-500 text-sm hover:underline"
+                              disabled={deleting}
+                              className="text-red-500 text-sm hover:underline disabled:opacity-50"
                             >
-                              Delete
+                              {deleting ? "Deleting..." : "Delete"}
                             </button>
                           </div>
                         </td>

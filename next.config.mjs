@@ -7,8 +7,24 @@ const nextConfig = {
       "lh3.googleusercontent.com", // Also common for Google Drive thumbnails
       "via.placeholder.com",
       "drive.google.com",
+      "api.shivenfccaards.com", // ✅ Corrected domain spelling here
     ],
     remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "api.shivenfccaards.com", // ✅ Corrected here too
+        pathname: "/uploads/**", // Match all files and folders under 'uploads'
+      },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com", // ✅ Corrected here too
+        pathname: "**", // Match all files and folders under 'uploads'
+      },
+      {
+        protocol: "https",
+        hostname: "drive.google.com",
+        pathname: "**",
+      },
       {
         protocol: "https",
         hostname: "api.shivencardds.com", // Backend production domain

@@ -25,6 +25,7 @@ const SoldProducts = () => {
         }
       );
       setSales(response.data.data);
+      console.log(response.data);
       setTotalPages(response.data.totalPages);
     } catch (error) {
       toast.error("Error fetching sales data.Please try again");

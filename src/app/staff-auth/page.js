@@ -35,10 +35,10 @@ export default function StaffAuthPage() {
         localStorage.setItem("staffAuthToken", response.data.token);
         // If it's the first-time login, redirect to change password page
         if (response.data.isInitialPassword) {
-          router.push("staff-panel/change-password");
+          router.replace("staff-panel/change-password");
         } else {
           // Redirect to staff panel
-          router.push("/staff-panel/Dashboard");
+          router.replace("/staff-panel/Dashboard");
         }
       } else {
         alert("Login failed. Please try again.");

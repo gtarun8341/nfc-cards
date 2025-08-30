@@ -159,7 +159,7 @@ export default function NFCPage() {
       data.forEach((item) => {
         const images = item.media
           ?.filter((m) => m.mediaType === "image")
-          ?.map((m) => convertDriveLinkToDirect(m.driveLink)); // ✅ CONVERT HERE
+          ?.map((m) => m.cloudinaryUrl); // Use cloudinaryUrl directly
 
         switch (item.section) {
           case "Different Type Of Cards":
@@ -187,14 +187,6 @@ export default function NFCPage() {
     } catch (err) {
       console.error("Failed to fetch media", err);
     }
-  };
-  const convertDriveLinkToDirect = (link) => {
-    const match = link.match(/\/d\/([^/]+)\//);
-    if (match && match[1]) {
-      const fileId = match[1];
-      return `https://drive.google.com/uc?export=view&id=${fileId}`;
-    }
-    return link;
   };
 
   useEffect(() => {

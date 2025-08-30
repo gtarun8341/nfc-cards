@@ -27,7 +27,7 @@ const ProductsCategoriesPage = () => {
       };
 
       const response = await api.get(
-        `/api/user-details/admin/users-products?page=${page}&limit=10&search=${encodeURIComponent(
+        `/api/products-details/admin/users-products?page=${page}&limit=10&search=${encodeURIComponent(
           searchQuery
         )}&productType=${selectedType}&discount=${selectedDiscount}`,
         config
@@ -109,7 +109,7 @@ const ProductsCategoriesPage = () => {
           type="text"
           value={searchQuery}
           onChange={handleSearchChange}
-          placeholder="Search by user name"
+          placeholder="Search by  name"
           className="border p-2 w-full"
         />
         <select

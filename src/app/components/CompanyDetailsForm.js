@@ -1,11 +1,14 @@
-"use client"; // Next.js Client Component
-
+"use client";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-const CompanyDetailsForm = ({ onDataChange, initialData }) => {
+import api from "../apiConfig/axiosConfig";
+
+const CompanyDetailsForm = ({ onSubmit }) => {
   const [logoSizeMB, setLogoSizeMB] = useState(null);
+  const [loading, setLoading] = useState(true); // Initially true to wait for API response
 
   const [data, setData] = useState({
+    _id: null, // explicitly null means new record
     companyName: "",
     name: "",
     designation: "",
@@ -18,33 +21,176 @@ const CompanyDetailsForm = ({ onDataChange, initialData }) => {
     googleMap: "",
     address: "",
     logo: null,
+    logoUrl: "",
   });
 
-  // Effect to set initial data
   useEffect(() => {
-    if (initialData) {
-      setData((prevData) => ({
-        ...prevData,
-        ...initialData,
-      }));
-    }
-  }, [initialData]);
+    const fetchCompanyDetails = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        console.log("Token from localStorage:", token);
+
+        const config = {
+          headers: { Authorization: `Bearer ${token}` },
+        };
+
+        const res = await api.get("/api/company-details", config);
+        console.log("Response from API:", res);
+
+        if (res.data) {
+          setData({
+            ...res.data,
+            _id: res.data._id || null, // ensure _id is set if present
+            logoUrl: res.data.logo
+              ? `${api.defaults.baseURL}/uploads/companyDetails/${res.data.userId}/${res.data.logo}`
+              : "",
+            logo: null,
+          });
+        } else {
+          setData((prev) => ({
+            ...prev,
+            _id: null, // no record exists => add mode
+          }));
+        }
+      } catch (error) {
+        if (error.response?.status === 404) {
+          // No company details found — initialize empty form without error toast
+          setData({
+            companyName: "",
+            name: "",
+            designation: "",
+            contact1: "",
+            contact2: "",
+            whatsapp1: "",
+            whatsapp2: "",
+            email: "",
+            website: "",
+            googleMap: "",
+            address: "",
+            logo: null,
+            logoUrl: "",
+          });
+        } else {
+          toast.error("Failed to fetch company details");
+        }
+        setLoading(false);
+      } finally {
+        setLoading(false);
+        console.log("Loading set to false");
+      }
+    };
+
+    fetchCompanyDetails();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    const newValue = files ? files[0] : value;
-    setData((prevData) => ({ ...prevData, [name]: newValue }));
-    onDataChange({ [name]: newValue });
+    if (name === "logo" && files.length > 0) {
+      const file = files[0];
+      setLogoSizeMB((file.size / (1024 * 1024)).toFixed(2));
+      setData((prev) => ({
+        ...prev,
+        logo: file,
+        logoUrl: URL.createObjectURL(file), // show preview of new logo
+      }));
+    } else {
+      setData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    // Log the updated data
-    console.log("Updated Form Data:", { ...data, [name]: newValue });
+    // Add mode: all required fields must be filled
+    if (!data._id) {
+      const requiredFields = [
+        "companyName",
+        "name",
+        "designation",
+        "email",
+        "contact1",
+        "contact2",
+        "whatsapp1",
+        "whatsapp2",
+        "website",
+        "googleMap",
+        "address",
+      ];
+      for (const field of requiredFields) {
+        if (!data[field]) {
+          toast.error(`Please fill in ${field}`);
+          return;
+        }
+      }
+      // Check logo: either new file or existing logo URL must be present
+      if (!data.logo && !data.logoUrl) {
+        toast.error("Please upload a logo");
+        return;
+      }
+    }
+
+    // Update mode: allow partial updates (no strict validation)
+
+    const formData = new FormData();
+
+    // Append only fields that have value to support partial updates
+    [
+      "companyName",
+      "name",
+      "designation",
+      "contact1",
+      "contact2",
+      "whatsapp1",
+      "whatsapp2",
+      "email",
+      "website",
+      "googleMap",
+      "address",
+    ].forEach((key) => {
+      if (data[key] !== undefined && data[key] !== null && data[key] !== "") {
+        formData.append(key, data[key]);
+      }
+    });
+
+    if (data.logo) {
+      formData.append("logo", data.logo);
+    }
+
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("authToken");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      };
+
+      if (data._id) {
+        // Update existing
+        await api.put("/api/company-details", formData, config);
+        toast.success("Company details updated successfully!");
+      } else {
+        // Add new
+        await api.post("/api/company-details", formData, config);
+        toast.success("Company details added successfully!");
+      }
+
+      if (onSubmit) onSubmit(data);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to save company details.");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  if (loading) {
+    return <p className="text-center p-4">Loading...</p>; // Show loading state until data loaded
+  }
+
+  // When data is ready, render form
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-xl border border-gray-200">
-      <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-        Company Details
-      </h2>
+    <form onSubmit={handleSubmit} className="w-full max-w-5xl mx-auto p-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {[
           {
@@ -66,37 +212,22 @@ const CompanyDetailsForm = ({ onDataChange, initialData }) => {
             type: "text",
             required: true,
           },
-          {
-            label: "Contact Number 2",
-            name: "contact2",
-            type: "text",
-            required: false,
-          },
+          { label: "Contact Number 2", name: "contact2", type: "text" },
           {
             label: "WhatsApp Number 1",
             name: "whatsapp1",
             type: "text",
             required: true,
           },
-          {
-            label: "WhatsApp Number 2",
-            name: "whatsapp2",
-            type: "text",
-            required: false,
-          },
+          { label: "WhatsApp Number 2", name: "whatsapp2", type: "text" },
           { label: "Email", name: "email", type: "email", required: true },
-          { label: "Website", name: "website", type: "url", required: false },
-          {
-            label: "Google Map Link",
-            name: "googleMap",
-            type: "text",
-            required: false,
-          },
+          { label: "Website", name: "website", type: "url" },
+          { label: "Google Map Link", name: "googleMap", type: "text" },
         ].map(({ label, name, type, required }) => (
           <div key={name} className="w-full">
             <label
-              className="block text-sm font-medium text-gray-700"
               htmlFor={name}
+              className="block text-sm font-medium text-gray-700"
             >
               {label}
             </label>
@@ -105,17 +236,17 @@ const CompanyDetailsForm = ({ onDataChange, initialData }) => {
               name={name}
               id={name}
               placeholder={`Enter ${label}`}
-              value={data[name]}
+              value={data[name] || ""}
               onChange={handleChange}
               required={required}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-400 focus:outline-none"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
             />
           </div>
         ))}
         <div className="col-span-1 md:col-span-2">
           <label
-            className="block text-sm font-medium text-gray-700"
             htmlFor="address"
+            className="block text-sm font-medium text-gray-700"
           >
             Address
           </label>
@@ -123,18 +254,25 @@ const CompanyDetailsForm = ({ onDataChange, initialData }) => {
             name="address"
             id="address"
             placeholder="Enter Address"
-            value={data.address}
+            value={data.address || ""}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-400 focus:outline-none"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
           />
         </div>
         <div className="col-span-1 md:col-span-2">
           <label
-            className="block text-sm font-medium text-gray-700"
             htmlFor="logo"
+            className="block text-sm font-medium text-gray-700"
           >
             Upload Logo (Max 5 MB)
           </label>
+          {data.logoUrl && (
+            <img
+              src={data.logoUrl}
+              alt="Company Logo"
+              className="mb-2 max-h-24 rounded"
+            />
+          )}
           <input
             type="file"
             name="logo"
@@ -142,23 +280,19 @@ const CompanyDetailsForm = ({ onDataChange, initialData }) => {
             accept="image/*"
             onChange={(e) => {
               const file = e.target.files[0];
-              const maxSize = 5 * 1024 * 1024; // 5 MB
-
               if (file) {
                 const sizeMB = file.size / (1024 * 1024);
                 if (sizeMB > 5) {
                   toast.error("File size should not exceed 5 MB.");
                   e.target.value = "";
-                  setLogoSizeMB(null); // Reset display
+                  setLogoSizeMB(null);
                   return;
                 }
-
-                setLogoSizeMB(sizeMB.toFixed(2)); // Display size
+                setLogoSizeMB(sizeMB.toFixed(2));
                 handleChange(e);
               }
             }}
-            required
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-400 focus:outline-none"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
           />
           {logoSizeMB && (
             <p className="text-sm text-gray-600 mt-1">
@@ -167,7 +301,16 @@ const CompanyDetailsForm = ({ onDataChange, initialData }) => {
           )}
         </div>
       </div>
-    </div>
+      <div className="mt-6 flex justify-end">
+        <button
+          disabled={loading}
+          type="submit"
+          className="bg-blue-600 disabled:opacity-50 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg shadow-md transition-colors"
+        >
+          {loading ? "Saving..." : data._id ? "Update" : "Submit"}
+        </button>
+      </div>
+    </form>
   );
 };
 

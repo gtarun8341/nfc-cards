@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import api from "../apiConfig/axiosConfig";
 import AllFooter from "../components/AllFooter";
@@ -12,6 +12,7 @@ export default function AuthPage() {
   const router = useRouter();
   const [userRole, setUserRole] = useState("admin"); // default role
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false); // NEW
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,7 +33,7 @@ export default function AuthPage() {
         localStorage.setItem("adminAuthToken", response.data.token);
         toast.success("Login successful");
 
-        router.push("/admin-panel/Dashboard");
+        setSuccess(true); // <----- SET SUCCESS!
       } else {
         toast.error("Login failed. Please try again.");
       }
@@ -53,6 +54,11 @@ export default function AuthPage() {
     }
   };
 
+  useEffect(() => {
+    if (success) {
+      router.replace("/admin-panel/Dashboard"); // Use replace so user cannot go back
+    }
+  }, [success, router]);
   return (
     <>
       <section className="min-h-[80vh]  flex items-center justify-center bg-white">

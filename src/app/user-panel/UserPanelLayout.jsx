@@ -29,9 +29,17 @@ const UserPanelLayout = ({ children }) => {
   const [activeForm, setActiveForm] = useState("multi-step");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // State for sidebar toggle
   const router = useRouter();
-  const [userDetailsExist, setUserDetailsExist] = useState(false); // State to check user details
+  // const [userDetailsExist, setUserDetailsExist] = useState(false); // State to check user details
   const [limitations, setLimitations] = useState({});
-
+  const [flags, setFlags] = React.useState({
+    aboutCompanyExists: false,
+    additionalFormExists: false,
+    bankDetailsExists: false,
+    companyDetailsExists: false,
+    galleryImagesExists: false,
+    hasActiveProducts: false,
+    socialMediaExists: false,
+  });
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
@@ -44,23 +52,50 @@ const UserPanelLayout = ({ children }) => {
 
         const response = await api.get("/api/users/checkUserDetails", config);
         console.log(response.data, "Server response");
-        console.log(
-          !!response.data?.userDetailsExist,
-          "Converted boolean value"
-        );
-        setUserDetailsExist(!!response.data?.userDetailsExist);
+        const data = response.data;
+
+        setFlags({
+          aboutCompanyExists: !!data.aboutCompanyExists,
+          additionalFormExists: !!data.additionalFormExists,
+          bankDetailsExists: !!data.bankDetailsExists,
+          companyDetailsExists: !!data.companyDetailsExists,
+          galleryImagesExists: !!data.galleryImagesExists,
+          hasActiveProducts: !!data.hasActiveProducts,
+          socialMediaExists: !!data.socialMediaExists,
+        });
+
         setLimitations(response.data?.limitations || {});
       } catch (error) {
         console.error("Error fetching user details:", error);
-        setUserDetailsExist(false);
+        // setUserDetailsExist(false);
       }
     };
     fetchUserDetails();
   }, []);
 
+  // Destructure for easy checks
+  const {
+    aboutCompanyExists,
+    additionalFormExists,
+    bankDetailsExists,
+    companyDetailsExists,
+    galleryImagesExists,
+    hasActiveProducts,
+    socialMediaExists,
+  } = flags;
+
+  // Define completeness flags
+  const allExceptAdditional =
+    aboutCompanyExists &&
+    bankDetailsExists &&
+    companyDetailsExists &&
+    galleryImagesExists &&
+    hasActiveProducts &&
+    socialMediaExists;
+
+  const allComplete = allExceptAdditional && additionalFormExists;
+
   const menuItems = [
-    // { name: 'multi-step', path: 'multi-step', icon: UserIcon, onClick: () => setActiveForm('multi-step') },
-    // { name: 'edit-account', path: 'edit-account', icon: UserGroupIcon, onClick: () => setActiveForm('edit-account') },
     {
       name: "Dashboard",
       path: "/user-panel/Dashboard",
@@ -78,50 +113,7 @@ const UserPanelLayout = ({ children }) => {
       icon: BriefcaseIcon,
       onClick: () => setActiveForm("company-profile"),
     },
-    // { name: 'templates-manage', path: 'templates-manage', icon: WrenchIcon, onClick: () => setActiveForm('templates-manage') },
-    // {
-    //   name: "Manage Listing",
-    //   icon: CogIcon,
-    //   submenu: [
-    //     {
-    //       name: "Mini Website",
-    //       path: "/user-panel/mini-website",
-    //       icon: DocumentArrowUpIcon,
-    //       onClick: () => setActiveForm("mini-website"),
-    //     },
-    //     {
-    //       name: "NFC Cards",
-    //       path: "/user-panel/nfc-cards",
-    //       icon: CreditCardIcon,
-    //       onClick: () => setActiveForm("nfc-cards"),
-    //     },
-    //     {
-    //       name: "PDF Visiting Card",
-    //       path: "/user-panel/pdf-visiting-card",
-    //       icon: DocumentArrowUpIcon,
-    //       onClick: () => setActiveForm("pdf-visiting-card"),
-    //     },
-    //     {
-    //       name: "One Page Business Profile",
-    //       path: "/user-panel/one-page-business-profile",
-    //       icon: PencilSquareIcon,
-    //       onClick: () => setActiveForm("one-page-business-profile"),
-    //     },
-    //     {
-    //       name: "Physical Visiting Card",
-    //       path: "/user-panel/physical-visiting-card",
-    //       icon: CreditCardIcon,
-    //       onClick: () => setActiveForm("physical-visiting-card"),
-    //     },
-    //     {
-    //       name: "Business Essentials",
-    //       path: "/user-panel/business-essentials",
-    //       icon: BriefcaseIcon,
-    //       onClick: () => setActiveForm("business-essentials"),
-    //     },
-    //     // { name: 'Additional Services', icon: UserIcon, onClick: () => setActiveForm('additional-services') },
-    //   ],
-    // },
+
     {
       name: "Reports",
       icon: ChartBarIcon, // You can use a Lucide or Heroicons icon here
@@ -146,13 +138,6 @@ const UserPanelLayout = ({ children }) => {
         },
       ],
     },
-
-    // { name: 'Mini Website', path: 'mini-website', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('mini-website') },
-    // { name: 'NFC Cards', path: 'nfc-cards', icon: CreditCardIcon, onClick: () => setActiveForm('nfc-cards') },
-    // { name: 'PDF Visiting Card', path: 'pdf-visiting-card', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('pdf-visiting-card') },
-    // { name: 'One Page Business Profile', path: 'one-page-business-profile', icon: PencilSquareIcon, onClick: () => setActiveForm('one-page-business-profile') },
-    // { name: 'Physical Visiting Card', path: 'physical-visiting-card', icon: CreditCardIcon, onClick: () => setActiveForm('physical-visiting-card') },
-    // { name: 'Business Essentials', path: 'business-essentials', icon: BriefcaseIcon, onClick: () => setActiveForm('business-essentials') },
     {
       name: "Card Purchases",
       path: "/user-panel/card-purchases",
@@ -171,8 +156,6 @@ const UserPanelLayout = ({ children }) => {
       icon: ShoppingCartIcon,
       onClick: () => setActiveForm("product-catalogue"),
     },
-    // { name: 'Product Sales Management', path: 'product-sales-management', icon: ChartBarIcon, onClick: () => setActiveForm('product-sales-management') },
-    // { name: 'Payment Management', path: 'payment-management', icon: CreditCardIcon, onClick: () => setActiveForm('payment-management') },
     {
       name: "Sold Products",
       path: "/user-panel/sold-products",
@@ -197,15 +180,12 @@ const UserPanelLayout = ({ children }) => {
       icon: UserGroupIcon,
       onClick: () => setActiveForm("contact-management"),
     },
-    // { name: 'Card Analytics', path: 'card-analytics', icon: AdjustmentsHorizontalIcon, onClick: () => setActiveForm('card-analytics') },
-    // { name: 'Capture Leads', path: 'capture-leads', icon: ChartBarIcon, onClick: () => setActiveForm('capture-leads') },
     {
       name: "CRM",
       path: "/user-panel/crm",
       icon: AdjustmentsHorizontalIcon,
       onClick: () => setActiveForm("crm"),
     },
-    // { name: 'Paper Business Cards Scan', path: 'paper-business-cards-scan', icon: DocumentArrowUpIcon, onClick: () => setActiveForm('paper-business-cards-scan') },
     {
       name: "Enquires",
       path: "/user-panel/enquires",
@@ -218,16 +198,13 @@ const UserPanelLayout = ({ children }) => {
       icon: ClipboardDocumentIcon,
       onClick: () => setActiveForm("Review"),
     },
-    // {
-    //   name: "Offer / Discounts / Events",
-    //   path: "/user-panel/offer-discounts-events",
-    //   icon: GiftIcon,
-    //   onClick: () => setActiveForm("offer-discounts-events"),
-    // },
   ];
-  if (userDetailsExist) {
-    const listingSubmenu = [];
 
+  // Conditionally build listing submenu based on flags and limitations
+  let listingSubmenu = [];
+
+  if (allExceptAdditional && !additionalFormExists) {
+    // Show all except "One Page Business Profile"
     if (limitations?.miniWebsite !== "0") {
       listingSubmenu.push({
         name: "Mini Website",
@@ -236,7 +213,6 @@ const UserPanelLayout = ({ children }) => {
         onClick: () => setActiveForm("mini-website"),
       });
     }
-
     if (limitations?.pdfVisitingCard !== "0") {
       listingSubmenu.push({
         name: "PDF Visiting Card",
@@ -245,16 +221,6 @@ const UserPanelLayout = ({ children }) => {
         onClick: () => setActiveForm("pdf-visiting-card"),
       });
     }
-
-    if (limitations?.businessProfile !== "0") {
-      listingSubmenu.push({
-        name: "One Page Business Profile",
-        path: "/user-panel/one-page-business-profile",
-        icon: PencilSquareIcon,
-        onClick: () => setActiveForm("one-page-business-profile"),
-      });
-    }
-
     if (limitations?.physicalVisitingCard !== "0") {
       listingSubmenu.push({
         name: "Physical Visiting Card",
@@ -263,7 +229,6 @@ const UserPanelLayout = ({ children }) => {
         onClick: () => setActiveForm("physical-visiting-card"),
       });
     }
-
     if (limitations?.businessEssentials !== "0") {
       listingSubmenu.push({
         name: "Business Essentials",
@@ -272,17 +237,61 @@ const UserPanelLayout = ({ children }) => {
         onClick: () => setActiveForm("business-essentials"),
       });
     }
-
-    if (listingSubmenu.length > 0) {
-      const manageListingMenu = {
-        name: "Manage Listing",
-        icon: CogIcon,
-        submenu: listingSubmenu,
-      };
-
-      // 🧠 Insert at position 3 (4th item — index starts from 0)
-      menuItems.splice(3, 0, manageListingMenu);
+  } else if (allComplete) {
+    // Show all including "One Page Business Profile"
+    if (limitations?.miniWebsite !== "0") {
+      listingSubmenu.push({
+        name: "Mini Website",
+        path: "/user-panel/mini-website",
+        icon: DocumentArrowUpIcon,
+        onClick: () => setActiveForm("mini-website"),
+      });
     }
+    if (limitations?.pdfVisitingCard !== "0") {
+      listingSubmenu.push({
+        name: "PDF Visiting Card",
+        path: "/user-panel/pdf-visiting-card",
+        icon: DocumentArrowUpIcon,
+        onClick: () => setActiveForm("pdf-visiting-card"),
+      });
+    }
+    if (limitations?.businessProfile !== "0") {
+      listingSubmenu.push({
+        name: "One Page Business Profile",
+        path: "/user-panel/one-page-business-profile",
+        icon: PencilSquareIcon,
+        onClick: () => setActiveForm("one-page-business-profile"),
+      });
+    }
+    if (limitations?.physicalVisitingCard !== "0") {
+      listingSubmenu.push({
+        name: "Physical Visiting Card",
+        path: "/user-panel/physical-visiting-card",
+        icon: CreditCardIcon,
+        onClick: () => setActiveForm("physical-visiting-card"),
+      });
+    }
+    if (limitations?.businessEssentials !== "0") {
+      listingSubmenu.push({
+        name: "Business Essentials",
+        path: "/user-panel/business-essentials",
+        icon: BriefcaseIcon,
+        onClick: () => setActiveForm("business-essentials"),
+      });
+    }
+  } else {
+    // No listing pages, optionally prompt for completing required forms
+    listingSubmenu = [];
+  }
+
+  // Insert "Manage Listing" menu if there are any listing submenu items
+  if (listingSubmenu.length > 0) {
+    const manageListingMenu = {
+      name: "Manage Listing",
+      icon: CogIcon,
+      submenu: listingSubmenu,
+    };
+    menuItems.splice(3, 0, manageListingMenu);
   }
 
   const handleLogout = () => {

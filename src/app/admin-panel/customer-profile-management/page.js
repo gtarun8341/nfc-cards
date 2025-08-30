@@ -32,6 +32,7 @@ const CustomerProfileManagementPage = () => {
         )}`,
         config
       );
+      console.log("Fetched customers:", response.data.users);
       setCustomers(response.data.users);
       setTotalPages(response.data.totalPages);
     } catch (error) {

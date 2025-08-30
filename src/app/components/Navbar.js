@@ -2,8 +2,10 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { FiMenu, FiX } from "react-icons/fi"; // Icons for hamburger
+import { usePathname } from "next/navigation";
 
 const Navbar = () => {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState("");
@@ -21,6 +23,11 @@ const Navbar = () => {
     else if (staffAuthToken) setUserRole("staff");
     else if (authToken) setUserRole("user");
   }, []);
+
+  useEffect(() => {
+    // whenever pathname changes, close the menu
+    setIsOpen(false);
+  }, [pathname]);
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">

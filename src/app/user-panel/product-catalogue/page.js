@@ -17,7 +17,7 @@ const ProductCataloguePage = () => {
     gst: "",
     units: "",
     category: "", // <-- Add this
-    discount: "",
+    discount: null,
   });
   const [uploadedCount, setUploadedCount] = useState(0);
   const [uploadLimit, setUploadLimit] = useState(0);
@@ -110,26 +110,31 @@ const ProductCataloguePage = () => {
     }
 
     // If adding a product, ensure image is provided
-    if (!isEditing && !currentProduct.image) {
-      setError("Image is required when adding a product.");
-      toast.error("Image is required when adding a product.");
-      return;
-    }
+    // if (!isEditing && !currentProduct.image) {
+    //   setError("Image is required when adding a product.");
+    //   toast.error("Image is required when adding a product.");
+    //   return;
+    // }
 
     setError(""); // Reset error if validation passes
 
     const formData = new FormData();
-    formData.append("name", currentProduct.name);
-    formData.append("type", currentProduct.type);
-    formData.append("price", currentProduct.price);
-    formData.append("hsnCode", currentProduct.hsnCode);
-    formData.append("gst", currentProduct.gst);
-    formData.append("units", currentProduct.units);
-    formData.append("category", currentProduct.category);
-    formData.append("discount", currentProduct.discount);
+
+    Object.entries({
+      productName: currentProduct.name,
+      productPrice: currentProduct.price,
+      productType: currentProduct.type,
+      hsnCode: currentProduct.hsnCode,
+      gst: currentProduct.gst,
+      units: currentProduct.units,
+      category: currentProduct.category,
+      discount: currentProduct.discount ?? "",
+    }).forEach(([key, val]) => {
+      formData.append(`products[0][${key}]`, val);
+    });
 
     if (currentProduct.image) {
-      formData.append("productImages[]", currentProduct.image); // Append image file if available
+      formData.append("productImages", currentProduct.image);
     }
 
     const config = {
@@ -147,7 +152,7 @@ const ProductCataloguePage = () => {
 
         // Update product if editing
         response = await api.put(
-          `/api/products/${editProductId}`,
+          `/api/products-details/${editProductId}`,
           formData,
           config
         );
@@ -157,7 +162,7 @@ const ProductCataloguePage = () => {
       } else {
         // Add new product if not editing
         console.log(formData);
-        response = await api.post("/api/products/", formData, config);
+        response = await api.post("/api/products-details/", formData, config);
         toast.success("Product added successfully!"); // ✅ toast
       }
 
@@ -177,7 +182,7 @@ const ProductCataloguePage = () => {
   const fetchProducts = async () => {
     const token = localStorage.getItem("authToken");
     try {
-      const response = await api.get(`/api/products`, {
+      const response = await api.get(`/api/products-details/user`, {
         headers: { Authorization: `Bearer ${token}` },
         params: {
           search: encodeURIComponent(searchQuery),
@@ -186,10 +191,11 @@ const ProductCataloguePage = () => {
         },
       });
       setCatalogue(response.data.products);
+      console.log("Fetched products:", response.data);
       setUploadedCount(response.data.uploadedCount);
       setUploadLimit(response.data.uploadLimit);
       setTotalPages(response.data.totalPages);
-      setUserId(response.data.id);
+      setUserId(response.data.userId);
       setUserDetailsAvailable(true); // ✅ user details exist
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -218,7 +224,7 @@ const ProductCataloguePage = () => {
       gst: product.gst,
       units: product.units,
       category: product.category,
-      discount: product.discount,
+      discount: product.discount || null,
       currentImage: product.productImages?.[0] || null,
     });
 
@@ -231,7 +237,7 @@ const ProductCataloguePage = () => {
     console.log(productId, "id");
     const token = localStorage.getItem("authToken");
     try {
-      await api.delete(`/api/products/${productId}`, {
+      await api.delete(`/api/products-details/${productId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success("Product deleted successfully!"); // ✅ toast
@@ -258,7 +264,7 @@ const ProductCataloguePage = () => {
       gst: "",
       units: "",
       category: "",
-      discount: "",
+      discount: null,
     });
     setIsEditing(false);
     setEditProductId(null);
@@ -456,7 +462,7 @@ const ProductCataloguePage = () => {
                     {product.productImages &&
                       product.productImages[0] &&
                       (() => {
-                        const imageUrl = `${api.defaults.baseURL}/uploads/userDetails/${userId}/${product.productImages[0]}`;
+                        const imageUrl = `${api.defaults.baseURL}/uploads/products/${product.userId}/${product.productImages[0]}`;
                         console.log("Image URL:", imageUrl); // Log the URL
                         return (
                           <Image
